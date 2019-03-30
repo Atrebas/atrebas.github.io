@@ -120,7 +120,7 @@ by [this stackoverflow question](http://stackoverflow.com/questions/21435339/dat
 errors or imprecisions. Corrections and suggestions are welcome.
 - For the sake of readability, the console outputs are hidden by default. 
 Click on the button below to show or hide the outputs. Also, the R code used in 
-this document is independently [available]() and can be easily reproduced.     
+this document is independently [available](https://github.com/Atrebas/atrebas.github.io/blob/master/post/2019-03-03-datatable-dplyr.R) and can be easily reproduced.     
 
 <div style="text-align: center;"><input type='button' id='hideshow' value='Show the outputs'></div>
 
