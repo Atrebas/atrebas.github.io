@@ -1,0 +1,122 @@
+---
+title: "Self-studying Python and Machine Learning: 2018 in review"
+author: "Atrebas"
+date: "2019-01-15"
+summary: Both for personal interest and professional development, I started to learn Python and machine learning concepts. This article summarizes my 2018 learning path.   
+categories: ["R"]
+tags: ["R Markdown", "plot", "regression"]
+---
+
+<script src="/js/set-target-blank-links.js"></script>
+
+<style>
+  .figure > p {
+    text-align: center;
+    align: bottom;
+    font-size: 10px;
+  }
+</style>
+
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(collapse = TRUE)
+```
+
+Both for personal interest and professional development, I started to learn Python and machine learning concepts.
+This article summarizes my 2018 learning path.   
+
+## Courses
+
+In January, I completed the MOOC ["Python 3: from the fundamentals to advanced concepts"](https://www.fun-mooc.fr/courses/course-v1:UCA+107001+session01/about) that I started in November 2017. This MOOC, taught in French by two [INRIA](https://www.inria.fr/en/) researchers, provided me with a very good introduction to the Python programming language: overview of the built-in types, functions, notions of OOP, ...    
+Compared to the other courses I followed later, I think this one was the most complete, providing a progressive and detailed view of advanced notions like generator expressions, memory management, scoping rules, ... I would definetely recommend it.     
+My lecture notes are [here](https://github.com/Atrebas/python-code/blob/master/mooc-python.py) and the complete pdf of the MOOC is available [here](https://github.com/parmentelat/moocpython/blob/master/pdf_du_cours/from_sphinx/Python3.pdf).    
+
+In March, I enrolled in a second MOOC on the [FUN platform](https://www.fun-mooc.fr): [Deep Learning](https://www.fun-mooc.fr/courses/course-v1:CNAM+01031+session01/about).
+Although I did not initially plan to follow this course, I spotted it when it came out and I thought it would be a good opportunity to learn more about this exciting topic.    
+The course was well structured (6 weeks, 6 chapters each): introduction to neural networks, CNN, historical perspectives and modern network architectures, applications, optimization, ... Excepting a small demo of Keras, there was no programming in this course and all the evaluations where based on multiple choice questions. Yet, it was quite challenging and I learnt a lot.     
+
+Later during the spring, to further practice and revise some Python, I took the free version of the [Learn Python](https://www.codecademy.com/learn/learn-python) Codecademy course. Nothing really new here compare to the Python course mentioned above, but the Codecademy platform is nice for learning in an interactive way. This course has been recently updated for Python 3, so it is a good resource to check.    
+
+During the summer, I followed the Udacity [Intro to Machine Learning](https://eu.udacity.com/course/intro-to-machine-learning--ud120) course. The reason I choose this course rather than the popular Andrew Ng's one on Coursera is because it uses Python and the scikit-learn library (more precisely it uses Python 2, but I used Python 3 with code available on Github).     
+As the title indicates, this is an introduction. So, the course doesn't go into too much details and some of the evaluations are really simple. To learn more about the underlying mathematical concepts, in parallel, I followed some of the videos from [MIT 6.034](https://ocw.mit.edu/courses/electrical-engineering-and-computer-science/6-034-artificial-intelligence-fall-2010/). However, as shown in the picture below, I think this Udacity course offers a good overview of the ML concepts and of the iterative approach required to run an analysis.    
+
+![Udacity ML course overview (source: Udacity)](/images/ud120.png)    
+
+
+Then, from October to mid-December, over a 75-day streak, I have completed more than 30 [DataCamp](https://www.datacamp.com/) courses, including the [Data Scientist with Python track](https://www.datacamp.com/tracks/data-scientist-with-python) and several R courses.    
+It was a very good wrap-up, allowing me to review and strengthen the different topics covered previously, from the basics of Python programming to machine learning and even some bits of deep learning. Moreover, it made me more acquainted with data science libraries (Numpy, Pandas, or Bokeh) and I also discovered the basics of SQL.    
+DataCamp is a very good learning tool, with great intructors. One drawback is that the exercices can be a bit overguided. I have not tested the proposed data projects yet, but will surely do in a near future.    
+
+!['Data Scientist with Python' DataCamp certificate](/images/datacamp.png)
+
+
+<br>
+
+## Putting my new skills into practice
+
+Considering the number of education platforms and online resources, it's easy to get trapped on the 'MOOC carousel'. While these courses are useful to understand the underlying concepts and discover best practices, learning by doing is essential.    
+In December, I discovered the [kmnist dataset](https://arxiv.org/abs/1812.01718) and decided to give it a try. I explored some machine learning and deep learning approaches, assessed their performance for classification, and dig a bit more into dimension reduction methods and visualization. It was only a 10-day streak, but it was nonetheless useful. I picked a lot of code here and there, but was able to understand it and adapt it to my needs. Hopefully, more will come in 2019.    
+
+![Some examples of kana for the kmnist dataset (source: Clanuwat _et al._)](/images/kmnist_examples.png)
+
+
+<br>
+
+## The data science toolkit
+
+![The Python data science ecosystem (source: Yotta Conseil)](/images/python.png)   
+
+Along the way, I have discovered several tools. I think the Python ecosystem is rather complex, but it also a very interesting and innovative field.    
+- First, I installed Anaconda and started to use Jupyter Notebooks.    
+- Then, I created new environments, including one dedicated to deep learning with TensorFlow and Keras installed, though I only scratched the surface of these libraries.      
+- As mentioned above, I have also learned the rudiments of libraries like numpy, pandas, matplotlib, and scikit-learn... 
+Scikit-learn is particularly easy to use with with a well-designed API and a fantastic documentation, making the coding part relatively simple (compared to the understanding of the methods, feature engineering, and all the analytical process).    
+- I had a quick look at google [Colab](https://colab.research.google.com/notebooks/welcome.ipynb), and will probably use it more often for more demanding computations.    
+- I tested the [reticulate](https://rstudio.github.io/reticulate/) package to use Python from R (using the RStudio IDE).    
+- And finally, I also become a big fan of [vscode](https://code.visualstudio.com/). For Javascript, R, and Python, vscode is very versatile and the interface is awesome.     
+
+
+<br>
+
+## Other
+### MOOC
+I was interested in other moocs. In particular, I enrolled in two other courses: [Fundamentals for Big Data](https://www.fun-mooc.fr/courses/course-v1:MinesTelecom+04006+session09/about) on Fun and [Linear Algebra](https://www.edx.org/course/algebre-lineaire-partie-1-epflx-algebrex-1) on edX. I did not manage to fit them in my schedule. However, I have completed two other small courses: [Privacy in a digital world](https://www.fun-mooc.fr/courses/course-v1:inria+41015+session01/about) and [Introduction to Statistics with R](https://www.fun-mooc.fr/courses/course-v1:UPSUD+42001+session10/about). The former was very general and oriented towards a general audience, but useful in the RGPD context. The latter was a good refresher of basic statistics methods.    
+
+### D3.js
+After reading Scott Murray's book (interactive data visualization for the web), I spent some time coding several visualizations. To learn further about D3.js and Javascript in general, I also checked [Mike Freeman's book](https://info474-s17.github.io/book/) and some of [Curran Kelleher's videos](https://curran.github.io/dataviz-course-2018/).    
+D3.js is amaizing. I hacked some examples in the past and I would really like to dive into it more deeply.    
+
+
+### Books
+Among the books I read, partially or completely, let's mention:    
+- [Data Science with Python](http://shop.oreilly.com/product/0636920034919.do), by Jake VanderPlas. An absolute must-read to learn about Python data science libraries.    
+- [Hands-On Machine Learning with Scikit-Learn and TensorFlow](http://shop.oreilly.com/product/0636920052289.do), by Aurélien Géron. So far, the most complete book on machine learning I read. It covers a lot of methods.     
+- [Deep Learning with Keras](https://www.manning.com/books/deep-learning-with-python), by François Chollet.     
+- [Introduction au Machine Learning](https://www.dunod.com/sciences-techniques/introduction-au-machine-learning), by Chloé-Agathe Azencott. A good book, in French, complementary to the previous ones since it focuses on the maths and methods and not on the code.    
+- [Mike Freeman's books](http://mfviz.com/): great resources, straight to the point on different topics (web development, data visualization, programming in general, ...).     
+- [Advanced R](http://adv-r.had.co.nz/) by Hadley Wickham.     
+- [The Art of Readable Code](http://shop.oreilly.com/product/9780596802301.do) by Dustin Boswell and Trevor Foucher. Recommended by Hadley Wickham, it is indeed a very inspiring book.    
+
+
+<br>
+
+## Conclusion
+So, did I become a Python and machine learning expert with all these courses, books, and coding sessions? Definitely not. I still have a lot more to learn and to practice. But there is progress being made and I have developed a better intuition of how all these things work.    
+As said by [Peter Norvig](https://www.norvig.com/21-days.html), being a good programmer or develop expertise in any domain takes time. [Learning is a lifelong process](https://en.wikipedia.org/wiki/Lifelong_learning)!    
+
+
+<br>
+
+## Perspectives
+
+What's next? For 2019, I have the following objectves in mind:      
+- learn git and create a website/blog to more efficiently keep track of my achievements     
+- finalize this article so as to make it my first post    
+- refine and write about some personal works (mainly R-related)    
+- follow the fast.ai courses (machine learning and deep learning)     
+- more applications and personal projects    
+- more maths to better understand the methods     
+- more D3.js experiments      
+- more books (An Introduction to Statistical Learning by _James et al._, Python Machine Learning by Raschka and Mirjalili, Introduction to Machine Learning with Python by Mueller and Guido, ...)
+
+

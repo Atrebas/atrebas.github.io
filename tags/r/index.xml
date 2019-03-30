@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes" ?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+  <channel>
+    <title>R on Home</title>
+    <link>/tags/r/</link>
+    <description>Recent content in R on Home</description>
+    <generator>Hugo -- gohugo.io</generator>
+    <language>en-us</language>
+    <lastBuildDate>Sun, 03 Mar 2019 00:00:00 +0000</lastBuildDate>
+    
+	<atom:link href="/tags/r/index.xml" rel="self" type="application/rss+xml" />
+    
+    
+    <item>
+      <title>A data.table and dplyr tour</title>
+      <link>/post/2019-03-03-datatable-dplyr/</link>
+      <pubDate>Sun, 03 Mar 2019 00:00:00 +0000</pubDate>
+      
+      <guid>/post/2019-03-03-datatable-dplyr/</guid>
+      <description>IntroductionAboutdata.table and dplyrCreate example dataBasic operationsFilter rowsSort rowsSelect columnsSummarise dataAdd/update/delete columnsbyGoing furtherAdvanced columns manipulationChain expressionsIndexing and Keysset*() modificationsAdvanced use of byMiscellaneousRead / Write dataReshape dataOtherJoin/Bind data setsJoinMore joinsBindSet operationsSummary-------------------------------------------------------------------------------table {width: 100%;border-top: none !</description>
+    </item>
+    
+  </channel>
+</rss>

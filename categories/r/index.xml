@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes" ?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+  <channel>
+    <title>R on Home</title>
+    <link>/categories/r/</link>
+    <description>Recent content in R on Home</description>
+    <generator>Hugo -- gohugo.io</generator>
+    <language>en-us</language>
+    <lastBuildDate>Sun, 03 Mar 2019 00:00:00 +0000</lastBuildDate>
+    
+	<atom:link href="/categories/r/index.xml" rel="self" type="application/rss+xml" />
+    
+    
+    <item>
+      <title>A data.table and dplyr tour</title>
+      <link>/post/2019-03-03-datatable-dplyr/</link>
+      <pubDate>Sun, 03 Mar 2019 00:00:00 +0000</pubDate>
+      
+      <guid>/post/2019-03-03-datatable-dplyr/</guid>
+      <description>IntroductionAboutdata.table and dplyrCreate example dataBasic operationsFilter rowsSort rowsSelect columnsSummarise dataAdd/update/delete columnsbyGoing furtherAdvanced columns manipulationChain expressionsIndexing and Keysset*() modificationsAdvanced use of byMiscellaneousRead / Write dataReshape dataOtherJoin/Bind data setsJoinMore joinsBindSet operationsSummary-------------------------------------------------------------------------------table {width: 100%;border-top: none !</description>
+    </item>
+    
+    <item>
+      <title>Self-studying Python and Machine Learning: 2018 in review</title>
+      <link>/post/2019-01-15-2018-learning/</link>
+      <pubDate>Tue, 15 Jan 2019 00:00:00 +0000</pubDate>
+      
+      <guid>/post/2019-01-15-2018-learning/</guid>
+      <description>.figure  p {text-align: center;align: bottom;font-size: 10px;}Both for personal interest and professional development, I started to learn Python and machine learning concepts.This article summarizes my 2018 learning path.
+CoursesIn January, I completed the MOOC “Python 3: from the fundamentals to advanced concepts” that I started in November 2017. This MOOC, taught in French by two INRIA researchers, provided me with a very good introduction to the Python programming language: overview of the built-in types, functions, notions of OOP, …</description>
+    </item>
+    
+  </channel>
+</rss>
