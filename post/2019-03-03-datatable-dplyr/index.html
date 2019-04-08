@@ -181,10 +181,9 @@
 <div id="about" class="section level3">
 <h3>About</h3>
 <ul>
-<li>This document is derived from the <a href="https://www.datacamp.com">Datacamp</a>’s <a href="https://www.datacamp.com/community/tutorials/data-table-cheat-sheet">data.table cheat sheet</a>.
-See the corresponding <a href="https://www.datacamp.com/search?q=data.table">courses</a>.<br />
+<li>This document has been been inspired by <a href="http://stackoverflow.com/questions/21435339/data-table-vs-dplyr-can-one-do-something-well-the-other-cant-or-does-poorly/27840349#27840349">this stackoverflow question</a> and by the data.table cheat sheet published by Karlijn Willems. It has been written for my own self-teaching and may contain errors or imprecisions. Corrections and suggestions are welcome.<br />
 </li>
-<li>Other useful ressources for data.table can be found on the data.table
+<li>Resources for data.table can be found on the data.table
 <a href="https://github.com/Rdatatable/data.table/wiki">wiki</a>, in the data.table
 <a href="https://cran.r-project.org/web/packages/data.table/index.html">vignettes</a>,
 and in the package documentation.<br />
@@ -194,10 +193,6 @@ and in the package documentation.<br />
 the dplyr <a href="https://cran.r-project.org/web/packages/dplyr/index.html">vignettes</a>,
 and the package documentation.<br />
 </li>
-<li>The idea of presenting data.table and dplyr code side by side has been inspired
-by <a href="http://stackoverflow.com/questions/21435339/data-table-vs-dplyr-can-one-do-something-well-the-other-cant-or-does-poorly/27840349#27840349">this stackoverflow question</a>.</li>
-<li>This document has been written for my own self-teaching and may contain
-errors or imprecisions. Corrections and suggestions are welcome.</li>
 <li>For the sake of readability, the console outputs are hidden by default.
 Click on the button below to show or hide the outputs. Also, the R code used in
 this document is independently <a href="https://github.com/Atrebas/atrebas.github.io/blob/master/post/2019-03-03-datatable-dplyr.R">available</a> and can be easily reproduced.</li>
@@ -3436,7 +3431,7 @@ tibble(vec) %&gt;% tidyr::separate(vec, c(&quot;V1&quot;, &quot;V2&quot;))</code
 <tr>
 <td align="left">
 <pre class="r"><code>getDTthreads() # setDTthreads()</code></pre>
-<pre><code>## [1] 4</code></pre>
+<pre><code>## [1] 2</code></pre>
 </td>
 <td align="left">
 <pre class="r"><code># NA</code></pre>
@@ -4134,7 +4129,7 @@ CJ(c(2,1,1), 3:2, sorted = FALSE, unique = TRUE)</code></pre>
 </div>
 <div id="overlap-join" class="section level4">
 <h4>Overlap join</h4>
-<p>It is important to mention <code>foverlaps()</code> from data.table that allows to perform ‘overlap joins’. This is an very powerful function, but a bit out of scope for this document. See <a href="https://raw.githubusercontent.com/wiki/Rdatatable/data.table/talks/EARL2014_OverlapRangeJoin_Arun.pdf">these slides</a> for more details.</p>
+<p>It is important to mention <code>foverlaps()</code> from data.table that allows to perform ‘overlap joins’. This is a very powerful function, but a bit out of scope for this document. See <a href="https://raw.githubusercontent.com/wiki/Rdatatable/data.table/talks/EARL2014_OverlapRangeJoin_Arun.pdf">these slides</a> for more details.</p>
 <br>
 <hr>
 </div>
@@ -4378,12 +4373,10 @@ all_equal(x, x)</code></pre>
 </div>
 <div id="summary" class="section level1">
 <h1>Summary</h1>
-This article presented the most important features of both data.table and dplyr, two packages that are now essential tools for data manipulation in R.<br />
+<p>This article presented the most important features of both data.table and dplyr, two packages that are now essential tools for data manipulation in R.<br />
 There are still a lot of features not covered in this document, in particular, data.table functions to deal with time-series or dplyr vectorized functions have not been discussed, but ‘done is better than perfect’…<br />
 Hopefully, this comparison is not too biased, but I must admit that my preference is for data.table. So, I hope this post will encourage some readers to give it a try!<br />
-
-<hr>
-<pre class="r"><code>sessionInfo()</code></pre>
+<br><br></p>
 <pre><code>## R version 3.3.2 (2016-10-31)
 ## Platform: x86_64-w64-mingw32/x64 (64-bit)
 ## Running under: Windows 7 x64 (build 7601) Service Pack 1
@@ -4399,7 +4392,7 @@ Hopefully, this comparison is not too biased, but I must admit that my preferenc
 ## [1] methods   stats     graphics  grDevices utils     datasets  base     
 ## 
 ## other attached packages:
-## [1] dplyr_0.8.0.1     knitr_1.21        data.table_1.12.0
+## [1] dplyr_0.8.0.1     knitr_1.21        data.table_1.12.3
 ## 
 ## loaded via a namespace (and not attached):
 ##  [1] Rcpp_1.0.0       magrittr_1.5     hms_0.4.2        tidyselect_0.2.5
@@ -4426,7 +4419,7 @@ Hopefully, this comparison is not too biased, but I must admit that my preferenc
 
         		<footer>
 			<span>
-			&copy; <time datetime="2019-03-30 17:22:29.1170171 &#43;0100 CET m=&#43;0.098000001">2019</time> . Made with <a href='https://gohugo.io'>Hugo</a> using the <a href='https://github.com/EmielH/tale-hugo/'>Tale</a> theme and the <a href='https://bookdown.org/yihui/blogdown/'>blogdown</a> R package.
+			&copy; <time datetime="2019-04-08 20:37:07.3560016 &#43;0200 CEST m=&#43;0.177500001">2019</time> . Made with <a href='https://gohugo.io'>Hugo</a> using the <a href='https://github.com/EmielH/tale-hugo/'>Tale</a> theme and the <a href='https://bookdown.org/yihui/blogdown/'>blogdown</a> R package.
 			</span>
 		</footer>
 

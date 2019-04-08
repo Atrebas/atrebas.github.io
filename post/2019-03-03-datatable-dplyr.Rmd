@@ -7,7 +7,7 @@ output:
   blogdown::html_page:
     toc: true
 categories: ["R"]
-tags: ["R", "data.table", "dplyr", "data"]
+tags: ["R", "data.table", "dplyr"]
 ---
 
 
@@ -104,9 +104,8 @@ read_chunk('2019-03-03-datatable-dplyr.R')
 # Introduction
 
 ### About
-- This document is derived from the [Datacamp](https://www.datacamp.com)'s [data.table cheat sheet](https://www.datacamp.com/community/tutorials/data-table-cheat-sheet). 
-See the corresponding [courses](https://www.datacamp.com/search?q=data.table).   
-- Other useful ressources for data.table can be found on the data.table
+- This document has been been inspired by [this stackoverflow question](http://stackoverflow.com/questions/21435339/data-table-vs-dplyr-can-one-do-something-well-the-other-cant-or-does-poorly/27840349#27840349) and by the data.table cheat sheet published by Karlijn Willems. It has been written for my own self-teaching and may contain errors or imprecisions. Corrections and suggestions are welcome.   
+- Resources for data.table can be found on the data.table
 [wiki](https://github.com/Rdatatable/data.table/wiki), in the data.table
 [vignettes](https://cran.r-project.org/web/packages/data.table/index.html), 
 and in the package documentation.   
@@ -114,10 +113,6 @@ and in the package documentation.
 [cheat sheet](https://github.com/rstudio/cheatsheets/raw/master/data-transformation.pdf),
 the dplyr [vignettes](https://cran.r-project.org/web/packages/dplyr/index.html),
 and the package documentation.   
-- The idea of presenting data.table and dplyr code side by side has been inspired
-by [this stackoverflow question](http://stackoverflow.com/questions/21435339/data-table-vs-dplyr-can-one-do-something-well-the-other-cant-or-does-poorly/27840349#27840349).
-- This document has been written for my own self-teaching and may contain 
-errors or imprecisions. Corrections and suggestions are welcome.
 - For the sake of readability, the console outputs are hidden by default. 
 Click on the button below to show or hide the outputs. Also, the R code used in 
 this document is independently [available](https://github.com/Atrebas/atrebas.github.io/blob/master/post/2019-03-03-datatable-dplyr.R) and can be easily reproduced.     
@@ -1391,7 +1386,7 @@ data.table excels at joining data, and offers additional functions and features.
 ```
 </td></tr></tbody></table>
 #### Overlap join
-It is important to mention `foverlaps()` from data.table that allows to perform 'overlap joins'. This is an very powerful function, but a bit out of scope for this document. See [these slides](https://raw.githubusercontent.com/wiki/Rdatatable/data.table/talks/EARL2014_OverlapRangeJoin_Arun.pdf) for more details. 
+It is important to mention `foverlaps()` from data.table that allows to perform 'overlap joins'. This is a very powerful function, but a bit out of scope for this document. See [these slides](https://raw.githubusercontent.com/wiki/Rdatatable/data.table/talks/EARL2014_OverlapRangeJoin_Arun.pdf) for more details. 
 
 
 <br><hr>
@@ -1489,9 +1484,9 @@ It is important to mention `foverlaps()` from data.table that allows to perform 
 This article presented the most important features of both data.table and dplyr, two packages that are now essential tools for data manipulation in R.      
 There are still a lot of features not covered in this document, in particular, data.table functions to deal with time-series or dplyr vectorized functions have not been discussed, but 'done is better than perfect'...     
 Hopefully, this comparison is not too biased, but I must admit that my preference is for data.table. So, I hope this post will encourage some readers to give it a try!    
-<hr>
+<br><br>
 
-```{r, eval = TRUE, message = FALSE, warning = FALSE}
+```{r, echo = FALSE, eval = TRUE, message = FALSE, warning = FALSE}
 <<sessionInfo>>
 ```
 

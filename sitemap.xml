@@ -23,12 +23,6 @@
   </url>
   
   <url>
-    <loc>/tags/data/</loc>
-    <lastmod>2019-03-03T00:00:00+00:00</lastmod>
-    <priority>0</priority>
-  </url>
-  
-  <url>
     <loc>/tags/data.table/</loc>
     <lastmod>2019-03-03T00:00:00+00:00</lastmod>
     <priority>0</priority>
@@ -47,7 +41,7 @@
   </url>
   
   <url>
-    <loc>/tags/plot/</loc>
+    <loc>/tags/learning/</loc>
     <lastmod>2019-01-15T00:00:00+00:00</lastmod>
     <priority>0</priority>
   </url>
@@ -55,6 +49,12 @@
   <url>
     <loc>/post/</loc>
     <lastmod>2019-03-03T00:00:00+00:00</lastmod>
+    <priority>0</priority>
+  </url>
+  
+  <url>
+    <loc>/tags/python/</loc>
+    <lastmod>2019-01-15T00:00:00+00:00</lastmod>
     <priority>0</priority>
   </url>
   
@@ -67,18 +67,6 @@
   <url>
     <loc>/categories/r/</loc>
     <lastmod>2019-03-03T00:00:00+00:00</lastmod>
-    <priority>0</priority>
-  </url>
-  
-  <url>
-    <loc>/tags/r-markdown/</loc>
-    <lastmod>2019-01-15T00:00:00+00:00</lastmod>
-    <priority>0</priority>
-  </url>
-  
-  <url>
-    <loc>/tags/regression/</loc>
-    <lastmod>2019-01-15T00:00:00+00:00</lastmod>
     <priority>0</priority>
   </url>
   

@@ -4,7 +4,7 @@ author: "Atrebas"
 date: "2019-01-15"
 summary: Both for personal interest and professional development, I started to learn Python and machine learning concepts. This article summarizes my 2018 learning path.   
 categories: ["R"]
-tags: ["R Markdown", "plot", "regression"]
+tags: ["R", "Python", "Learning"]
 ---
 
 <script src="/js/set-target-blank-links.js"></script>
@@ -43,12 +43,8 @@ As the title indicates, this is an introduction. So, the course doesn't go into 
 ![Udacity ML course overview (source: Udacity)](/images/ud120.png)    
 
 
-Then, from October to mid-December, over a 75-day streak, I have completed more than 30 [DataCamp](https://www.datacamp.com/) courses, including the [Data Scientist with Python track](https://www.datacamp.com/tracks/data-scientist-with-python) and several R courses.    
-It was a very good wrap-up, allowing me to review and strengthen the different topics covered previously, from the basics of Python programming to machine learning and even some bits of deep learning. Moreover, it made me more acquainted with data science libraries (Numpy, Pandas, or Bokeh) and I also discovered the basics of SQL.    
-DataCamp is a very good learning tool, with great intructors. One drawback is that the exercices can be a bit overguided. I have not tested the proposed data projects yet, but will surely do in a near future.    
-
-!['Data Scientist with Python' DataCamp certificate](/images/datacamp.png)
-
+Then, from October to mid-December, over a 75-day streak, I have completed more than 30 DataCamp courses, including the 'Data Scientist with Python' track and several R courses.    
+It was good wrap-up, allowing me to review and strengthen the different topics covered previously, from the basics of Python programming to machine learning and even some bits of deep learning. Moreover, it made me more acquainted with data science libraries (Numpy, Pandas, or Bokeh) and I also discovered the basics of SQL.    
 
 <br>
 
@@ -73,7 +69,7 @@ Along the way, I have discovered several tools. I think the Python ecosystem is 
 Scikit-learn is particularly easy to use with with a well-designed API and a fantastic documentation, making the coding part relatively simple (compared to the understanding of the methods, feature engineering, and all the analytical process).    
 - I had a quick look at google [Colab](https://colab.research.google.com/notebooks/welcome.ipynb), and will probably use it more often for more demanding computations.    
 - I tested the [reticulate](https://rstudio.github.io/reticulate/) package to use Python from R (using the RStudio IDE).    
-- And finally, I also become a big fan of [vscode](https://code.visualstudio.com/). For Javascript, R, and Python, vscode is very versatile and the interface is awesome.     
+- And finally, I have also become a big fan of [vscode](https://code.visualstudio.com/). For Javascript, R, and Python, vscode is very versatile and the interface is awesome.     
 
 
 <br>
