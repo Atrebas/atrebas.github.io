@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes" ?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+  <channel>
+    <title>Ggplot2 on Home</title>
+    <link>/tags/ggplot2/</link>
+    <description>Recent content in Ggplot2 on Home</description>
+    <generator>Hugo -- gohugo.io</generator>
+    <language>en-us</language>
+    <lastBuildDate>Sat, 18 May 2019 00:00:00 +0000</lastBuildDate>
+    
+	<atom:link href="/tags/ggplot2/index.xml" rel="self" type="application/rss+xml" />
+    
+    
+    <item>
+      <title>Turning images into ridgeline plots</title>
+      <link>/post/2019-05-18-images-to-ridges/</link>
+      <pubDate>Sat, 18 May 2019 00:00:00 +0000</pubDate>
+      
+      <guid>/post/2019-05-18-images-to-ridges/</guid>
+      <description>.hljs{background: #a7a7a71a;font-size: 90%;}What if we turn images into ridgeline plots?
+Ridgeline plots“Ridgeline plots are partially overlapping line plots that create the impression of a mountain range. They can be quite useful for visualizing changes in distributions over time or space.” - Claus Wilke.
+They have been quite popular recently. Some references include:
+The work of James Cheshire to represent population density</description>
+    </item>
+    
+  </channel>
+</rss>

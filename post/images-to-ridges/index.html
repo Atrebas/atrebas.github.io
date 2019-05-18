@@ -1,0 +1,363 @@
+<!DOCTYPE html>
+<html lang="en-us">
+    <head>
+		<meta charset="UTF-8">
+		<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	
+		<title>
+				Turning images into ridgeline plots &middot; Home
+		</title>
+	
+		
+  		<link rel="stylesheet" href="/css/style.css">
+		<link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Libre+Baskerville:400,400i,700">
+	
+		
+		<link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32.png">
+		<link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16.png">
+		<link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon.png">
+	
+		
+		<link href="" rel="alternate" type="application/rss+xml" title="Home" />
+		
+		
+		<link rel="stylesheet" href="/css/github-gist.css" rel="stylesheet" id="theme-stylesheet">
+        <script src="/js/highlight.pack.js"></script>
+        <script>hljs.initHighlightingOnLoad();</script>
+	
+	</head>
+	
+    <body>
+        		<nav class="nav">
+			<div class="nav-container">
+				<a href="/">
+					<h2 class="nav-title">Home</h2>
+				</a>
+				<ul>
+    <li><a href="/about">About</a></li>
+	<li><a href="/">Posts</a></li>
+</ul>
+			</div>
+		</nav>
+
+        
+
+<main>
+	<div class="post">
+		<div class="post-info">
+    <span>Written by</span>
+        Atrebas
+        <br>
+        <span>on&nbsp;</span><time datetime="2019-05-18 00:00:00 &#43;0000 UTC">May 18, 2019</time>
+</div>
+		<h1 class="post-title">Turning images into ridgeline plots</h1>
+<div class="post-line"></div>
+
+		
+
+		
+
+
+<p>I had been thinking about it for a while. I was not sure what the result would look like.<br />
+What if we turn images into ridgeline plots?</p>
+<div id="ridgeline-plots" class="section level1">
+<h1>Ridgeline plots</h1>
+<blockquote>
+<p>“Ridgeline plots are partially overlapping line plots that create the impression of a mountain range. They can be quite useful for visualizing changes in distributions over time or space.” - Claus Wilke.</p>
+</blockquote>
+<p>They have been quite popular recently. Some references include:</p>
+<ul>
+<li>The work of <a href="http://spatial.ly/2014/08/population-lines/">James Cheshire</a> to represent population density<br />
+</li>
+<li>Alex Whan’s <a href="http://alexwhan.com/2016-03-24-joy-division-plot">post</a>, reproducing the Joy Division’s album cover<br />
+</li>
+<li>The <a href="https://github.com/clauswilke/ggridges">ggridges</a> package from Claus Wilke<br />
+</li>
+<li>In Python, the recent <a href="https://github.com/ColCarroll/ridge_map">ridge_map</a> library by Colin Carroll finally convinced me make some experiments</li>
+</ul>
+</div>
+<div id="import-images" class="section level1">
+<h1>Import images</h1>
+<p>First, let’s load the required packages. Then, we create a function to import an image from a url
+and store the grayscale pixel values as a matrix.</p>
+<pre class="r"><code>library(data.table)
+library(ggplot2)
+library(ggridges)
+library(jpeg)
+
+
+img_to_matrix &lt;- function(imgurl) {
+  tmp &lt;- tempfile()
+  download.file(imgurl, tmp, mode = &quot;wb&quot;)
+  img &lt;- readJPEG(tmp)
+  file.remove(tmp)
+  img &lt;- t(apply(img, 2, rev)) # rotate
+  print(paste(&quot;Image loaded.&quot;, nrow(img), &quot;x&quot;, ncol(img), &quot;pixels.&quot;))
+  img
+}</code></pre>
+<p>We’ll use two images throughout this post.</p>
+<pre class="r"><code>url1 &lt;- &quot;http://upload.wikimedia.org/wikipedia/en/8/86/Einstein_tongue.jpg&quot;
+url2 &lt;- &quot;http://upload.wikimedia.org/wikipedia/commons/thumb/3/3b/Monroe_1953_publicity.jpg/391px-Monroe_1953_publicity.jpg&quot;
+
+img1 &lt;- img_to_matrix(url1)</code></pre>
+<pre><code>## [1] &quot;Image loaded. 230 x 286 pixels.&quot;</code></pre>
+<pre class="r"><code>img2 &lt;- img_to_matrix(url2)</code></pre>
+<pre><code>## [1] &quot;Image loaded. 391 x 480 pixels.&quot;</code></pre>
+<pre class="r"><code>par(mfrow = c(1, 2))
+image(img1, col = gray.colors(10))
+image(img2, col = gray.colors(10))</code></pre>
+<p><img src="/post/2019-05-18-images-to-ridges_files/figure-html/unnamed-chunk-2-1.png" width="672" /></p>
+<div id="convert-image-to-a-data.frame" class="section level2">
+<h2>Convert image to a data.frame</h2>
+<p>Next, the <code>matrix_to_dt</code> function will convert an image matrix into a data.frame. The data.table package is used here for convenience.<br />
+This function is simply used to melt the matrix. The coordinates on the y axis (<code>y2</code>) correspond to the y value + the pixel intensity (<code>z</code>).</p>
+<p>This function has four parameters:</p>
+<ul>
+<li><code>img</code>: the matrix object<br />
+</li>
+<li><code>ratio</code>: integer value, used to reduce the size of the matrix<br />
+</li>
+<li><code>height</code>: numeric value, scaling applied to pixel value, higher will make peaks taller (and create overlap)<br />
+</li>
+<li><code>y_as_factor</code>: boolean, will make things easier with ggplot2 <code>geom_ribbon()</code></li>
+</ul>
+<pre class="r"><code>matrix_to_dt &lt;- function(img, ratio = NULL, height = 3, y_as_factor = FALSE) {
+  if (!is.null(ratio)) {
+    img &lt;- img[seq(1, nrow(img), by = ratio), 
+               seq(1, ncol(img), by = ratio)]
+  }
+  
+  imgdt &lt;- data.table(x = rep(1:nrow(img), ncol(img)),
+                      y = rep(1:ncol(img), each = nrow(img)),
+                      z = as.numeric(img))
+  
+  imgdt[, y2 := y + z * height]
+  
+  if (y_as_factor) {
+    imgdt[, y := factor(y, levels = max(y):1)]
+    setorder(imgdt, -y)
+  }
+  
+  imgdt[]
+}</code></pre>
+</div>
+<div id="basic-plots" class="section level2">
+<h2>Basic plots</h2>
+<p>Starting with a simple ggplot2 plot, using <code>geom_path()</code>.</p>
+<pre class="r"><code>imgdt &lt;- matrix_to_dt(img1, ratio = 2L)
+
+ggplot(data = imgdt) +
+  geom_path(aes(x     = x,
+                y     = y2,
+                group = y),
+            size = 0.05) + 
+  theme_void()</code></pre>
+<p><img src="/post/2019-05-18-images-to-ridges_files/figure-html/unnamed-chunk-4-1.png" width="672" /></p>
+<p>Here is another try increasing the height.</p>
+<pre class="r"><code>imgdt &lt;- matrix_to_dt(img1, height = 5L, ratio = 2L)
+
+ggplot(data = imgdt) +
+  geom_path(aes(x     = x,
+                y     = y2,
+                group = y),
+            size = 0.05) + 
+  theme_void()</code></pre>
+<p><img src="/post/2019-05-18-images-to-ridges_files/figure-html/unnamed-chunk-5-1.png" width="672" /></p>
+<pre class="r"><code>imgdt &lt;- matrix_to_dt(img2, height = 5L, ratio = 4L)
+
+ggplot(data = imgdt) +
+  geom_path(aes(x     = x,
+                y     = y2,
+                group = y),
+            size = 0.05) + 
+  theme_void()</code></pre>
+<p><img src="/post/2019-05-18-images-to-ridges_files/figure-html/unnamed-chunk-6-1.png" width="672" /></p>
+<p>We can also used vertical lines. In fact, I think they are more appropriate for these pictures.</p>
+<pre class="r"><code>imgdt &lt;- matrix_to_dt(img1, height = 5L, ratio = 2L)
+
+ggplot(data = imgdt) +
+  geom_path(aes(x     = x + z * 5L,
+                y     = y,
+                group = x),
+            size   = 0.05,
+            colour = &quot;gray&quot;) + 
+  theme_void()</code></pre>
+<p><img src="/post/2019-05-18-images-to-ridges_files/figure-html/unnamed-chunk-7-1.png" width="672" /></p>
+<pre class="r"><code>imgdt &lt;- matrix_to_dt(img2, height = 5L, ratio = 3L)
+
+ggplot(data = imgdt) +
+  geom_path(aes(x      = x + z * 4L,
+                y      = y,
+                group  = x,
+                colour = x),
+            size = 0.05) +
+  scale_colour_continuous(type = &quot;viridis&quot;, guide = FALSE) +
+  theme_void()</code></pre>
+<p><img src="/post/2019-05-18-images-to-ridges_files/figure-html/unnamed-chunk-8-1.png" width="672" /></p>
+</div>
+<div id="ribbon-plots" class="section level2">
+<h2>Ribbon plots</h2>
+<p>To avoid the ovelapping of the lines, we can use <code>geom_ribbon</code>. The y values are converted into factors to keep them in the right order.</p>
+<pre class="r"><code>imgdt &lt;- matrix_to_dt(img1, height = 5L, y_as_factor = TRUE, ratio = 3L)
+
+ggplot(data = imgdt) +
+  geom_ribbon(aes(x     = x,
+                  ymax  = y2,
+                  ymin  = 0,
+                  group = y),
+              size   = 0.1,
+              colour = &quot;white&quot;,
+              fill   = &quot;black&quot;) + 
+  theme_void()</code></pre>
+<p><img src="/post/2019-05-18-images-to-ridges_files/figure-html/unnamed-chunk-9-1.png" width="672" /></p>
+<pre class="r"><code>imgdt &lt;- matrix_to_dt(img2, height = 7L, y_as_factor = TRUE, ratio = 4L)
+
+ggplot(data = imgdt) +
+  geom_ribbon(aes(x     = x,
+                  ymax  = y2,
+                  ymin  = 0,
+                  group = y),
+              size   = 0.1,
+              colour = &quot;white&quot;,
+              fill   = &quot;black&quot;) + 
+  theme_void()</code></pre>
+<p><img src="/post/2019-05-18-images-to-ridges_files/figure-html/unnamed-chunk-10-1.png" width="672" /></p>
+</div>
+<div id="ggridges" class="section level2">
+<h2>ggridges</h2>
+<p>The plots above are a bit sharp and lack the smooth aspect of ridgeline plots.<br />
+A first solution could be to use a smoothing spline. As an alternative, I gave a try to ggridges. The trick here is to transform the data by repeating the x values proportionally to the pixel intensity.</p>
+<pre class="r"><code>imgdt &lt;- matrix_to_dt(img1, height = 7L, y_as_factor = TRUE, ratio = 3L)
+
+imgdt2 &lt;- imgdt[, .(x = rep(x, round(z * 100))), by = y]
+imgdt2[, y := factor(y, levels = rev(levels(y)))]
+
+ggplot(imgdt2,
+       aes(x = x,
+           y = y)) +
+  stat_density_ridges(geom      = &quot;density_ridges&quot;, 
+                      #calc_ecdf = TRUE, 
+                      bandwidth = 0.8,
+                      colour    = &quot;white&quot;,
+                      fill      = &quot;black&quot;,
+                      scale     = 5,
+                      size      = 0.01) +
+  theme_ridges() +
+  theme_void() +
+  theme(panel.background = element_rect(fill = &#39;black&#39;)) </code></pre>
+<p><img src="/post/2019-05-18-images-to-ridges_files/figure-html/unnamed-chunk-11-1.png" width="672" /></p>
+<pre class="r"><code>imgdt &lt;- matrix_to_dt(img2, height = 7L, y_as_factor = TRUE, ratio = 4L)
+
+imgdt2 &lt;- imgdt[, .(x = rep(x, round(z * 100))), by = y]
+imgdt2[, y := factor(y, levels = rev(levels(y)))]
+
+ggplot(imgdt2,
+       aes(x = x,
+           y = y)) +
+  stat_density_ridges(geom      = &quot;density_ridges&quot;, 
+                      bandwidth = 0.8,
+                      colour    = &quot;white&quot;,
+                      fill      = &quot;black&quot;,
+                      scale     = 5,
+                      size      = 0.01,
+                      rel_min_height = 0.15) +
+  theme_ridges() +
+  theme_void() +
+  theme(panel.background = element_rect(fill = &#39;black&#39;))</code></pre>
+<p><img src="/post/2019-05-18-images-to-ridges_files/figure-html/unnamed-chunk-12-1.png" width="672" /></p>
+<pre class="r"><code>ggplot(imgdt2,
+       aes(x = x,
+           y = y)) +
+  stat_density_ridges(geom      = &quot;density_ridges&quot;, 
+                      bandwidth = 0.8,
+                      alpha     = 1,
+                      size      = 0.01,
+                      fill      = &quot;white&quot;,
+                      color     = NA,
+                      rel_min_height = 0.15) +
+  theme_ridges() +
+  theme_void() + 
+  theme(panel.background = element_rect(fill = &#39;black&#39;))</code></pre>
+<p><img src="/post/2019-05-18-images-to-ridges_files/figure-html/unnamed-chunk-13-1.png" width="672" /></p>
+</div>
+<div id="conclusion" class="section level2">
+<h2>Conclusion</h2>
+<p>Let’s conclude with a final example.</p>
+<pre class="r"><code>jpeg(&quot;tmp.jpg&quot;)
+plot(0, 0, type = &quot;n&quot;, axes = FALSE, xlab = &quot;&quot;, ylab = &quot;&quot;)
+text(0, 0, &quot;ggplot2\nrocks!&quot;, cex = 9)
+dev.off()</code></pre>
+<pre><code>## png 
+##   2</code></pre>
+<pre class="r"><code>img   &lt;- readJPEG(&quot;tmp.jpg&quot;)
+img   &lt;- 1 - t(apply(img[, , 1], 2, rev))
+imgdt &lt;- matrix_to_dt(img, height = 4L, y_as_factor = TRUE, ratio = 3L)
+file.remove(&quot;tmp.jpg&quot;)</code></pre>
+<pre><code>## [1] TRUE</code></pre>
+<pre class="r"><code>ggplot(imgdt) +
+  geom_ribbon(aes(x      = x,
+                  ymax   = y2,
+                  ymin   = 0,
+                  group  = y,
+                  colour = y),
+              size = 0.6,
+              fill = &quot;white&quot;) + 
+  theme_void() +
+  scale_colour_discrete(guide = FALSE)</code></pre>
+<p><img src="/post/2019-05-18-images-to-ridges_files/figure-html/unnamed-chunk-14-1.png" width="672" /></p>
+<p>Zooming in and out the high-resolution plots rendered as a pdf file is mesmerizing and it is quite impressive to see the amount of details captured by these few intertwining lines.</p>
+<p><br></p>
+<pre class="r"><code>sessionInfo()</code></pre>
+<pre><code>## R version 3.3.2 (2016-10-31)
+## Platform: x86_64-w64-mingw32/x64 (64-bit)
+## Running under: Windows 7 x64 (build 7601) Service Pack 1
+## 
+## locale:
+## [1] LC_COLLATE=English_United States.1252 
+## [2] LC_CTYPE=English_United States.1252   
+## [3] LC_MONETARY=English_United States.1252
+## [4] LC_NUMERIC=C                          
+## [5] LC_TIME=English_United States.1252    
+## 
+## attached base packages:
+## [1] methods   stats     graphics  grDevices utils     datasets  base     
+## 
+## other attached packages:
+## [1] jpeg_0.1-8        ggridges_0.5.1    ggplot2_3.1.0     data.table_1.12.3
+## 
+## loaded via a namespace (and not attached):
+##  [1] Rcpp_1.0.0        knitr_1.21        magrittr_1.5     
+##  [4] tidyselect_0.2.5  munsell_0.5.0     viridisLite_0.3.0
+##  [7] colorspace_1.3-2  R6_2.3.0          rlang_0.3.1      
+## [10] dplyr_0.8.0.1     stringr_1.3.1     plyr_1.8.4       
+## [13] tools_3.3.2       grid_3.3.2        gtable_0.2.0     
+## [16] xfun_0.4.11       withr_2.1.2       htmltools_0.3.6  
+## [19] assertthat_0.2.0  yaml_2.2.0        lazyeval_0.2.1   
+## [22] digest_0.6.18     tibble_2.0.1      crayon_1.3.4     
+## [25] bookdown_0.9      purrr_0.2.5       glue_1.3.0       
+## [28] evaluate_0.12     rmarkdown_1.11    blogdown_0.10    
+## [31] labeling_0.3      stringi_1.2.4     pillar_1.3.1     
+## [34] scales_1.0.0      pkgconfig_2.0.2</code></pre>
+</div>
+</div>
+
+
+		
+	</div>
+
+	<div class="pagination">
+		<a href="/post/2019-03-03-datatable-dplyr/" class="left arrow">&#8592;</a>
+
+		<a href="#" class="top">Top</a>
+	</div>
+</main>
+
+
+        		<footer>
+			<span>
+			&copy; <time datetime="2019-05-18 11:47:43.2141507 &#43;0200 CEST m=&#43;0.151000001">2019</time> . Made with <a href='https://gohugo.io'>Hugo</a> using the <a href='https://github.com/EmielH/tale-hugo/'>Tale</a> theme and the <a href='https://bookdown.org/yihui/blogdown/'>blogdown</a> R package.
+			</span>
+		</footer>
+
+    </body>
+</html>

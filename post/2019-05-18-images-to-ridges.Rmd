@@ -1,0 +1,323 @@
+---
+title: "Turning images into ridgeline plots"
+author: "Atrebas"
+date: "2019-05-18"
+summary: I was wondering what images turned into ridgeline plots would look like. This post illustrates some experiments performed with ggplot2 and ggridges.     
+output:
+  blogdown::html_page
+categories: ["R"]
+tags: ["R", "ggplot2"]
+---
+
+<style>
+  .hljs{
+    background: #a7a7a71a;
+    font-size: 90%;
+  }
+</style>
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+
+What if we turn images into ridgeline plots?    
+
+# Ridgeline plots
+
+
+> "Ridgeline plots are partially overlapping line plots that create the impression of a mountain range. They can be quite useful for visualizing changes in distributions over time or space." - Claus Wilke.
+
+They have been quite popular recently. Some references include:
+
+- The work of [James Cheshire](http://spatial.ly/2014/08/population-lines/) to represent population density    
+- Alex Whan's [post](http://alexwhan.com/2016-03-24-joy-division-plot), reproducing the Joy Division's album cover    
+- The [ggridges](https://github.com/clauswilke/ggridges) package from Claus Wilke    
+- In Python, the recent [ridge_map](https://github.com/ColCarroll/ridge_map) library by Colin Carroll finally convinced me to perform some experiments     
+     
+
+
+# Import images
+
+First, let's load the required packages. Then, we create a function to import an image from a url
+and store the grayscale pixel values as a matrix.    
+
+
+```{r, message = FALSE}
+
+library(data.table)
+library(ggplot2)
+library(ggridges)
+library(jpeg)
+
+img_to_matrix <- function(imgurl) {
+  tmp <- tempfile()
+  download.file(imgurl, tmp, mode = "wb")
+  img <- readJPEG(tmp)
+  file.remove(tmp)
+  img <- t(apply(img, 2, rev)) # rotate
+  print(paste("Image loaded.", nrow(img), "x", ncol(img), "pixels."))
+  img
+}
+
+```
+
+We'll use two images throughout this post.
+
+```{r}
+url1 <- "http://upload.wikimedia.org/wikipedia/en/8/86/Einstein_tongue.jpg"
+url2 <- "http://upload.wikimedia.org/wikipedia/commons/thumb/3/3b/Monroe_1953_publicity.jpg/391px-Monroe_1953_publicity.jpg"
+
+img1 <- img_to_matrix(url1)
+img2 <- img_to_matrix(url2)
+
+par(mfrow = c(1, 2))
+image(img1, col = gray.colors(50))
+image(img2, col = gray.colors(50))
+```
+
+
+## Convert image to a data.frame
+
+Next, the `matrix_to_dt` function will convert an image matrix into a data.frame. The data.table package is used here for convenience.    
+This function is simply used to melt the matrix. The coordinates on the y axis that are used below (`y2`) correspond to the y value + the pixel intensity (`z`).     
+
+This function has four parameters:     
+
+- `img`: the matrix object     
+- `ratio`: integer value, used to reduce the size of the matrix     
+- `height`: numeric value, scaling applied to pixel value, higher will make peaks taller (and create overlap)    
+- `y_as_factor`: boolean, will make things easier with ggplot2 `geom_ribbon()`    
+
+
+```{r}
+matrix_to_dt <- function(img, ratio = NULL, height = 3, y_as_factor = FALSE) {
+  if (!is.null(ratio)) {
+    img <- img[seq(1, nrow(img), by = ratio), 
+               seq(1, ncol(img), by = ratio)]
+  }
+  
+  imgdt <- data.table(x = rep(1:nrow(img), ncol(img)),
+                      y = rep(1:ncol(img), each = nrow(img)),
+                      z = as.numeric(img))
+  
+  imgdt[, y2 := y + z * height]
+  
+  if (y_as_factor) {
+    imgdt[, y := factor(y, levels = max(y):1)]
+    setorder(imgdt, -y)
+  }
+  
+  imgdt[]
+}
+```
+
+
+## Basic plots
+
+Starting with a simple ggplot2 plot, using `geom_path()`.
+
+```{r fig.height = 8.7}
+imgdt <- matrix_to_dt(img1, ratio = 2L)
+
+ggplot(data = imgdt) +
+  geom_path(aes(x     = x,
+                y     = y2,
+                group = y),
+            size = 0.05) + 
+  theme_void()
+```
+
+Here is another try increasing the height.    
+
+```{r fig.height = 8.7}
+imgdt <- matrix_to_dt(img1, height = 5L, ratio = 2L)
+
+ggplot(data = imgdt) +
+  geom_path(aes(x     = x,
+                y     = y2,
+                group = y),
+            size = 0.05) + 
+  theme_void()
+```
+
+```{r fig.height = 8.6}
+imgdt <- matrix_to_dt(img2, height = 5L, ratio = 4L)
+
+ggplot(data = imgdt) +
+  geom_path(aes(x     = x,
+                y     = y2,
+                group = y),
+            size = 0.05) + 
+  theme_void()
+```
+
+
+We can also used vertical lines. In fact, I think they are more appropriate for these pictures.    
+
+
+```{r fig.height = 8.7}
+imgdt <- matrix_to_dt(img1, height = 5L, ratio = 2L)
+
+ggplot(data = imgdt) +
+  geom_path(aes(x     = x + z * 5L,
+                y     = y,
+                group = x),
+            size   = 0.05,
+            colour = "gray") + 
+  theme_void()
+```
+
+
+```{r fig.height = 8.6}
+imgdt <- matrix_to_dt(img2, height = 5L, ratio = 3L)
+
+ggplot(data = imgdt) +
+  geom_path(aes(x      = x + z * 4L,
+                y      = y,
+                group  = x,
+                colour = x),
+            size = 0.05) +
+  scale_colour_continuous(type = "viridis", guide = FALSE) +
+  theme_void()
+```
+
+
+## Ribbon plots
+
+To prevent the lines from overlapping, we can use `geom_ribbon`. The y values are converted into factors to keep them in the right order.   
+    
+    
+```{r fig.height = 8.7}
+imgdt <- matrix_to_dt(img1, height = 5L, y_as_factor = TRUE, ratio = 2L)
+
+ggplot(data = imgdt) +
+  geom_ribbon(aes(x     = x,
+                  ymax  = y2,
+                  ymin  = 0,
+                  group = y),
+              size   = 0.1,
+              colour = "white",
+              fill   = "black") + 
+  theme_void()
+```
+
+```{r fig.height = 8.6}
+imgdt <- matrix_to_dt(img2, height = 7L, y_as_factor = TRUE, ratio = 4L)
+
+ggplot(data = imgdt) +
+  geom_ribbon(aes(x     = x,
+                  ymax  = y2,
+                  ymin  = 0,
+                  group = y),
+              size   = 0.1,
+              colour = "white",
+              fill   = "black") + 
+  theme_void()
+```
+
+## ggridges
+
+The plots above are a bit sharp and lack the smooth aspect of ridgeline plots.    
+A first solution could be to use a smoothing spline. As an alternative, I gave a try to ggridges. The trick here is to transform the data by repeating the x values proportionally to the pixel intensity.    
+
+
+```{r fig.height = 8.7}
+imgdt <- matrix_to_dt(img1, height = 7L, y_as_factor = TRUE, ratio = 2L)
+
+imgdt2 <- imgdt[, .(x = rep(x, round(z * 100))), by = y]
+imgdt2[, y := factor(y, levels = rev(levels(y)))]
+
+ggplot(imgdt2,
+       aes(x = x,
+           y = y)) +
+  stat_density_ridges(geom      = "density_ridges", 
+                      bandwidth = 0.8,
+                      colour    = "white",
+                      fill      = "black",
+                      scale     = 7,
+                      size      = 0.01) +
+  theme_ridges() +
+  theme_void() +
+  theme(panel.background = element_rect(fill = 'black')) 
+```
+
+
+```{r fig.height = 8.6}
+imgdt <- matrix_to_dt(img2, height = 7L, y_as_factor = TRUE, ratio = 4L)
+
+imgdt2 <- imgdt[, .(x = rep(x, round(z * 100))), by = y]
+imgdt2[, y := factor(y, levels = rev(levels(y)))]
+
+ggplot(imgdt2,
+       aes(x = x,
+           y = y)) +
+  stat_density_ridges(geom      = "density_ridges", 
+                      bandwidth = 0.8,
+                      colour    = "white",
+                      fill      = "black",
+                      scale     = 5,
+                      size      = 0.01,
+                      rel_min_height = 0.15) +
+  theme_ridges() +
+  theme_void() +
+  theme(panel.background = element_rect(fill = 'black'))
+```
+
+```{r fig.height = 8.6}
+ggplot(imgdt2,
+       aes(x = x,
+           y = y)) +
+  stat_density_ridges(geom      = "density_ridges", 
+                      bandwidth = 0.8,
+                      alpha     = 1,
+                      size      = 0.01,
+                      fill      = "white",
+                      color     = NA,
+                      rel_min_height = 0.15) +
+  theme_ridges() +
+  theme_void() + 
+  theme(panel.background = element_rect(fill = 'black'))
+```
+
+
+<br>
+
+## Conclusion
+
+Zooming in and out the high-resolution plots rendered as a pdf file is mesmerizing and it is quite impressive to see the amount of details captured by these few intertwining lines.    
+
+Here is a final example.     
+
+```{r, message = FALSE, warning = FALSE}
+jpeg("tmp.jpg")
+plot(0, 0, type = "n", axes = FALSE, xlab = "", ylab = "")
+text(0, 0, "ggplot2\nrocks!", cex = 9)
+dev.off()
+
+img   <- readJPEG("tmp.jpg")
+img   <- 1 - t(apply(img[, , 1], 2, rev))
+imgdt <- matrix_to_dt(img, height = 4L, y_as_factor = TRUE, ratio = 3L)
+file.remove("tmp.jpg")
+
+ggplot(imgdt) +
+  geom_ribbon(aes(x      = x,
+                  ymax   = y2,
+                  ymin   = 0,
+                  group  = y,
+                  colour = y),
+              size = 0.6,
+              fill = "white") + 
+  theme_void() +
+  scale_colour_discrete(guide = FALSE)
+```
+
+
+<br>
+
+
+```{r}
+sessionInfo()
+```
+
+
