@@ -6,10 +6,20 @@
     <description>Recent content on Home</description>
     <generator>Hugo -- gohugo.io</generator>
     <language>en-us</language>
-    <lastBuildDate>Sat, 18 May 2019 00:00:00 +0000</lastBuildDate>
+    <lastBuildDate>Sat, 08 Jun 2019 00:00:00 +0000</lastBuildDate>
     
 	<atom:link href="/index.xml" rel="self" type="application/rss+xml" />
     
+    
+    <item>
+      <title>Dendrograms in R, a lightweight approach</title>
+      <link>/post/2019-06-08-lightweight-dendrograms/</link>
+      <pubDate>Sat, 08 Jun 2019 00:00:00 +0000</pubDate>
+      
+      <guid>/post/2019-06-08-lightweight-dendrograms/</guid>
+      <description>.hljs{background: #a7a7a71a;font-size: 90%;}Dendrograms in RDendrograms are diagrams useful to illustrate hierarchical relationships, such as those obtained from a hierarchical clustering. They are commonly used in biology, especially in genetics, for example to illustrate the relationships among a set of genes or taxa.
+Several alternatives exist in R to visualize dendrograms (reviews here and here), like base R of course, or the ape package.</description>
+    </item>
     
     <item>
       <title>Turning images into ridgeline plots</title>

@@ -1,0 +1,433 @@
+<!DOCTYPE html>
+<html lang="en-us">
+    <head>
+		<meta charset="UTF-8">
+		<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	
+		<title>
+				Dendrograms in R, a lightweight approach &middot; Home
+		</title>
+	
+		
+  		<link rel="stylesheet" href="/css/style.css">
+		<link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Libre+Baskerville:400,400i,700">
+	
+		
+		<link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32.png">
+		<link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16.png">
+		<link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon.png">
+	
+		
+		<link href="" rel="alternate" type="application/rss+xml" title="Home" />
+		
+		
+		<link rel="stylesheet" href="/css/github-gist.css" rel="stylesheet" id="theme-stylesheet">
+        <script src="/js/highlight.pack.js"></script>
+        <script>hljs.initHighlightingOnLoad();</script>
+	
+	</head>
+	
+    <body>
+        		<nav class="nav">
+			<div class="nav-container">
+				<a href="/">
+					<h2 class="nav-title">Home</h2>
+				</a>
+				<ul>
+    <li><a href="/about">About</a></li>
+	<li><a href="/">Posts</a></li>
+</ul>
+			</div>
+		</nav>
+
+        
+
+<main>
+	<div class="post">
+		<div class="post-info">
+    <span>Written by</span>
+        Atrebas
+        <br>
+        <span>on&nbsp;</span><time datetime="2019-06-08 00:00:00 &#43;0000 UTC">June 8, 2019</time>
+</div>
+		<h1 class="post-title">Dendrograms in R, a lightweight approach</h1>
+<div class="post-line"></div>
+
+		
+
+		
+
+
+<script src="/js/set-target-blank-links.js"></script>
+<style>
+  .hljs{
+    background: #a7a7a71a;
+    font-size: 90%;
+  }
+</style>
+<div id="dendrograms-in-r" class="section level2">
+<h2>Dendrograms in R</h2>
+<p>Dendrograms are diagrams useful to illustrate hierarchical relationships, such as those obtained from a hierarchical clustering. They are commonly used in biology, especially in genetics, for example to illustrate the relationships among a set of genes or taxa.</p>
+<p>Several alternatives exist in R to visualize dendrograms (reviews <a href="http://www.sthda.com/english/wiki/beautiful-dendrogram-visualizations-in-r-5-must-known-methods-unsupervised-machine-learning#plot.dendrogram-function">here</a> and <a href="http://rpubs.com/gaston/dendrograms">here</a>), like base R of course, or the <a href="http://ape-package.ird.fr/">ape</a> package. For ggplot2-based solutions, let’s mention <a href="https://cran.r-project.org/web/packages/ggdendro/index.html">ggdendro</a>, <a href="https://github.com/talgalili/dendextend">dendextend</a>, or <a href="https://guangchuangyu.github.io/software/ggtree/">ggtree</a>.<br />
+<a href="https://cran.r-project.org/web/packages/ggdendro/index.html">ggdendro</a> is stable, lightweight (no dependency other than MASS and ggplot2), and allows to access cluster data in a convenient format, but its functionalities are a bit limited in terms of visualization. On the other hand, <a href="https://github.com/talgalili/dendextend">dendextend</a> and <a href="https://guangchuangyu.github.io/software/ggtree/">ggtree</a> offers a lot of great features, but at the cost of higher dependency requirements and a steeper learning curve to use them effectively.</p>
+<p>I wanted a “lightweight” and flexible ggplot2-based solution to draw dendrograms, in particular with the possibility to highlight clusters using different branch colors.<br />
+<a href="https://stackoverflow.com/questions/21474388/colorize-clusters-in-dendogram-with-ggplot2">This stackoverflow question</a> provided me with some leads and I finally ended up writing the functions described below, using ggdendro and ggplot2 only.</p>
+<pre class="r"><code>library(ggdendro)
+library(ggplot2)</code></pre>
+<p><br></p>
+</div>
+<div id="tweaking-ggdendro" class="section level2">
+<h2>Tweaking ggdendro</h2>
+<p>As a first step, I have ‘extended’ <code>ggdendro::dendro_data()</code>. The <code>dendro_data_k()</code> function takes a <code>k</code> argument, an integer, specifying the number of desired clusters. This value is simply used in the <code>base::cutree()</code> function, and, for each cluster, the segments are assigned the cluster id of the corresponding leaves based on their x, xend, and yend coordinates. This may not be the most elegant way, but it is quite straighforward.</p>
+<pre class="r"><code>dendro_data_k &lt;- function(hc, k) {
+  
+  hcdata    &lt;-  ggdendro::dendro_data(hc, type = &quot;rectangle&quot;)
+  seg       &lt;-  hcdata$segments
+  labclust  &lt;-  cutree(hc, k)[hc$order]
+  segclust  &lt;-  rep(0L, nrow(seg))
+  heights   &lt;-  sort(hc$height, decreasing = TRUE)
+  height    &lt;-  mean(c(heights[k], heights[k - 1L]), na.rm = TRUE)
+  
+  for (i in 1:k) {
+    xi      &lt;-  hcdata$labels$x[labclust == i]
+    idx1    &lt;-  seg$x    &gt;= min(xi) &amp; seg$x    &lt;= max(xi)
+    idx2    &lt;-  seg$xend &gt;= min(xi) &amp; seg$xend &lt;= max(xi)
+    idx3    &lt;-  seg$yend &lt; height
+    idx     &lt;-  idx1 &amp; idx2 &amp; idx3
+    segclust[idx] &lt;- i
+  }
+  
+  idx                    &lt;-  which(segclust == 0L)
+  segclust[idx]          &lt;-  segclust[idx + 1L]
+  hcdata$segments$clust  &lt;-  segclust
+  hcdata$segments$line   &lt;-  ifelse(segclust &lt; 1L, 1L, 0L)
+  hcdata$labels$clust    &lt;-  labclust
+  
+  hcdata
+}</code></pre>
+<p><br></p>
+</div>
+<div id="plot-functions" class="section level2">
+<h2>Plot functions</h2>
+<p>With the convenient data structure obtained from ggdendro and the function above, the tree can be built using ggplot2. Two geoms are used: <code>geom_segment()</code> for the branches, and <code>geom_text()</code> for the labels.<br />
+Things become a bit more complicated if we want to customize the orientation of the tree (for example top to bottom or left to right) or the format (circular plot). To deal with that more easily, a distinct function is used (internally) to set the parameters of the labels (angle, offset, …).</p>
+<pre class="r"><code>set_labels_params &lt;- function(nbLabels,
+                              direction = c(&quot;tb&quot;, &quot;bt&quot;, &quot;lr&quot;, &quot;rl&quot;),
+                              fan       = FALSE) {
+  if (fan) {
+    angle       &lt;-  360 / nbLabels * 1:nbLabels + 90
+    idx         &lt;-  angle &gt;= 90 &amp; angle &lt;= 270
+    angle[idx]  &lt;-  angle[idx] + 180
+    hjust       &lt;-  rep(0, nbLabels)
+    hjust[idx]  &lt;-  1
+  } else {
+    angle       &lt;-  rep(0, nbLabels)
+    hjust       &lt;-  0
+    if (direction %in% c(&quot;tb&quot;, &quot;bt&quot;)) { angle &lt;- angle + 45 }
+    if (direction %in% c(&quot;tb&quot;, &quot;rl&quot;)) { hjust &lt;- 1 }
+  }
+  list(angle = angle, hjust = hjust, vjust = 0.5)
+}</code></pre>
+<pre class="r"><code>plot_ggdendro &lt;- function(hcdata,
+                          direction   = c(&quot;lr&quot;, &quot;rl&quot;, &quot;tb&quot;, &quot;bt&quot;),
+                          fan         = FALSE,
+                          scale.color = NULL,
+                          branch.size = 1,
+                          label.size  = 3,
+                          nudge.label = 0.01,
+                          expand.y    = 0.1) {
+  
+  direction &lt;- match.arg(direction) # if fan = FALSE
+  ybreaks   &lt;- pretty(segment(hcdata)$y, n = 5)
+  ymax      &lt;- max(segment(hcdata)$y)
+  
+  ## branches
+  p &lt;- ggplot() +
+    geom_segment(data         =  segment(hcdata),
+                 aes(x        =  x,
+                     y        =  y,
+                     xend     =  xend,
+                     yend     =  yend,
+                     linetype =  factor(line),
+                     colour   =  factor(clust)
+                 ),
+                 lineend      =  &quot;round&quot;,
+                 show.legend  =  FALSE,
+                 size         =  branch.size)
+  
+  ## orientation
+  if (fan) {
+    p &lt;- p +
+      coord_polar(direction = -1) +
+      scale_x_continuous(breaks = NULL,
+                         limits = c(0, nrow(label(hcdata)))) +
+      scale_y_reverse(breaks = ybreaks)
+  } else {
+    p &lt;- p + scale_x_continuous(breaks = NULL)
+    if (direction %in% c(&quot;rl&quot;, &quot;lr&quot;)) {
+      p &lt;- p + coord_flip()
+    }
+    if (direction %in% c(&quot;bt&quot;, &quot;lr&quot;)) {
+      p &lt;- p + scale_y_reverse(breaks = ybreaks)
+    } else {
+      p &lt;- p + scale_y_continuous(breaks = ybreaks)
+      nudge.label &lt;- -(nudge.label)
+    }
+  }
+  
+  # labels
+  labelParams &lt;- set_labels_params(nrow(hcdata$labels), direction, fan)
+  hcdata$labels$angle &lt;- labelParams$angle
+  
+  p &lt;- p +
+    geom_text(data        =  label(hcdata),
+              aes(x       =  x,
+                  y       =  y,
+                  label   =  label,
+                  colour  =  factor(clust),
+                  angle   =  angle),
+              vjust       =  labelParams$vjust,
+              hjust       =  labelParams$hjust,
+              nudge_y     =  ymax * nudge.label,
+              size        =  label.size,
+              show.legend =  FALSE)
+  
+  # colors and limits
+  if (!is.null(scale.color)) {
+    p &lt;- p + scale_color_manual(values = scale.color)
+  }
+  
+  ylim &lt;- -round(ymax * expand.y, 1)
+  p    &lt;- p + expand_limits(y = ylim)
+  
+  p
+}</code></pre>
+<p><br></p>
+</div>
+<div id="basic-dendrogram" class="section level2">
+<h2>Basic dendrogram</h2>
+<p>We are now ready to build a dendrogram. By default, the standard ggplot2 theme is applied.</p>
+<pre class="r"><code>D  &lt;- dist(mtcars)
+hc &lt;- hclust(D)
+
+hcdata &lt;- dendro_data_k(hc, 3)
+
+p &lt;- plot_ggdendro(hcdata,
+                   direction   = &quot;lr&quot;,
+                   expand.y    = 0.2)
+p</code></pre>
+<p><img src="/post/2019-06-08-lightweight-dendrograms_files/figure-html/unnamed-chunk-5-1.png" width="672" /></p>
+<p><br></p>
+</div>
+<div id="customized-dendrograms" class="section level2">
+<h2>Customized dendrograms</h2>
+<p>We can further customize the dendrogram, by ajusting the <code>plot_ggdendro()</code> parameters, or adding additional properties. Below is an example with <code>ggplot2::theme_void()</code>.</p>
+<pre class="r"><code>cols &lt;- c(&quot;#a9a9a9&quot;, &quot;#1f77b4&quot;, &quot;#ff7f0e&quot;, &quot;#2ca02c&quot;)
+
+p &lt;- plot_ggdendro(hcdata,
+                   direction   = &quot;tb&quot;,
+                   scale.color = cols,
+                   label.size  = 2.5,
+                   branch.size = 0.5,
+                   expand.y    = 0.2)
+
+p &lt;- p + theme_void() + expand_limits(x = c(-1, 32))
+p</code></pre>
+<p><img src="/post/2019-06-08-lightweight-dendrograms_files/figure-html/unnamed-chunk-6-1.png" width="672" /></p>
+<p>Here is another example adding custom theme elements.</p>
+<pre class="r"><code>mytheme &lt;- theme(axis.text          = element_text(color = &quot;#50505030&quot;),
+                 panel.grid.major.y = element_line(color = &quot;#50505030&quot;,
+                                                   size  = 0.25))
+p + mytheme</code></pre>
+<p><img src="/post/2019-06-08-lightweight-dendrograms_files/figure-html/unnamed-chunk-7-1.png" width="672" /></p>
+<p>Finally, let’s do a fan dendrogram.</p>
+<pre class="r"><code>p &lt;- plot_ggdendro(hcdata,
+                   fan         = TRUE,
+                   scale.color = cols,
+                   label.size  = 4,
+                   nudge.label = 0.02,
+                   expand.y    = 0.4)
+
+mytheme &lt;- theme(panel.background = element_rect(fill = &quot;black&quot;))
+
+p + theme_void() + mytheme</code></pre>
+<p><img src="/post/2019-06-08-lightweight-dendrograms_files/figure-html/unnamed-chunk-8-1.png" width="672" /></p>
+<p><br></p>
+</div>
+<div id="further-customization" class="section level2">
+<h2>Further customization</h2>
+<p>Besides the graphical properties, it is also possible to add other <code>geom</code> elements, making the possibilities endless.</p>
+<pre class="r"><code>p &lt;- plot_ggdendro(hcdata,
+                   fan         = TRUE,
+                   scale.color = cols,
+                   label.size  = 4,
+                   nudge.label = 0.15,
+                   expand.y    = 0.8)
+
+mytheme &lt;- theme(panel.background = element_rect(fill = &quot;black&quot;))
+
+p &lt;- p + theme_void() + mytheme
+
+p + geom_point(data     = mtcars, 
+               aes(x    = match(rownames(mtcars), hcdata$labels$label),
+                   y    = -30,
+                   fill = as.factor(cyl)),
+               size     = 5,
+               shape    = 21,
+               show.legend = FALSE) +
+  scale_fill_manual(values = c(&quot;white&quot;, &quot;yellow&quot;, &quot;red&quot;)) +
+  geom_text(data      = mtcars, 
+            aes(x     = match(rownames(mtcars), hcdata$labels$label),
+                y     = -30,
+                label = cyl),
+            size = 3)</code></pre>
+<p><img src="/post/2019-06-08-lightweight-dendrograms_files/figure-html/unnamed-chunk-9-1.png" width="768" /></p>
+<p><br></p>
+<p>Combining multiple plots, with gridExtra for example, we can easily make tanglegrams.</p>
+<pre class="r"><code>library(gridExtra)
+
+tanglegram &lt;- function(hcdata1, hcdata2, cols){
+  
+  p1 &lt;- plot_ggdendro(hcdata1,
+                      direction   = &quot;lr&quot;,
+                      scale.color = cols,
+                      expand.y    = 0.2) +
+    theme_void()
+  p2 &lt;- plot_ggdendro(hcdata2,
+                      direction   = &quot;rl&quot;,
+                      scale.color = cols,
+                      expand.y    = 0.2) +
+    theme_void()
+  
+  idx &lt;- data.table(y1 = 1:nrow(hcdata1$labels),
+                    y2 = match(hcdata1$labels$label, hcdata2$labels$label))
+  p3 &lt;- ggplot() +
+    geom_segment(data     = idx, 
+                 aes(x    = 0,
+                     y    = y1,
+                     xend = 1,
+                     yend = y2),
+                 color    = &quot;grey&quot;) +
+    theme_void()
+  
+  grid.arrange(p1, p3, p2, ncol = 3, widths = c(2, 1, 2))
+}
+
+D       &lt;- dist(mtcars)
+hc1     &lt;- hclust(D, &quot;average&quot;)
+hc2     &lt;- hclust(D, &quot;ward.D2&quot;)
+hcdata1 &lt;- dendro_data_k(hc1, 5)
+hcdata2 &lt;- dendro_data_k(hc2, 5)
+cols    &lt;- c(&quot;#a9a9a9&quot;, &quot;#1f77b4&quot;, &quot;#ff7f0e&quot;, &quot;#2ca02c&quot;, &quot;#d62728&quot;, &quot;#9467bd&quot;)</code></pre>
+<pre class="r"><code>tanglegram(hcdata1, hcdata2, cols)</code></pre>
+<p><img src="/post/2019-06-08-lightweight-dendrograms_files/figure-html/unnamed-chunk-11-1.png" width="1248" />
+The <a href="https://cran.r-project.org/web/packages/gclus/">gclus</a> package can be used to reorder the hclust objects, facilitating the comparison.</p>
+<pre class="r"><code>library(gclus)
+
+hcdata3 &lt;- dendro_data_k(reorder(hc1, dis = D), 5)
+hcdata4 &lt;- dendro_data_k(reorder(hc2, dis = D), 5)
+
+tanglegram(hcdata3, hcdata4, cols)</code></pre>
+<p><img src="/post/2019-06-08-lightweight-dendrograms_files/figure-html/unnamed-chunk-12-1.png" width="1248" /></p>
+<p><br></p>
+<p>A last example, with a dendrogram and a ‘kind of bubblemap’. I think adding a size encoding helps to better get the structure of the data compared to a standard heatmap. In the mtcars dataset, the variables have different units, but here, the goal is simply to highlight low or high values.</p>
+<pre class="r"><code>library(data.table)
+
+D      &lt;- dist(mtcars)
+hc     &lt;- reorder(hclust(D), dis = D)
+hcdata &lt;- dendro_data_k(hc, 3)
+
+p1 &lt;- plot_ggdendro(hcdata,
+                    direction   = &quot;lr&quot;,
+                    scale.color = cols,
+                    expand.y    = 0.15) +
+  theme(axis.text.x      = element_text(color = &quot;#ffffff&quot;),
+        panel.background = element_rect(fill  = &quot;#ffffff&quot;),
+        axis.ticks       = element_blank()) + 
+  scale_color_brewer(palette = &quot;Set1&quot;) +
+  xlab(NULL) +
+  ylab(NULL)
+
+# scale and reshape mtcars data
+scaled &lt;- setDT(lapply(mtcars, scales::rescale))
+melted &lt;- melt(scaled, measure.vars = colnames(mtcars))
+melted[, variable := as.factor(variable)]
+idx    &lt;- match(rownames(mtcars), hcdata$labels$label)
+melted[, car := rep(idx, ncol(mtcars))]
+
+# &#39;bubblemap&#39;
+p2 &lt;- ggplot(melted) +
+  geom_point(aes(x      = variable,
+                 y      = car,
+                 size   = value,
+                 color  = value),
+             show.legend = FALSE) +
+  scale_color_viridis_c(direction = -1) +
+  theme_minimal() +
+  theme(axis.text.y = element_blank()) +
+  xlab(NULL) +
+  ylab(NULL)
+
+grid.arrange(p1, p2, ncol = 2, widths = 3:2)</code></pre>
+<p><img src="/post/2019-06-08-lightweight-dendrograms_files/figure-html/unnamed-chunk-13-1.png" width="1248" /></p>
+<p><br></p>
+</div>
+<div id="conclusion" class="section level2">
+<h2>Conclusion</h2>
+<p>R packages like <a href="https://guangchuangyu.github.io/software/ggtree/">ggtree</a> or <a href="https://github.com/talgalili/dendextend">dendextend</a> are great for out-of-the-box fancy dendrograms. With about 120 lines of code and three functions, the approach described in this article is really basic, but it is also flexible. Customizing the theme parameters and combining the dendrogram with other plot elements, it is quite easy to build more complex visualizations.</p>
+<p><br></p>
+<pre class="r"><code>sessionInfo()</code></pre>
+<pre><code>## R version 3.3.2 (2016-10-31)
+## Platform: x86_64-w64-mingw32/x64 (64-bit)
+## Running under: Windows 7 x64 (build 7601) Service Pack 1
+## 
+## locale:
+## [1] LC_COLLATE=English_United States.1252 
+## [2] LC_CTYPE=English_United States.1252   
+## [3] LC_MONETARY=English_United States.1252
+## [4] LC_NUMERIC=C                          
+## [5] LC_TIME=English_United States.1252    
+## 
+## attached base packages:
+## [1] methods   stats     graphics  grDevices utils     datasets  base     
+## 
+## other attached packages:
+## [1] gclus_1.3.1       cluster_2.0.7-1   gridExtra_2.3     ggplot2_3.1.0    
+## [5] ggdendro_0.1-20   data.table_1.12.3
+## 
+## loaded via a namespace (and not attached):
+##  [1] Rcpp_1.0.0         RColorBrewer_1.1-2 pillar_1.3.1      
+##  [4] plyr_1.8.4         tools_3.3.2        digest_0.6.18     
+##  [7] viridisLite_0.3.0  evaluate_0.12      tibble_2.0.1      
+## [10] gtable_0.2.0       pkgconfig_2.0.2    rlang_0.3.1       
+## [13] yaml_2.2.0         blogdown_0.10      xfun_0.4.11       
+## [16] withr_2.1.2        stringr_1.3.1      dplyr_0.8.0.1     
+## [19] knitr_1.21         grid_3.3.2         tidyselect_0.2.5  
+## [22] glue_1.3.0         R6_2.3.0           rmarkdown_1.11    
+## [25] bookdown_0.9       purrr_0.2.5        magrittr_1.5      
+## [28] scales_1.0.0       htmltools_0.3.6    MASS_7.3-50       
+## [31] assertthat_0.2.0   colorspace_1.3-2   labeling_0.3      
+## [34] stringi_1.2.4      lazyeval_0.2.1     munsell_0.5.0     
+## [37] crayon_1.3.4</code></pre>
+</div>
+
+
+		
+	</div>
+
+	<div class="pagination">
+		<a href="/post/2019-05-18-images-to-ridges/" class="left arrow">&#8592;</a>
+
+		<a href="#" class="top">Top</a>
+	</div>
+</main>
+
+
+        		<footer>
+			<span>
+			&copy; <time datetime="2019-06-08 18:16:39.845053 &#43;0200 CEST m=&#43;0.076500001">2019</time> . Made with <a href='https://gohugo.io'>Hugo</a> using the <a href='https://github.com/EmielH/tale-hugo/'>Tale</a> theme and the <a href='https://bookdown.org/yihui/blogdown/'>blogdown</a> R package.
+			</span>
+		</footer>
+
+    </body>
+</html>

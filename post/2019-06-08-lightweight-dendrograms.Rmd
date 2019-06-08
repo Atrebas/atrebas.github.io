@@ -1,0 +1,384 @@
+---
+title: "Dendrograms in R, a lightweight approach"
+author: "Atrebas"
+date: '2019-06-08'
+summary: I wanted a "lightweight" and flexible ggplot2-based solution to draw dendrograms, in particular with the possibility to highlight clusters using different branch colors. I finally ended up writing a small set of functions, using ggdendro and ggplot2 only.
+categories: ["R", "visualization"]
+tags: ["R", "ggplot2", "visualization"]
+---
+
+<script src="/js/set-target-blank-links.js"></script>
+
+<style>
+  .hljs{
+    background: #a7a7a71a;
+    font-size: 90%;
+  }
+</style>
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## Dendrograms in R
+
+Dendrograms are diagrams useful to illustrate hierarchical relationships, such as those obtained from a hierarchical clustering. They are commonly used in biology, especially in genetics, for example to illustrate the relationships among a set of genes or taxa.    
+
+Several alternatives exist in R to visualize dendrograms (reviews [here](http://www.sthda.com/english/wiki/beautiful-dendrogram-visualizations-in-r-5-must-known-methods-unsupervised-machine-learning#plot.dendrogram-function) and [here](http://rpubs.com/gaston/dendrograms)), like base R of course, or the [ape](http://ape-package.ird.fr/) package. For ggplot2-based solutions, let's mention [ggdendro](https://cran.r-project.org/web/packages/ggdendro/index.html), [dendextend](https://github.com/talgalili/dendextend), or [ggtree](https://guangchuangyu.github.io/software/ggtree/).     
+[ggdendro](https://cran.r-project.org/web/packages/ggdendro/index.html) is stable, lightweight (no dependency other than MASS and ggplot2), and allows to access cluster data in a convenient format, but its functionalities are a bit limited in terms of visualization. On the other hand, [dendextend](https://github.com/talgalili/dendextend) and [ggtree](https://guangchuangyu.github.io/software/ggtree/) offers a lot of great features, but at the cost of higher dependency requirements and a steeper learning curve to use them effectively.    
+
+I wanted a "lightweight" and flexible ggplot2-based solution to draw dendrograms, in particular with the possibility to highlight clusters using different branch colors.   
+[This stackoverflow question](https://stackoverflow.com/questions/21474388/colorize-clusters-in-dendogram-with-ggplot2) provided me with some leads and I finally ended up writing the functions described below, using ggdendro and ggplot2 only.   
+
+```{r, message = FALSE, warning = FALSE}
+library(ggdendro)
+library(ggplot2)
+```
+<br>
+
+## Tweaking ggdendro
+
+As a first step, I have 'extended' `ggdendro::dendro_data()`. The `dendro_data_k()` function takes a `k` argument, an integer, specifying the number of desired clusters. This value is simply used in the `base::cutree()` function, and, for each cluster, the segments are assigned the cluster id of the corresponding leaves based on their x, xend, and yend coordinates. This may not be the most elegant way, but it is quite straighforward.    
+
+```{r}
+dendro_data_k <- function(hc, k) {
+  
+  hcdata    <-  ggdendro::dendro_data(hc, type = "rectangle")
+  seg       <-  hcdata$segments
+  labclust  <-  cutree(hc, k)[hc$order]
+  segclust  <-  rep(0L, nrow(seg))
+  heights   <-  sort(hc$height, decreasing = TRUE)
+  height    <-  mean(c(heights[k], heights[k - 1L]), na.rm = TRUE)
+  
+  for (i in 1:k) {
+    xi      <-  hcdata$labels$x[labclust == i]
+    idx1    <-  seg$x    >= min(xi) & seg$x    <= max(xi)
+    idx2    <-  seg$xend >= min(xi) & seg$xend <= max(xi)
+    idx3    <-  seg$yend < height
+    idx     <-  idx1 & idx2 & idx3
+    segclust[idx] <- i
+  }
+  
+  idx                    <-  which(segclust == 0L)
+  segclust[idx]          <-  segclust[idx + 1L]
+  hcdata$segments$clust  <-  segclust
+  hcdata$segments$line   <-  ifelse(segclust < 1L, 1L, 0L)
+  hcdata$labels$clust    <-  labclust
+  
+  hcdata
+}
+```
+
+<br>
+
+## Plot functions
+
+With the convenient data structure obtained from ggdendro and the function above, the tree can be built using ggplot2. Two geoms are used: `geom_segment()` for the branches, and `geom_text()` for the labels.    
+Things become a bit more complicated if we want to customize the orientation of the tree (for example top to bottom or left to right) or the format (circular plot). To deal with that more easily, a distinct function is used (internally) to set the parameters of the labels (angle, offset, ...).
+
+```{r}
+set_labels_params <- function(nbLabels,
+                              direction = c("tb", "bt", "lr", "rl"),
+                              fan       = FALSE) {
+  if (fan) {
+    angle       <-  360 / nbLabels * 1:nbLabels + 90
+    idx         <-  angle >= 90 & angle <= 270
+    angle[idx]  <-  angle[idx] + 180
+    hjust       <-  rep(0, nbLabels)
+    hjust[idx]  <-  1
+  } else {
+    angle       <-  rep(0, nbLabels)
+    hjust       <-  0
+    if (direction %in% c("tb", "bt")) { angle <- angle + 45 }
+    if (direction %in% c("tb", "rl")) { hjust <- 1 }
+  }
+  list(angle = angle, hjust = hjust, vjust = 0.5)
+}
+```
+
+```{r}
+plot_ggdendro <- function(hcdata,
+                          direction   = c("lr", "rl", "tb", "bt"),
+                          fan         = FALSE,
+                          scale.color = NULL,
+                          branch.size = 1,
+                          label.size  = 3,
+                          nudge.label = 0.01,
+                          expand.y    = 0.1) {
+  
+  direction <- match.arg(direction) # if fan = FALSE
+  ybreaks   <- pretty(segment(hcdata)$y, n = 5)
+  ymax      <- max(segment(hcdata)$y)
+  
+  ## branches
+  p <- ggplot() +
+    geom_segment(data         =  segment(hcdata),
+                 aes(x        =  x,
+                     y        =  y,
+                     xend     =  xend,
+                     yend     =  yend,
+                     linetype =  factor(line),
+                     colour   =  factor(clust)
+                 ),
+                 lineend      =  "round",
+                 show.legend  =  FALSE,
+                 size         =  branch.size)
+  
+  ## orientation
+  if (fan) {
+    p <- p +
+      coord_polar(direction = -1) +
+      scale_x_continuous(breaks = NULL,
+                         limits = c(0, nrow(label(hcdata)))) +
+      scale_y_reverse(breaks = ybreaks)
+  } else {
+    p <- p + scale_x_continuous(breaks = NULL)
+    if (direction %in% c("rl", "lr")) {
+      p <- p + coord_flip()
+    }
+    if (direction %in% c("bt", "lr")) {
+      p <- p + scale_y_reverse(breaks = ybreaks)
+    } else {
+      p <- p + scale_y_continuous(breaks = ybreaks)
+      nudge.label <- -(nudge.label)
+    }
+  }
+  
+  # labels
+  labelParams <- set_labels_params(nrow(hcdata$labels), direction, fan)
+  hcdata$labels$angle <- labelParams$angle
+  
+  p <- p +
+    geom_text(data        =  label(hcdata),
+              aes(x       =  x,
+                  y       =  y,
+                  label   =  label,
+                  colour  =  factor(clust),
+                  angle   =  angle),
+              vjust       =  labelParams$vjust,
+              hjust       =  labelParams$hjust,
+              nudge_y     =  ymax * nudge.label,
+              size        =  label.size,
+              show.legend =  FALSE)
+  
+  # colors and limits
+  if (!is.null(scale.color)) {
+    p <- p + scale_color_manual(values = scale.color)
+  }
+  
+  ylim <- -round(ymax * expand.y, 1)
+  p    <- p + expand_limits(y = ylim)
+  
+  p
+}
+```
+
+<br>
+
+## Basic dendrogram
+
+We are now ready to build a dendrogram. By default, the standard ggplot2 theme is applied.    
+
+```{r}
+D  <- dist(mtcars)
+hc <- hclust(D)
+
+hcdata <- dendro_data_k(hc, 3)
+
+p <- plot_ggdendro(hcdata,
+                   direction   = "lr",
+                   expand.y    = 0.2)
+p
+```
+
+<br>
+
+## Customized dendrograms
+
+We can further customize the dendrogram, by ajusting the `plot_ggdendro()` parameters, or adding additional properties. Below is an example with `ggplot2::theme_void()`.
+
+```{r}
+cols <- c("#a9a9a9", "#1f77b4", "#ff7f0e", "#2ca02c")
+
+p <- plot_ggdendro(hcdata,
+                   direction   = "tb",
+                   scale.color = cols,
+                   label.size  = 2.5,
+                   branch.size = 0.5,
+                   expand.y    = 0.2)
+
+p <- p + theme_void() + expand_limits(x = c(-1, 32))
+p
+```
+
+Here is another example adding custom theme elements.    
+
+```{r}
+mytheme <- theme(axis.text          = element_text(color = "#50505030"),
+                 panel.grid.major.y = element_line(color = "#50505030",
+                                                   size  = 0.25))
+p + mytheme
+```
+
+Finally, let's do a fan dendrogram.    
+
+
+```{r, fig.height = 7, fig.width = 7}
+p <- plot_ggdendro(hcdata,
+                   fan         = TRUE,
+                   scale.color = cols,
+                   label.size  = 4,
+                   nudge.label = 0.02,
+                   expand.y    = 0.4)
+
+mytheme <- theme(panel.background = element_rect(fill = "black"))
+
+p + theme_void() + mytheme
+```
+
+<br>
+
+## Further customization
+
+Besides the graphical properties, it is also possible to add other `geom` elements, making the possibilities endless.   
+
+```{r, fig.height = 7, fig.width = 8}
+p <- plot_ggdendro(hcdata,
+                   fan         = TRUE,
+                   scale.color = cols,
+                   label.size  = 4,
+                   nudge.label = 0.15,
+                   expand.y    = 0.8)
+
+mytheme <- theme(panel.background = element_rect(fill = "black"))
+
+p <- p + theme_void() + mytheme
+
+p + geom_point(data     = mtcars, 
+               aes(x    = match(rownames(mtcars), hcdata$labels$label),
+                   y    = -30,
+                   fill = as.factor(cyl)),
+               size     = 5,
+               shape    = 21,
+               show.legend = FALSE) +
+  scale_fill_manual(values = c("white", "yellow", "red")) +
+  geom_text(data      = mtcars, 
+            aes(x     = match(rownames(mtcars), hcdata$labels$label),
+                y     = -30,
+                label = cyl),
+            size = 3)
+```
+
+<br>
+
+Combining multiple plots, with gridExtra for example, we can easily make tanglegrams.    
+
+```{r, warning = FALSE}
+library(gridExtra)
+
+tanglegram <- function(hcdata1, hcdata2, cols){
+  
+  p1 <- plot_ggdendro(hcdata1,
+                      direction   = "lr",
+                      scale.color = cols,
+                      expand.y    = 0.2) +
+    theme_void()
+  p2 <- plot_ggdendro(hcdata2,
+                      direction   = "rl",
+                      scale.color = cols,
+                      expand.y    = 0.2) +
+    theme_void()
+  
+  idx <- data.table(y1 = 1:nrow(hcdata1$labels),
+                    y2 = match(hcdata1$labels$label, hcdata2$labels$label))
+  p3 <- ggplot() +
+    geom_segment(data     = idx, 
+                 aes(x    = 0,
+                     y    = y1,
+                     xend = 1,
+                     yend = y2),
+                 color    = "grey") +
+    theme_void()
+  
+  grid.arrange(p1, p3, p2, ncol = 3, widths = c(2, 1, 2))
+}
+
+D       <- dist(mtcars)
+hc1     <- hclust(D, "average")
+hc2     <- hclust(D, "ward.D2")
+hcdata1 <- dendro_data_k(hc1, 5)
+hcdata2 <- dendro_data_k(hc2, 5)
+cols    <- c("#a9a9a9", "#1f77b4", "#ff7f0e", "#2ca02c", "#d62728", "#9467bd")
+```
+
+```{r, fig.height = 7, fig.width = 13}
+tanglegram(hcdata1, hcdata2, cols)
+```
+The [gclus](https://cran.r-project.org/web/packages/gclus/) package can be used to reorder the hclust objects, facilitating the comparison.       
+
+```{r, fig.height = 7, fig.width = 13, warning = FALSE, message = FALSE}
+library(gclus)
+
+hcdata3 <- dendro_data_k(reorder(hc1, dis = D), 5)
+hcdata4 <- dendro_data_k(reorder(hc2, dis = D), 5)
+
+tanglegram(hcdata3, hcdata4, cols)
+```
+
+<br>
+
+A last example, with a dendrogram and a 'kind of bubblemap'. I think adding a size encoding helps to better get the structure of the data compared to a standard heatmap. In the mtcars dataset, the variables have different units, but here, the goal is simply to highlight low or high values.   
+
+```{r, fig.height = 7, fig.width = 13, message = FALSE}
+library(data.table)
+
+D      <- dist(mtcars)
+hc     <- reorder(hclust(D), dis = D)
+hcdata <- dendro_data_k(hc, 3)
+
+p1 <- plot_ggdendro(hcdata,
+                    direction   = "lr",
+                    scale.color = cols,
+                    expand.y    = 0.15) +
+  theme(axis.text.x      = element_text(color = "#ffffff"),
+        panel.background = element_rect(fill  = "#ffffff"),
+        axis.ticks       = element_blank()) + 
+  scale_color_brewer(palette = "Set1") +
+  xlab(NULL) +
+  ylab(NULL)
+
+# scale and reshape mtcars data
+scaled <- setDT(lapply(mtcars, scales::rescale))
+melted <- melt(scaled, measure.vars = colnames(mtcars))
+melted[, variable := as.factor(variable)]
+idx    <- match(rownames(mtcars), hcdata$labels$label)
+melted[, car := rep(idx, ncol(mtcars))]
+
+# 'bubblemap'
+p2 <- ggplot(melted) +
+  geom_point(aes(x      = variable,
+                 y      = car,
+                 size   = value,
+                 color  = value),
+             show.legend = FALSE) +
+  scale_color_viridis_c(direction = -1) +
+  theme_minimal() +
+  theme(axis.text.y = element_blank()) +
+  xlab(NULL) +
+  ylab(NULL)
+
+grid.arrange(p1, p2, ncol = 2, widths = 3:2)
+```
+
+<br>
+
+## Conclusion
+
+R packages like [ggtree](https://guangchuangyu.github.io/software/ggtree/) or [dendextend](https://github.com/talgalili/dendextend) are great for out-of-the-box fancy dendrograms. With about 120 lines of code and three functions, the approach described in this article is really basic, but it is also flexible. Customizing the theme parameters and combining the dendrogram with other plot elements, it is quite easy to build more complex visualizations.     
+
+<br>
+
+```{r}
+sessionInfo()
+```
+
