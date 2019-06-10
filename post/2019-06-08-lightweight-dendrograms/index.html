@@ -71,7 +71,7 @@
 <p>Several alternatives exist in R to visualize dendrograms (reviews <a href="http://www.sthda.com/english/wiki/beautiful-dendrogram-visualizations-in-r-5-must-known-methods-unsupervised-machine-learning#plot.dendrogram-function">here</a> and <a href="http://rpubs.com/gaston/dendrograms">here</a>), like base R of course, or the <a href="http://ape-package.ird.fr/">ape</a> package. For ggplot2-based solutions, let’s mention <a href="https://cran.r-project.org/web/packages/ggdendro/index.html">ggdendro</a>, <a href="https://github.com/talgalili/dendextend">dendextend</a>, or <a href="https://guangchuangyu.github.io/software/ggtree/">ggtree</a>.<br />
 <a href="https://cran.r-project.org/web/packages/ggdendro/index.html">ggdendro</a> is stable, lightweight (no dependency other than MASS and ggplot2), and allows to access cluster data in a convenient format, but its functionalities are a bit limited in terms of visualization. On the other hand, <a href="https://github.com/talgalili/dendextend">dendextend</a> and <a href="https://guangchuangyu.github.io/software/ggtree/">ggtree</a> offers a lot of great features, but at the cost of higher dependency requirements and a steeper learning curve to use them effectively.</p>
 <p>I wanted a “lightweight” and flexible ggplot2-based solution to draw dendrograms, in particular with the possibility to highlight clusters using different branch colors.<br />
-<a href="https://stackoverflow.com/questions/21474388/colorize-clusters-in-dendogram-with-ggplot2">This stackoverflow question</a> provided me with some leads and I finally ended up writing the functions described below, using ggdendro and ggplot2 only.</p>
+Inspired by <a href="https://stackoverflow.com/questions/21474388/colorize-clusters-in-dendogram-with-ggplot2">this stackoverflow question</a>, I finally ended up writing the functions described below, using ggdendro and ggplot2 only.</p>
 <pre class="r"><code>library(ggdendro)
 library(ggplot2)</code></pre>
 <p><br></p>
@@ -149,8 +149,7 @@ Things become a bit more complicated if we want to customize the orientation of 
                      xend     =  xend,
                      yend     =  yend,
                      linetype =  factor(line),
-                     colour   =  factor(clust)
-                 ),
+                     colour   =  factor(clust)),
                  lineend      =  &quot;round&quot;,
                  show.legend  =  FALSE,
                  size         =  branch.size)
@@ -299,7 +298,7 @@ tanglegram &lt;- function(hcdata1, hcdata2, cols){
                       expand.y    = 0.2) +
     theme_void()
   
-  idx &lt;- data.table(y1 = 1:nrow(hcdata1$labels),
+  idx &lt;- data.frame(y1 = 1:nrow(hcdata1$labels),
                     y2 = match(hcdata1$labels$label, hcdata2$labels$label))
   p3 &lt;- ggplot() +
     geom_segment(data     = idx, 
@@ -425,7 +424,7 @@ grid.arrange(p1, p2, ncol = 2, widths = 3:2)</code></pre>
 
         		<footer>
 			<span>
-			&copy; <time datetime="2019-06-08 18:16:39.845053 &#43;0200 CEST m=&#43;0.076500001">2019</time> . Made with <a href='https://gohugo.io'>Hugo</a> using the <a href='https://github.com/EmielH/tale-hugo/'>Tale</a> theme and the <a href='https://bookdown.org/yihui/blogdown/'>blogdown</a> R package.
+			&copy; <time datetime="2019-06-10 15:56:28.7814014 &#43;0200 CEST m=&#43;0.142400001">2019</time> . Made with <a href='https://gohugo.io'>Hugo</a> using the <a href='https://github.com/EmielH/tale-hugo/'>Tale</a> theme and the <a href='https://bookdown.org/yihui/blogdown/'>blogdown</a> R package.
 			</span>
 		</footer>
 

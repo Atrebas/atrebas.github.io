@@ -28,7 +28,7 @@ Several alternatives exist in R to visualize dendrograms (reviews [here](http://
 [ggdendro](https://cran.r-project.org/web/packages/ggdendro/index.html) is stable, lightweight (no dependency other than MASS and ggplot2), and allows to access cluster data in a convenient format, but its functionalities are a bit limited in terms of visualization. On the other hand, [dendextend](https://github.com/talgalili/dendextend) and [ggtree](https://guangchuangyu.github.io/software/ggtree/) offers a lot of great features, but at the cost of higher dependency requirements and a steeper learning curve to use them effectively.    
 
 I wanted a "lightweight" and flexible ggplot2-based solution to draw dendrograms, in particular with the possibility to highlight clusters using different branch colors.   
-[This stackoverflow question](https://stackoverflow.com/questions/21474388/colorize-clusters-in-dendogram-with-ggplot2) provided me with some leads and I finally ended up writing the functions described below, using ggdendro and ggplot2 only.   
+Inspired by [this stackoverflow question](https://stackoverflow.com/questions/21474388/colorize-clusters-in-dendogram-with-ggplot2), I finally ended up writing the functions described below, using ggdendro and ggplot2 only.   
 
 ```{r, message = FALSE, warning = FALSE}
 library(ggdendro)
@@ -118,8 +118,7 @@ plot_ggdendro <- function(hcdata,
                      xend     =  xend,
                      yend     =  yend,
                      linetype =  factor(line),
-                     colour   =  factor(clust)
-                 ),
+                     colour   =  factor(clust)),
                  lineend      =  "round",
                  show.legend  =  FALSE,
                  size         =  branch.size)
@@ -289,7 +288,7 @@ tanglegram <- function(hcdata1, hcdata2, cols){
                       expand.y    = 0.2) +
     theme_void()
   
-  idx <- data.table(y1 = 1:nrow(hcdata1$labels),
+  idx <- data.frame(y1 = 1:nrow(hcdata1$labels),
                     y2 = match(hcdata1$labels$label, hcdata2$labels$label))
   p3 <- ggplot() +
     geom_segment(data     = idx, 
