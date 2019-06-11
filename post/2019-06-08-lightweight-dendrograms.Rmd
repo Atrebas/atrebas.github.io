@@ -38,7 +38,7 @@ library(ggplot2)
 
 ## Tweaking ggdendro
 
-As a first step, I have 'extended' `ggdendro::dendro_data()`. The `dendro_data_k()` function takes a `k` argument, an integer, specifying the number of desired clusters. This value is simply used in the `base::cutree()` function, and, for each cluster, the segments are assigned the cluster id of the corresponding leaves based on their x, xend, and yend coordinates. This may not be the most elegant way, but it is quite straighforward.    
+As a first step, I have 'extended' `ggdendro::dendro_data()`. The `dendro_data_k()` function takes a `k` argument, an integer, specifying the number of desired clusters. This value is simply used in the `base::cutree()` function, and, for each cluster, the segments are assigned the cluster id of the corresponding leaves based on their x, xend, and yend coordinates. This may not be the most elegant way, but it is quite straightforward.    
 
 ```{r}
 dendro_data_k <- function(hc, k) {
