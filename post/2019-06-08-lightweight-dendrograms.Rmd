@@ -320,6 +320,7 @@ library(data.table)
 
 mtc    <- scale(mtcars)
 D      <- dist(mtc)
+hc     <- hclust(D)
 hcdata <- dendro_data_k(hc, 3)
 
 p1 <- plot_ggdendro(hcdata,
