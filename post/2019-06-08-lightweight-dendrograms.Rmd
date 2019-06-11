@@ -179,8 +179,9 @@ plot_ggdendro <- function(hcdata,
 We are now ready to build a dendrogram. By default, the standard ggplot2 theme is applied.    
 
 ```{r}
-D  <- dist(mtcars)
-hc <- hclust(D)
+mtc <- scale(mtcars)
+D   <- dist(mtc)
+hc  <- hclust(D)
 
 hcdata <- dendro_data_k(hc, 3)
 
@@ -255,7 +256,7 @@ p <- p + theme_void() + mytheme
 
 p + geom_point(data     = mtcars, 
                aes(x    = match(rownames(mtcars), hcdata$labels$label),
-                   y    = -30,
+                   y    = -0.7,
                    fill = as.factor(cyl)),
                size     = 5,
                shape    = 21,
@@ -263,7 +264,7 @@ p + geom_point(data     = mtcars,
   scale_fill_manual(values = c("white", "yellow", "red")) +
   geom_text(data      = mtcars, 
             aes(x     = match(rownames(mtcars), hcdata$labels$label),
-                y     = -30,
+                y     = -0.7,
                 label = cyl),
             size = 3)
 ```
@@ -272,67 +273,53 @@ p + geom_point(data     = mtcars,
 
 Combining multiple plots, with gridExtra for example, we can easily make tanglegrams.    
 
-```{r, warning = FALSE}
+```{r, warning = FALSE, fig.height = 7, fig.width = 13}
 library(gridExtra)
 
-tanglegram <- function(hcdata1, hcdata2, cols){
-  
-  p1 <- plot_ggdendro(hcdata1,
-                      direction   = "lr",
-                      scale.color = cols,
-                      expand.y    = 0.2) +
-    theme_void()
-  p2 <- plot_ggdendro(hcdata2,
-                      direction   = "rl",
-                      scale.color = cols,
-                      expand.y    = 0.2) +
-    theme_void()
-  
-  idx <- data.frame(y1 = 1:nrow(hcdata1$labels),
-                    y2 = match(hcdata1$labels$label, hcdata2$labels$label))
-  p3 <- ggplot() +
-    geom_segment(data     = idx, 
-                 aes(x    = 0,
-                     y    = y1,
-                     xend = 1,
-                     yend = y2),
-                 color    = "grey") +
-    theme_void()
-  
-  grid.arrange(p1, p3, p2, ncol = 3, widths = c(2, 1, 2))
-}
-
-D       <- dist(mtcars)
+mtc     <- scale(mtcars)
+D       <- dist(mtc)
 hc1     <- hclust(D, "average")
 hc2     <- hclust(D, "ward.D2")
 hcdata1 <- dendro_data_k(hc1, 5)
 hcdata2 <- dendro_data_k(hc2, 5)
 cols    <- c("#a9a9a9", "#1f77b4", "#ff7f0e", "#2ca02c", "#d62728", "#9467bd")
-```
 
-```{r, fig.height = 7, fig.width = 13}
-tanglegram(hcdata1, hcdata2, cols)
-```
-The [gclus](https://cran.r-project.org/web/packages/gclus/) package can be used to reorder the hclust objects, facilitating the comparison.       
+p1 <- plot_ggdendro(hcdata1,
+                    direction   = "lr",
+                    scale.color = cols,
+                    expand.y    = 0.2) +
+  theme_void()
 
-```{r, fig.height = 7, fig.width = 13, warning = FALSE, message = FALSE}
-library(gclus)
+p2 <- plot_ggdendro(hcdata2,
+                    direction   = "rl",
+                    scale.color = cols,
+                    expand.y    = 0.2) +
+  theme_void()
 
-hcdata3 <- dendro_data_k(reorder(hc1, dis = D), 5)
-hcdata4 <- dendro_data_k(reorder(hc2, dis = D), 5)
+idx <- data.frame(y1 = 1:nrow(hcdata1$labels),
+                  y2 = match(hcdata1$labels$label, hcdata2$labels$label))
 
-tanglegram(hcdata3, hcdata4, cols)
+p3 <- ggplot() +
+  geom_segment(data     = idx, 
+               aes(x    = 0,
+                   y    = y1,
+                   xend = 1,
+                   yend = y2),
+               color    = "grey") +
+  theme_void()
+  
+grid.arrange(p1, p3, p2, ncol = 3, widths = c(2, 1, 2))
 ```
 
 <br>
 
-A last example, with a dendrogram and a 'kind of bubblemap'. I think adding a size encoding helps to better get the structure of the data compared to a standard heatmap. In the mtcars dataset, the variables have different units, but here, the goal is simply to highlight low or high values.   
+A last example, with a dendrogram and a 'kind of bubblemap'. I think adding a size encoding helps to better get the structure of the data compared to a standard heatmap. In the mtc dataset, the variables have different units, but here, the goal is simply to highlight low or high values.   
 
 ```{r, fig.height = 7, fig.width = 13, message = FALSE}
 library(data.table)
 
-D      <- dist(mtcars)
-hc     <- reorder(hclust(D), dis = D)
+mtc    <- scale(mtcars)
+D      <- dist(mtc)
 hcdata <- dendro_data_k(hc, 3)
 
 p1 <- plot_ggdendro(hcdata,
@@ -346,7 +333,7 @@ p1 <- plot_ggdendro(hcdata,
   xlab(NULL) +
   ylab(NULL)
 
-# scale and reshape mtcars data
+# scale from 0 to 1 and reshape mtcars data
 scaled <- setDT(lapply(mtcars, scales::rescale))
 melted <- melt(scaled, measure.vars = colnames(mtcars))
 melted[, variable := as.factor(variable)]

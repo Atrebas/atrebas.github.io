@@ -206,8 +206,9 @@ Things become a bit more complicated if we want to customize the orientation of 
 <div id="basic-dendrogram" class="section level2">
 <h2>Basic dendrogram</h2>
 <p>We are now ready to build a dendrogram. By default, the standard ggplot2 theme is applied.</p>
-<pre class="r"><code>D  &lt;- dist(mtcars)
-hc &lt;- hclust(D)
+<pre class="r"><code>mtc &lt;- scale(mtcars)
+D   &lt;- dist(mtc)
+hc  &lt;- hclust(D)
 
 hcdata &lt;- dendro_data_k(hc, 3)
 
@@ -269,7 +270,7 @@ p &lt;- p + theme_void() + mytheme
 
 p + geom_point(data     = mtcars, 
                aes(x    = match(rownames(mtcars), hcdata$labels$label),
-                   y    = -30,
+                   y    = -0.7,
                    fill = as.factor(cyl)),
                size     = 5,
                shape    = 21,
@@ -277,7 +278,7 @@ p + geom_point(data     = mtcars,
   scale_fill_manual(values = c(&quot;white&quot;, &quot;yellow&quot;, &quot;red&quot;)) +
   geom_text(data      = mtcars, 
             aes(x     = match(rownames(mtcars), hcdata$labels$label),
-                y     = -30,
+                y     = -0.7,
                 label = cyl),
             size = 3)</code></pre>
 <p><img src="/post/2019-06-08-lightweight-dendrograms_files/figure-html/unnamed-chunk-9-1.png" width="768" /></p>
@@ -285,55 +286,46 @@ p + geom_point(data     = mtcars,
 <p>Combining multiple plots, with gridExtra for example, we can easily make tanglegrams.</p>
 <pre class="r"><code>library(gridExtra)
 
-tanglegram &lt;- function(hcdata1, hcdata2, cols){
-  
-  p1 &lt;- plot_ggdendro(hcdata1,
-                      direction   = &quot;lr&quot;,
-                      scale.color = cols,
-                      expand.y    = 0.2) +
-    theme_void()
-  p2 &lt;- plot_ggdendro(hcdata2,
-                      direction   = &quot;rl&quot;,
-                      scale.color = cols,
-                      expand.y    = 0.2) +
-    theme_void()
-  
-  idx &lt;- data.frame(y1 = 1:nrow(hcdata1$labels),
-                    y2 = match(hcdata1$labels$label, hcdata2$labels$label))
-  p3 &lt;- ggplot() +
-    geom_segment(data     = idx, 
-                 aes(x    = 0,
-                     y    = y1,
-                     xend = 1,
-                     yend = y2),
-                 color    = &quot;grey&quot;) +
-    theme_void()
-  
-  grid.arrange(p1, p3, p2, ncol = 3, widths = c(2, 1, 2))
-}
-
-D       &lt;- dist(mtcars)
+mtc     &lt;- scale(mtcars)
+D       &lt;- dist(mtc)
 hc1     &lt;- hclust(D, &quot;average&quot;)
 hc2     &lt;- hclust(D, &quot;ward.D2&quot;)
 hcdata1 &lt;- dendro_data_k(hc1, 5)
 hcdata2 &lt;- dendro_data_k(hc2, 5)
-cols    &lt;- c(&quot;#a9a9a9&quot;, &quot;#1f77b4&quot;, &quot;#ff7f0e&quot;, &quot;#2ca02c&quot;, &quot;#d62728&quot;, &quot;#9467bd&quot;)</code></pre>
-<pre class="r"><code>tanglegram(hcdata1, hcdata2, cols)</code></pre>
-<p><img src="/post/2019-06-08-lightweight-dendrograms_files/figure-html/unnamed-chunk-11-1.png" width="1248" />
-The <a href="https://cran.r-project.org/web/packages/gclus/">gclus</a> package can be used to reorder the hclust objects, facilitating the comparison.</p>
-<pre class="r"><code>library(gclus)
+cols    &lt;- c(&quot;#a9a9a9&quot;, &quot;#1f77b4&quot;, &quot;#ff7f0e&quot;, &quot;#2ca02c&quot;, &quot;#d62728&quot;, &quot;#9467bd&quot;)
 
-hcdata3 &lt;- dendro_data_k(reorder(hc1, dis = D), 5)
-hcdata4 &lt;- dendro_data_k(reorder(hc2, dis = D), 5)
+p1 &lt;- plot_ggdendro(hcdata1,
+                    direction   = &quot;lr&quot;,
+                    scale.color = cols,
+                    expand.y    = 0.2) +
+  theme_void()
 
-tanglegram(hcdata3, hcdata4, cols)</code></pre>
-<p><img src="/post/2019-06-08-lightweight-dendrograms_files/figure-html/unnamed-chunk-12-1.png" width="1248" /></p>
+p2 &lt;- plot_ggdendro(hcdata2,
+                    direction   = &quot;rl&quot;,
+                    scale.color = cols,
+                    expand.y    = 0.2) +
+  theme_void()
+
+idx &lt;- data.frame(y1 = 1:nrow(hcdata1$labels),
+                  y2 = match(hcdata1$labels$label, hcdata2$labels$label))
+
+p3 &lt;- ggplot() +
+  geom_segment(data     = idx, 
+               aes(x    = 0,
+                   y    = y1,
+                   xend = 1,
+                   yend = y2),
+               color    = &quot;grey&quot;) +
+  theme_void()
+  
+grid.arrange(p1, p3, p2, ncol = 3, widths = c(2, 1, 2))</code></pre>
+<p><img src="/post/2019-06-08-lightweight-dendrograms_files/figure-html/unnamed-chunk-10-1.png" width="1248" /></p>
 <p><br></p>
-<p>A last example, with a dendrogram and a ‘kind of bubblemap’. I think adding a size encoding helps to better get the structure of the data compared to a standard heatmap. In the mtcars dataset, the variables have different units, but here, the goal is simply to highlight low or high values.</p>
+<p>A last example, with a dendrogram and a ‘kind of bubblemap’. I think adding a size encoding helps to better get the structure of the data compared to a standard heatmap. In the mtc dataset, the variables have different units, but here, the goal is simply to highlight low or high values.</p>
 <pre class="r"><code>library(data.table)
 
-D      &lt;- dist(mtcars)
-hc     &lt;- reorder(hclust(D), dis = D)
+mtc    &lt;- scale(mtcars)
+D      &lt;- dist(mtc)
 hcdata &lt;- dendro_data_k(hc, 3)
 
 p1 &lt;- plot_ggdendro(hcdata,
@@ -347,7 +339,7 @@ p1 &lt;- plot_ggdendro(hcdata,
   xlab(NULL) +
   ylab(NULL)
 
-# scale and reshape mtcars data
+# scale from 0 to 1 and reshape mtcars data
 scaled &lt;- setDT(lapply(mtcars, scales::rescale))
 melted &lt;- melt(scaled, measure.vars = colnames(mtcars))
 melted[, variable := as.factor(variable)]
@@ -368,7 +360,7 @@ p2 &lt;- ggplot(melted) +
   ylab(NULL)
 
 grid.arrange(p1, p2, ncol = 2, widths = 3:2)</code></pre>
-<p><img src="/post/2019-06-08-lightweight-dendrograms_files/figure-html/unnamed-chunk-13-1.png" width="1248" /></p>
+<p><img src="/post/2019-06-08-lightweight-dendrograms_files/figure-html/unnamed-chunk-11-1.png" width="1248" /></p>
 <p><br></p>
 </div>
 <div id="conclusion" class="section level2">
@@ -391,14 +383,13 @@ grid.arrange(p1, p2, ncol = 2, widths = 3:2)</code></pre>
 ## [1] methods   stats     graphics  grDevices utils     datasets  base     
 ## 
 ## other attached packages:
-## [1] gclus_1.3.1       cluster_2.0.7-1   gridExtra_2.3     ggplot2_3.1.0    
-## [5] ggdendro_0.1-20   data.table_1.12.3
+## [1] gridExtra_2.3     ggplot2_3.1.0     ggdendro_0.1-20   data.table_1.12.3
 ## 
 ## loaded via a namespace (and not attached):
-##  [1] Rcpp_1.0.0         RColorBrewer_1.1-2 pillar_1.3.1      
+##  [1] Rcpp_1.0.0         pillar_1.3.1       RColorBrewer_1.1-2
 ##  [4] plyr_1.8.4         tools_3.3.2        digest_0.6.18     
-##  [7] viridisLite_0.3.0  evaluate_0.12      tibble_2.0.1      
-## [10] gtable_0.2.0       pkgconfig_2.0.2    rlang_0.3.1       
+##  [7] evaluate_0.12      tibble_2.0.1       gtable_0.2.0      
+## [10] viridisLite_0.3.0  pkgconfig_2.0.2    rlang_0.3.1       
 ## [13] yaml_2.2.0         blogdown_0.10      xfun_0.4.11       
 ## [16] withr_2.1.2        stringr_1.3.1      dplyr_0.8.0.1     
 ## [19] knitr_1.21         grid_3.3.2         tidyselect_0.2.5  
@@ -424,7 +415,7 @@ grid.arrange(p1, p2, ncol = 2, widths = 3:2)</code></pre>
 
         		<footer>
 			<span>
-			&copy; <time datetime="2019-06-11 19:09:48.4746001 &#43;0200 CEST m=&#43;0.160200001">2019</time> . Made with <a href='https://gohugo.io'>Hugo</a> using the <a href='https://github.com/EmielH/tale-hugo/'>Tale</a> theme and the <a href='https://bookdown.org/yihui/blogdown/'>blogdown</a> R package.
+			&copy; <time datetime="2019-06-11 22:33:38.7036505 &#43;0200 CEST m=&#43;0.093000001">2019</time> . Made with <a href='https://gohugo.io'>Hugo</a> using the <a href='https://github.com/EmielH/tale-hugo/'>Tale</a> theme and the <a href='https://bookdown.org/yihui/blogdown/'>blogdown</a> R package.
 			</span>
 		</footer>
 
