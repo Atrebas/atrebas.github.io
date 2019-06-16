@@ -100,7 +100,7 @@ library(ggplot2)</code></pre>
   idx                    &lt;-  which(segclust == 0L)
   segclust[idx]          &lt;-  segclust[idx + 1L]
   hcdata$segments$clust  &lt;-  segclust
-  hcdata$segments$line   &lt;-  ifelse(segclust &lt; 1L, 1L, 0L)
+  hcdata$segments$line   &lt;-  as.integer(segclust &lt; 1L)
   hcdata$labels$clust    &lt;-  labclust
   
   hcdata
@@ -321,7 +321,7 @@ p3 &lt;- ggplot() +
 grid.arrange(p1, p3, p2, ncol = 3, widths = c(2, 1, 2))</code></pre>
 <p><img src="/post/2019-06-08-lightweight-dendrograms_files/figure-html/unnamed-chunk-10-1.png" width="1248" /></p>
 <p><br></p>
-<p>A last example, with a dendrogram and a ‘kind of bubblemap’. I think adding a size encoding helps to better get the structure of the data compared to a standard heatmap. In the mtc dataset, the variables have different units, but here, the goal is simply to highlight low or high values.</p>
+<p>A last example, with a dendrogram and a ‘kind of bubblemap’. I think adding a size encoding helps to better get the structure of the data compared to a standard heatmap. In the mtcars dataset, the variables have different units, but here, the goal is simply to highlight low or high values.</p>
 <pre class="r"><code>library(data.table)
 
 mtc    &lt;- scale(mtcars)
@@ -408,6 +408,7 @@ grid.arrange(p1, p2, ncol = 2, widths = 3:2)</code></pre>
 
 	<div class="pagination">
 		<a href="/post/2019-05-18-images-to-ridges/" class="left arrow">&#8592;</a>
+		<a href="/post/2019-06-16-learning-japanese/" class="right arrow">&#8594;</a>
 
 		<a href="#" class="top">Top</a>
 	</div>
@@ -416,7 +417,7 @@ grid.arrange(p1, p2, ncol = 2, widths = 3:2)</code></pre>
 
         		<footer>
 			<span>
-			&copy; <time datetime="2019-06-11 22:42:52.2041505 &#43;0200 CEST m=&#43;0.128500001">2019</time> . Made with <a href='https://gohugo.io'>Hugo</a> using the <a href='https://github.com/EmielH/tale-hugo/'>Tale</a> theme and the <a href='https://bookdown.org/yihui/blogdown/'>blogdown</a> R package.
+			&copy; <time datetime="2019-06-16 16:41:38.3194025 &#43;0200 CEST m=&#43;0.095000001">2019</time> . Made with <a href='https://gohugo.io'>Hugo</a> using the <a href='https://github.com/EmielH/tale-hugo/'>Tale</a> theme and the <a href='https://bookdown.org/yihui/blogdown/'>blogdown</a> R package.
 			</span>
 		</footer>
 

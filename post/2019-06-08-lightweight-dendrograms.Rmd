@@ -62,7 +62,7 @@ dendro_data_k <- function(hc, k) {
   idx                    <-  which(segclust == 0L)
   segclust[idx]          <-  segclust[idx + 1L]
   hcdata$segments$clust  <-  segclust
-  hcdata$segments$line   <-  ifelse(segclust < 1L, 1L, 0L)
+  hcdata$segments$line   <-  as.integer(segclust < 1L)
   hcdata$labels$clust    <-  labclust
   
   hcdata
@@ -313,7 +313,7 @@ grid.arrange(p1, p3, p2, ncol = 3, widths = c(2, 1, 2))
 
 <br>
 
-A last example, with a dendrogram and a 'kind of bubblemap'. I think adding a size encoding helps to better get the structure of the data compared to a standard heatmap. In the mtc dataset, the variables have different units, but here, the goal is simply to highlight low or high values.   
+A last example, with a dendrogram and a 'kind of bubblemap'. I think adding a size encoding helps to better get the structure of the data compared to a standard heatmap. In the mtcars dataset, the variables have different units, but here, the goal is simply to highlight low or high values.   
 
 ```{r, fig.height = 7, fig.width = 13, message = FALSE}
 library(data.table)
