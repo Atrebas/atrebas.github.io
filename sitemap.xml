@@ -62,13 +62,13 @@
   </url>
   
   <url>
-    <loc>/categories/japanese/</loc>
+    <loc>/tags/japanese/</loc>
     <lastmod>2019-06-16T00:00:00+00:00</lastmod>
     <priority>0</priority>
   </url>
   
   <url>
-    <loc>/tags/japanese/</loc>
+    <loc>/categories/japanese/</loc>
     <lastmod>2019-06-16T00:00:00+00:00</lastmod>
     <priority>0</priority>
   </url>
@@ -92,13 +92,13 @@
   </url>
   
   <url>
-    <loc>/categories/r/</loc>
+    <loc>/tags/r/</loc>
     <lastmod>2019-06-16T00:00:00+00:00</lastmod>
     <priority>0</priority>
   </url>
   
   <url>
-    <loc>/tags/r/</loc>
+    <loc>/categories/r/</loc>
     <lastmod>2019-06-16T00:00:00+00:00</lastmod>
     <priority>0</priority>
   </url>
@@ -110,13 +110,13 @@
   </url>
   
   <url>
-    <loc>/categories/visualization/</loc>
+    <loc>/tags/visualization/</loc>
     <lastmod>2019-06-16T00:00:00+00:00</lastmod>
     <priority>0</priority>
   </url>
   
   <url>
-    <loc>/tags/visualization/</loc>
+    <loc>/categories/visualization/</loc>
     <lastmod>2019-06-16T00:00:00+00:00</lastmod>
     <priority>0</priority>
   </url>

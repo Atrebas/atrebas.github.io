@@ -124,7 +124,8 @@ switched back to [ggplot2](https://ggplot2.tidyverse.org/) to render the plots a
 library(data.table) 
 library(ggplot2)    
 
-kana   <- fread("kana3.csv", encoding = "UTF-8")
+kana   <- fread("https://raw.githubusercontent.com/Atrebas/atrebas.github.io/master/files/kana3.csv",
+                encoding = "UTF-8")
 kana
 
 plot_kana <- function(kana){
