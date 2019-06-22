@@ -119,6 +119,8 @@ this document is independently [available](https://github.com/Atrebas/atrebas.gi
 
 <div style="text-align: center;"><input type='button' id='hideshow' value='Show the outputs'></div>
 
+### Update
+- _2019-06-22_: Coding style improved (thanks @tylerburleigh for pointing that out). Some data.table expressions with by reordered and indented to better highlight the similarity with dplyr. Minor comments and improvements.  
 
 <br><hr>
 ### data.table and dplyr
@@ -491,6 +493,7 @@ In the following commands, with data.table, columns are modified by reference us
 
 The `dplyr::group_by()` function and the corresponding `by` and `keyby` statements in data.table allow to run manipulate each group of observations and combine the results. The sole difference between  `by` and `keyby` is that `keyby` orders the results and creates a `key` that will allow faster subsetting (cf. the [indexing and keys](#indexing-and-keys) section). Below, we arbitrary use one or the other.    
 Again, the `all-at-if` variants of `group_by()` are available in dplyr but not presented here.    
+Note that it is possible to reorder the arguments in data.table: `DT[i, j, by] == DT[i, by, j]`. This is was is done below to better highlight the similarity with dplyr.    
 
 #### By group
 <table class="table table-condensed"><tbody><tr><td align="left">
@@ -1074,7 +1077,7 @@ Here again, `fread()` and `fwrite()` are very versatile and allow to handle diff
 
 <br><hr>
 ### Reshape data
-See [here](https://cran.r-project.org/web/packages/data.table/vignettes/datatable-reshape.html) and [here](https://tidyr.tidyverse.org/) for more details.
+The following part is still a bit clunky. I need to find better examples. See [here](https://cran.r-project.org/web/packages/data.table/vignettes/datatable-reshape.html) and [here](https://tidyr.tidyverse.org/) for more details.
 
 #### Melt data (from wide to long)
 <table class="table table-condensed"><tbody><tr><td align="left">

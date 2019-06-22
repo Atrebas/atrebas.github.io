@@ -61,6 +61,7 @@
 <ul>
 <li><a href="#introduction">Introduction</a><ul>
 <li><a href="#about">About</a></li>
+<li><a href="#update">Update</a></li>
 <li><a href="#data.table-and-dplyr">data.table and dplyr</a></li>
 <li><a href="#create-example-data">Create example data</a></li>
 </ul></li>
@@ -200,6 +201,12 @@ this document is independently <a href="https://github.com/Atrebas/atrebas.githu
 <div style="text-align: center;">
 <input type='button' id='hideshow' value='Show the outputs'>
 </div>
+</div>
+<div id="update" class="section level3">
+<h3>Update</h3>
+<ul>
+<li><em>2019-06-22</em>: Coding style improved (thanks <span class="citation">@tylerburleigh</span> for pointing that out). Some data.table expressions with by reordered and indented to better highlight the similarity with dplyr. Minor comments and improvements.</li>
+</ul>
 <br>
 <hr>
 </div>
@@ -228,34 +235,34 @@ Memory management, parallelism, and shrewd optimization give data.table the adva
 set.seed(1L)
 
 ## Create a data table
-DT = data.table(V1 = c(1L,2L),  # recycling
+DT &lt;- data.table(V1 = rep(c(1L, 2L), 5)[-10],
                 V2 = 1:9,
-                V3 = round(rnorm(3),2),
-                V4 = LETTERS[1:3])
+                V3 = c(0.5, 1.0, 1.5),
+                V4 = rep(LETTERS[1:3], 3))
 
 class(DT)
 DT</code></pre>
 <pre><code>## [1] &quot;data.table&quot; &quot;data.frame&quot;
-##    V1 V2    V3 V4
-## 1:  1  1 -0.63  A
-## 2:  2  2  0.18  B
-## 3:  1  3 -0.84  C
-## 4:  2  4 -0.63  A
-## 5:  1  5  0.18  B
-## 6:  2  6 -0.84  C
-## 7:  1  7 -0.63  A
-## 8:  2  8  0.18  B
-## 9:  1  9 -0.84  C</code></pre>
+##    V1 V2  V3 V4
+## 1:  1  1 0.5  A
+## 2:  2  2 1.0  B
+## 3:  1  3 1.5  C
+## 4:  2  4 0.5  A
+## 5:  1  5 1.0  B
+## 6:  2  6 1.5  C
+## 7:  1  7 0.5  A
+## 8:  2  8 1.0  B
+## 9:  1  9 1.5  C</code></pre>
 </td>
 <td align="left">
 <pre class="r"><code>library(dplyr)
 set.seed(1L)
 
 ## Create a data frame (tibble)
-DF = tibble(V1 = rep(c(1L,2L), 5)[-10],
-            V2 = 1:9,
-            V3 = rep(round(rnorm(3),2), 3),
-            V4 = rep(LETTERS[1:3], 3))
+DF &lt;- tibble(V1 = rep(c(1L, 2L), 5)[-10],
+             V2 = 1:9,
+             V3 = rep(c(0.5, 1.0, 1.5), 3),
+             V4 = rep(LETTERS[1:3], 3))
 
 class(DF)
 DF</code></pre>
@@ -263,15 +270,15 @@ DF</code></pre>
 ## # A tibble: 9 x 4
 ##      V1    V2    V3 V4   
 ##   &lt;int&gt; &lt;int&gt; &lt;dbl&gt; &lt;chr&gt;
-## 1     1     1 -0.63 A    
-## 2     2     2  0.18 B    
-## 3     1     3 -0.84 C    
-## 4     2     4 -0.63 A    
-## 5     1     5  0.18 B    
-## 6     2     6 -0.84 C    
-## 7     1     7 -0.63 A    
-## 8     2     8  0.18 B    
-## 9     1     9 -0.84 C</code></pre>
+## 1     1     1   0.5 A    
+## 2     2     2   1   B    
+## 3     1     3   1.5 C    
+## 4     2     4   0.5 A    
+## 5     1     5   1   B    
+## 6     2     6   1.5 C    
+## 7     1     7   0.5 A    
+## 8     2     8   1   B    
+## 9     1     9   1.5 C</code></pre>
 </td>
 </tr>
 </tbody>
@@ -296,26 +303,26 @@ DF</code></pre>
 <td align="left">
 <pre class="r"><code>DT[3:4,]
 DT[3:4] # same</code></pre>
-<pre><code>##    V1 V2    V3 V4
-## 1:  1  3 -0.84  C
-## 2:  2  4 -0.63  A
-##    V1 V2    V3 V4
-## 1:  1  3 -0.84  C
-## 2:  2  4 -0.63  A</code></pre>
+<pre><code>##    V1 V2  V3 V4
+## 1:  1  3 1.5  C
+## 2:  2  4 0.5  A
+##    V1 V2  V3 V4
+## 1:  1  3 1.5  C
+## 2:  2  4 0.5  A</code></pre>
 </td>
 <td align="left">
 <pre class="r"><code>DF[3:4,]
-DF %&gt;% slice(3:4) # same</code></pre>
+slice(DF, 3:4) # same</code></pre>
 <pre><code>## # A tibble: 2 x 4
 ##      V1    V2    V3 V4   
 ##   &lt;int&gt; &lt;int&gt; &lt;dbl&gt; &lt;chr&gt;
-## 1     1     3 -0.84 C    
-## 2     2     4 -0.63 A    
+## 1     1     3   1.5 C    
+## 2     2     4   0.5 A    
 ## # A tibble: 2 x 4
 ##      V1    V2    V3 V4   
 ##   &lt;int&gt; &lt;int&gt; &lt;dbl&gt; &lt;chr&gt;
-## 1     1     3 -0.84 C    
-## 2     2     4 -0.63 A</code></pre>
+## 1     1     3   1.5 C    
+## 2     2     4   0.5 A</code></pre>
 </td>
 </tr>
 </tbody>
@@ -329,34 +336,34 @@ DF %&gt;% slice(3:4) # same</code></pre>
 <td align="left">
 <pre class="r"><code>DT[!3:7,]
 DT[-(3:7)] # same</code></pre>
-<pre><code>##    V1 V2    V3 V4
-## 1:  1  1 -0.63  A
-## 2:  2  2  0.18  B
-## 3:  2  8  0.18  B
-## 4:  1  9 -0.84  C
-##    V1 V2    V3 V4
-## 1:  1  1 -0.63  A
-## 2:  2  2  0.18  B
-## 3:  2  8  0.18  B
-## 4:  1  9 -0.84  C</code></pre>
+<pre><code>##    V1 V2  V3 V4
+## 1:  1  1 0.5  A
+## 2:  2  2 1.0  B
+## 3:  2  8 1.0  B
+## 4:  1  9 1.5  C
+##    V1 V2  V3 V4
+## 1:  1  1 0.5  A
+## 2:  2  2 1.0  B
+## 3:  2  8 1.0  B
+## 4:  1  9 1.5  C</code></pre>
 </td>
 <td align="left">
 <pre class="r"><code>DF[-(3:7),]
-DF %&gt;% slice(-(3:7)) # same</code></pre>
+slice(DF, -(3:7)) # same</code></pre>
 <pre><code>## # A tibble: 4 x 4
 ##      V1    V2    V3 V4   
 ##   &lt;int&gt; &lt;int&gt; &lt;dbl&gt; &lt;chr&gt;
-## 1     1     1 -0.63 A    
-## 2     2     2  0.18 B    
-## 3     2     8  0.18 B    
-## 4     1     9 -0.84 C    
+## 1     1     1   0.5 A    
+## 2     2     2   1   B    
+## 3     2     8   1   B    
+## 4     1     9   1.5 C    
 ## # A tibble: 4 x 4
 ##      V1    V2    V3 V4   
 ##   &lt;int&gt; &lt;int&gt; &lt;dbl&gt; &lt;chr&gt;
-## 1     1     1 -0.63 A    
-## 2     2     2  0.18 B    
-## 3     2     8  0.18 B    
-## 4     1     9 -0.84 C</code></pre>
+## 1     1     1   0.5 A    
+## 2     2     2   1   B    
+## 3     2     8   1   B    
+## 4     1     9   1.5 C</code></pre>
 </td>
 </tr>
 </tbody>
@@ -369,39 +376,39 @@ DF %&gt;% slice(-(3:7)) # same</code></pre>
 <tr>
 <td align="left">
 <pre class="r"><code>DT[V2 &gt; 5]
-DT[V4 %chin% c(&quot;A&quot;,&quot;C&quot;)] # fast %in% for character</code></pre>
-<pre><code>##    V1 V2    V3 V4
-## 1:  2  6 -0.84  C
-## 2:  1  7 -0.63  A
-## 3:  2  8  0.18  B
-## 4:  1  9 -0.84  C
-##    V1 V2    V3 V4
-## 1:  1  1 -0.63  A
-## 2:  1  3 -0.84  C
-## 3:  2  4 -0.63  A
-## 4:  2  6 -0.84  C
-## 5:  1  7 -0.63  A
-## 6:  1  9 -0.84  C</code></pre>
+DT[V4 %chin% c(&quot;A&quot;, &quot;C&quot;)] # fast %in% for character</code></pre>
+<pre><code>##    V1 V2  V3 V4
+## 1:  2  6 1.5  C
+## 2:  1  7 0.5  A
+## 3:  2  8 1.0  B
+## 4:  1  9 1.5  C
+##    V1 V2  V3 V4
+## 1:  1  1 0.5  A
+## 2:  1  3 1.5  C
+## 3:  2  4 0.5  A
+## 4:  2  6 1.5  C
+## 5:  1  7 0.5  A
+## 6:  1  9 1.5  C</code></pre>
 </td>
 <td align="left">
-<pre class="r"><code>DF %&gt;% filter(V2 &gt; 5)
-DF %&gt;% filter(V4 %in% c(&quot;A&quot;,&quot;C&quot;))</code></pre>
+<pre class="r"><code>filter(DF, V2 &gt; 5)
+filter(DF, V4 %in% c(&quot;A&quot;, &quot;C&quot;))</code></pre>
 <pre><code>## # A tibble: 4 x 4
 ##      V1    V2    V3 V4   
 ##   &lt;int&gt; &lt;int&gt; &lt;dbl&gt; &lt;chr&gt;
-## 1     2     6 -0.84 C    
-## 2     1     7 -0.63 A    
-## 3     2     8  0.18 B    
-## 4     1     9 -0.84 C    
+## 1     2     6   1.5 C    
+## 2     1     7   0.5 A    
+## 3     2     8   1   B    
+## 4     1     9   1.5 C    
 ## # A tibble: 6 x 4
 ##      V1    V2    V3 V4   
 ##   &lt;int&gt; &lt;int&gt; &lt;dbl&gt; &lt;chr&gt;
-## 1     1     1 -0.63 A    
-## 2     1     3 -0.84 C    
-## 3     2     4 -0.63 A    
-## 4     2     6 -0.84 C    
-## 5     1     7 -0.63 A    
-## 6     1     9 -0.84 C</code></pre>
+## 1     1     1   0.5 A    
+## 2     1     3   1.5 C    
+## 3     2     4   0.5 A    
+## 4     2     6   1.5 C    
+## 5     1     7   0.5 A    
+## 6     1     9   1.5 C</code></pre>
 </td>
 </tr>
 </tbody>
@@ -415,18 +422,18 @@ DF %&gt;% filter(V4 %in% c(&quot;A&quot;,&quot;C&quot;))</code></pre>
 <td align="left">
 <pre class="r"><code>DT[V1 == 1 &amp; V4 == &quot;A&quot;]
 # any logical criteria can be used</code></pre>
-<pre><code>##    V1 V2    V3 V4
-## 1:  1  1 -0.63  A
-## 2:  1  7 -0.63  A</code></pre>
+<pre><code>##    V1 V2  V3 V4
+## 1:  1  1 0.5  A
+## 2:  1  7 0.5  A</code></pre>
 </td>
 <td align="left">
-<pre class="r"><code>DF %&gt;% filter(V1 == 1, V4 == &quot;A&quot;)
+<pre class="r"><code>filter(DF, V1 == 1, V4 == &quot;A&quot;)
 # any logical criteria can be used</code></pre>
 <pre><code>## # A tibble: 2 x 4
 ##      V1    V2    V3 V4   
 ##   &lt;int&gt; &lt;int&gt; &lt;dbl&gt; &lt;chr&gt;
-## 1     1     1 -0.63 A    
-## 2     1     7 -0.63 A</code></pre>
+## 1     1     1   0.5 A    
+## 2     1     7   0.5 A</code></pre>
 </td>
 </tr>
 </tbody>
@@ -439,24 +446,24 @@ DF %&gt;% filter(V4 %in% c(&quot;A&quot;,&quot;C&quot;))</code></pre>
 <tr>
 <td align="left">
 <pre class="r"><code>unique(DT)
-unique(DT, by = c(&quot;V1&quot;,&quot;V4&quot;)) # returns all cols</code></pre>
-<pre><code>##    V1 V2    V3 V4
-## 1:  1  1 -0.63  A
-## 2:  2  2  0.18  B
-## 3:  1  3 -0.84  C
-## 4:  2  4 -0.63  A
-## 5:  1  5  0.18  B
-## 6:  2  6 -0.84  C
-## 7:  1  7 -0.63  A
-## 8:  2  8  0.18  B
-## 9:  1  9 -0.84  C
-##    V1 V2    V3 V4
-## 1:  1  1 -0.63  A
-## 2:  2  2  0.18  B
-## 3:  1  3 -0.84  C
-## 4:  2  4 -0.63  A
-## 5:  1  5  0.18  B
-## 6:  2  6 -0.84  C</code></pre>
+unique(DT, by = c(&quot;V1&quot;, &quot;V4&quot;)) # returns all cols</code></pre>
+<pre><code>##    V1 V2  V3 V4
+## 1:  1  1 0.5  A
+## 2:  2  2 1.0  B
+## 3:  1  3 1.5  C
+## 4:  2  4 0.5  A
+## 5:  1  5 1.0  B
+## 6:  2  6 1.5  C
+## 7:  1  7 0.5  A
+## 8:  2  8 1.0  B
+## 9:  1  9 1.5  C
+##    V1 V2  V3 V4
+## 1:  1  1 0.5  A
+## 2:  2  2 1.0  B
+## 3:  1  3 1.5  C
+## 4:  2  4 0.5  A
+## 5:  1  5 1.0  B
+## 6:  2  6 1.5  C</code></pre>
 </td>
 <td align="left">
 <pre class="r"><code>distinct(DF) # distinct_all(DF)
@@ -465,15 +472,15 @@ distinct_at(DF, vars(V1, V4)) # returns selected cols
 <pre><code>## # A tibble: 9 x 4
 ##      V1    V2    V3 V4   
 ##   &lt;int&gt; &lt;int&gt; &lt;dbl&gt; &lt;chr&gt;
-## 1     1     1 -0.63 A    
-## 2     2     2  0.18 B    
-## 3     1     3 -0.84 C    
-## 4     2     4 -0.63 A    
-## 5     1     5  0.18 B    
-## 6     2     6 -0.84 C    
-## 7     1     7 -0.63 A    
-## 8     2     8  0.18 B    
-## 9     1     9 -0.84 C    
+## 1     1     1   0.5 A    
+## 2     2     2   1   B    
+## 3     1     3   1.5 C    
+## 4     2     4   0.5 A    
+## 5     1     5   1   B    
+## 6     2     6   1.5 C    
+## 7     1     7   0.5 A    
+## 8     2     8   1   B    
+## 9     1     9   1.5 C    
 ## # A tibble: 6 x 2
 ##      V1 V4   
 ##   &lt;int&gt; &lt;chr&gt;
@@ -495,31 +502,31 @@ distinct_at(DF, vars(V1, V4)) # returns selected cols
 <tr>
 <td align="left">
 <pre class="r"><code>na.omit(DT, cols = 1:4)  # fast S3 method with cols argument</code></pre>
-<pre><code>##    V1 V2    V3 V4
-## 1:  1  1 -0.63  A
-## 2:  2  2  0.18  B
-## 3:  1  3 -0.84  C
-## 4:  2  4 -0.63  A
-## 5:  1  5  0.18  B
-## 6:  2  6 -0.84  C
-## 7:  1  7 -0.63  A
-## 8:  2  8  0.18  B
-## 9:  1  9 -0.84  C</code></pre>
+<pre><code>##    V1 V2  V3 V4
+## 1:  1  1 0.5  A
+## 2:  2  2 1.0  B
+## 3:  1  3 1.5  C
+## 4:  2  4 0.5  A
+## 5:  1  5 1.0  B
+## 6:  2  6 1.5  C
+## 7:  1  7 0.5  A
+## 8:  2  8 1.0  B
+## 9:  1  9 1.5  C</code></pre>
 </td>
 <td align="left">
 <pre class="r"><code>tidyr::drop_na(DF, names(DF))</code></pre>
 <pre><code>## # A tibble: 9 x 4
 ##      V1    V2    V3 V4   
 ##   &lt;int&gt; &lt;int&gt; &lt;dbl&gt; &lt;chr&gt;
-## 1     1     1 -0.63 A    
-## 2     2     2  0.18 B    
-## 3     1     3 -0.84 C    
-## 4     2     4 -0.63 A    
-## 5     1     5  0.18 B    
-## 6     2     6 -0.84 C    
-## 7     1     7 -0.63 A    
-## 8     2     8  0.18 B    
-## 9     1     9 -0.84 C</code></pre>
+## 1     1     1   0.5 A    
+## 2     2     2   1   B    
+## 3     1     3   1.5 C    
+## 4     2     4   0.5 A    
+## 5     1     5   1   B    
+## 6     2     6   1.5 C    
+## 7     1     7   0.5 A    
+## 8     2     8   1   B    
+## 9     1     9   1.5 C</code></pre>
 </td>
 </tr>
 </tbody>
@@ -534,47 +541,47 @@ In addition to the main <code>filter()</code> function, dplyr also offers the <c
 <tr>
 <td align="left">
 <pre class="r"><code>DT[sample(.N, 3)] # .N = nb of rows in DT
-DT[sample(.N, .N/2)]
+DT[sample(.N, .N / 2)]
 DT[frankv(-V1, ties.method = &quot;dense&quot;) &lt; 2]</code></pre>
-<pre><code>##    V1 V2    V3 V4
-## 1:  1  9 -0.84  C
-## 2:  2  6 -0.84  C
-## 3:  1  5  0.18  B
-##    V1 V2    V3 V4
-## 1:  1  1 -0.63  A
-## 2:  2  2  0.18  B
-## 3:  2  8  0.18  B
-## 4:  1  5  0.18  B
-##    V1 V2    V3 V4
-## 1:  2  2  0.18  B
-## 2:  2  4 -0.63  A
-## 3:  2  6 -0.84  C
-## 4:  2  8  0.18  B</code></pre>
+<pre><code>##    V1 V2  V3 V4
+## 1:  1  3 1.5  C
+## 2:  1  9 1.5  C
+## 3:  1  5 1.0  B
+##    V1 V2  V3 V4
+## 1:  1  9 1.5  C
+## 2:  2  2 1.0  B
+## 3:  1  7 0.5  A
+## 4:  2  6 1.5  C
+##    V1 V2  V3 V4
+## 1:  2  2 1.0  B
+## 2:  2  4 0.5  A
+## 3:  2  6 1.5  C
+## 4:  2  8 1.0  B</code></pre>
 </td>
 <td align="left">
-<pre class="r"><code>DF %&gt;% sample_n(3)  # n random rows
-DF %&gt;% sample_frac(0.5) # fraction of random rows
-DF %&gt;% top_n(1, V1) # top n entries (includes equals)</code></pre>
+<pre class="r"><code>sample_n(DF, 3)      # n random rows
+sample_frac(DF, 0.5) # fraction of random rows
+top_n(DF, 1, V1)     # top n entries (includes equals)</code></pre>
 <pre><code>## # A tibble: 3 x 4
 ##      V1    V2    V3 V4   
 ##   &lt;int&gt; &lt;int&gt; &lt;dbl&gt; &lt;chr&gt;
-## 1     2     4 -0.63 A    
-## 2     1     7 -0.63 A    
-## 3     1     9 -0.84 C    
+## 1     2     6   1.5 C    
+## 2     1     9   1.5 C    
+## 3     1     1   0.5 A    
 ## # A tibble: 4 x 4
 ##      V1    V2    V3 V4   
 ##   &lt;int&gt; &lt;int&gt; &lt;dbl&gt; &lt;chr&gt;
-## 1     1     7 -0.63 A    
-## 2     2     8  0.18 B    
-## 3     1     3 -0.84 C    
-## 4     1     5  0.18 B    
+## 1     2     2   1   B    
+## 2     1     9   1.5 C    
+## 3     1     5   1   B    
+## 4     1     3   1.5 C    
 ## # A tibble: 4 x 4
 ##      V1    V2    V3 V4   
 ##   &lt;int&gt; &lt;int&gt; &lt;dbl&gt; &lt;chr&gt;
-## 1     2     2  0.18 B    
-## 2     2     4 -0.63 A    
-## 3     2     6 -0.84 C    
-## 4     2     8  0.18 B</code></pre>
+## 1     2     2   1   B    
+## 2     2     4   0.5 A    
+## 3     2     6   1.5 C    
+## 4     2     8   1   B</code></pre>
 </td>
 </tr>
 </tbody>
@@ -589,48 +596,48 @@ On the other hand, data.table also provides convenience functions to filter rows
 DT[V2 %between% c(3, 5)]
 DT[data.table::between(V2, 3, 5, incbounds = FALSE)]
 DT[V2 %inrange% list(-1:1, 1:3)] # see also ?inrange</code></pre>
-<pre><code>##    V1 V2   V3 V4
-## 1:  2  2 0.18  B
-## 2:  1  5 0.18  B
-## 3:  2  8 0.18  B
-##    V1 V2    V3 V4
-## 1:  1  3 -0.84  C
-## 2:  2  4 -0.63  A
-## 3:  1  5  0.18  B
-##    V1 V2    V3 V4
-## 1:  2  4 -0.63  A
-##    V1 V2    V3 V4
-## 1:  1  1 -0.63  A
-## 2:  2  2  0.18  B
-## 3:  1  3 -0.84  C</code></pre>
+<pre><code>##    V1 V2 V3 V4
+## 1:  2  2  1  B
+## 2:  1  5  1  B
+## 3:  2  8  1  B
+##    V1 V2  V3 V4
+## 1:  1  3 1.5  C
+## 2:  2  4 0.5  A
+## 3:  1  5 1.0  B
+##    V1 V2  V3 V4
+## 1:  2  4 0.5  A
+##    V1 V2  V3 V4
+## 1:  1  1 0.5  A
+## 2:  2  2 1.0  B
+## 3:  1  3 1.5  C</code></pre>
 </td>
 <td align="left">
-<pre class="r"><code>DF %&gt;% filter(grepl(&quot;^B&quot;, V4))
-DF %&gt;% filter(dplyr::between(V2, 3, 5))
-DF %&gt;% filter(V2 &gt; 3 &amp; V2 &lt; 5)
-DF %&gt;% filter(V2 &gt;= -1:1 &amp; V2 &lt;= 1:3)</code></pre>
+<pre class="r"><code>filter(DF, grepl(&quot;^B&quot;, V4))
+filter(DF, dplyr::between(V2, 3, 5))
+filter(DF, V2 &gt; 3 &amp; V2 &lt; 5)
+filter(DF, V2 &gt;= -1:1 &amp; V2 &lt;= 1:3)</code></pre>
 <pre><code>## # A tibble: 3 x 4
 ##      V1    V2    V3 V4   
 ##   &lt;int&gt; &lt;int&gt; &lt;dbl&gt; &lt;chr&gt;
-## 1     2     2  0.18 B    
-## 2     1     5  0.18 B    
-## 3     2     8  0.18 B    
+## 1     2     2     1 B    
+## 2     1     5     1 B    
+## 3     2     8     1 B    
 ## # A tibble: 3 x 4
 ##      V1    V2    V3 V4   
 ##   &lt;int&gt; &lt;int&gt; &lt;dbl&gt; &lt;chr&gt;
-## 1     1     3 -0.84 C    
-## 2     2     4 -0.63 A    
-## 3     1     5  0.18 B    
+## 1     1     3   1.5 C    
+## 2     2     4   0.5 A    
+## 3     1     5   1   B    
 ## # A tibble: 1 x 4
 ##      V1    V2    V3 V4   
 ##   &lt;int&gt; &lt;int&gt; &lt;dbl&gt; &lt;chr&gt;
-## 1     2     4 -0.63 A    
+## 1     2     4   0.5 A    
 ## # A tibble: 3 x 4
 ##      V1    V2    V3 V4   
 ##   &lt;int&gt; &lt;int&gt; &lt;dbl&gt; &lt;chr&gt;
-## 1     1     1 -0.63 A    
-## 2     2     2  0.18 B    
-## 3     1     3 -0.84 C</code></pre>
+## 1     1     1   0.5 A    
+## 2     2     2   1   B    
+## 3     1     3   1.5 C</code></pre>
 </td>
 </tr>
 </tbody>
@@ -649,31 +656,31 @@ DF %&gt;% filter(V2 &gt;= -1:1 &amp; V2 &lt;= 1:3)</code></pre>
 <tr>
 <td align="left">
 <pre class="r"><code>DT[order(V3)]  # see also setorder</code></pre>
-<pre><code>##    V1 V2    V3 V4
-## 1:  1  3 -0.84  C
-## 2:  2  6 -0.84  C
-## 3:  1  9 -0.84  C
-## 4:  1  1 -0.63  A
-## 5:  2  4 -0.63  A
-## 6:  1  7 -0.63  A
-## 7:  2  2  0.18  B
-## 8:  1  5  0.18  B
-## 9:  2  8  0.18  B</code></pre>
+<pre><code>##    V1 V2  V3 V4
+## 1:  1  1 0.5  A
+## 2:  2  4 0.5  A
+## 3:  1  7 0.5  A
+## 4:  2  2 1.0  B
+## 5:  1  5 1.0  B
+## 6:  2  8 1.0  B
+## 7:  1  3 1.5  C
+## 8:  2  6 1.5  C
+## 9:  1  9 1.5  C</code></pre>
 </td>
 <td align="left">
-<pre class="r"><code>DF %&gt;% arrange(V3)</code></pre>
+<pre class="r"><code>arrange(DF, V3)</code></pre>
 <pre><code>## # A tibble: 9 x 4
 ##      V1    V2    V3 V4   
 ##   &lt;int&gt; &lt;int&gt; &lt;dbl&gt; &lt;chr&gt;
-## 1     1     3 -0.84 C    
-## 2     2     6 -0.84 C    
-## 3     1     9 -0.84 C    
-## 4     1     1 -0.63 A    
-## 5     2     4 -0.63 A    
-## 6     1     7 -0.63 A    
-## 7     2     2  0.18 B    
-## 8     1     5  0.18 B    
-## 9     2     8  0.18 B</code></pre>
+## 1     1     1   0.5 A    
+## 2     2     4   0.5 A    
+## 3     1     7   0.5 A    
+## 4     2     2   1   B    
+## 5     1     5   1   B    
+## 6     2     8   1   B    
+## 7     1     3   1.5 C    
+## 8     2     6   1.5 C    
+## 9     1     9   1.5 C</code></pre>
 </td>
 </tr>
 </tbody>
@@ -686,31 +693,31 @@ DF %&gt;% filter(V2 &gt;= -1:1 &amp; V2 &lt;= 1:3)</code></pre>
 <tr>
 <td align="left">
 <pre class="r"><code>DT[order(-V3)]</code></pre>
-<pre><code>##    V1 V2    V3 V4
-## 1:  2  2  0.18  B
-## 2:  1  5  0.18  B
-## 3:  2  8  0.18  B
-## 4:  1  1 -0.63  A
-## 5:  2  4 -0.63  A
-## 6:  1  7 -0.63  A
-## 7:  1  3 -0.84  C
-## 8:  2  6 -0.84  C
-## 9:  1  9 -0.84  C</code></pre>
+<pre><code>##    V1 V2  V3 V4
+## 1:  1  3 1.5  C
+## 2:  2  6 1.5  C
+## 3:  1  9 1.5  C
+## 4:  2  2 1.0  B
+## 5:  1  5 1.0  B
+## 6:  2  8 1.0  B
+## 7:  1  1 0.5  A
+## 8:  2  4 0.5  A
+## 9:  1  7 0.5  A</code></pre>
 </td>
 <td align="left">
-<pre class="r"><code>DF %&gt;% arrange(desc(V3))</code></pre>
+<pre class="r"><code>arrange(DF, desc(V3))</code></pre>
 <pre><code>## # A tibble: 9 x 4
 ##      V1    V2    V3 V4   
 ##   &lt;int&gt; &lt;int&gt; &lt;dbl&gt; &lt;chr&gt;
-## 1     2     2  0.18 B    
-## 2     1     5  0.18 B    
-## 3     2     8  0.18 B    
-## 4     1     1 -0.63 A    
-## 5     2     4 -0.63 A    
-## 6     1     7 -0.63 A    
-## 7     1     3 -0.84 C    
-## 8     2     6 -0.84 C    
-## 9     1     9 -0.84 C</code></pre>
+## 1     1     3   1.5 C    
+## 2     2     6   1.5 C    
+## 3     1     9   1.5 C    
+## 4     2     2   1   B    
+## 5     1     5   1   B    
+## 6     2     8   1   B    
+## 7     1     1   0.5 A    
+## 8     2     4   0.5 A    
+## 9     1     7   0.5 A</code></pre>
 </td>
 </tr>
 </tbody>
@@ -723,31 +730,31 @@ DF %&gt;% filter(V2 &gt;= -1:1 &amp; V2 &lt;= 1:3)</code></pre>
 <tr>
 <td align="left">
 <pre class="r"><code>DT[order(V1, -V2)]</code></pre>
-<pre><code>##    V1 V2    V3 V4
-## 1:  1  9 -0.84  C
-## 2:  1  7 -0.63  A
-## 3:  1  5  0.18  B
-## 4:  1  3 -0.84  C
-## 5:  1  1 -0.63  A
-## 6:  2  8  0.18  B
-## 7:  2  6 -0.84  C
-## 8:  2  4 -0.63  A
-## 9:  2  2  0.18  B</code></pre>
+<pre><code>##    V1 V2  V3 V4
+## 1:  1  9 1.5  C
+## 2:  1  7 0.5  A
+## 3:  1  5 1.0  B
+## 4:  1  3 1.5  C
+## 5:  1  1 0.5  A
+## 6:  2  8 1.0  B
+## 7:  2  6 1.5  C
+## 8:  2  4 0.5  A
+## 9:  2  2 1.0  B</code></pre>
 </td>
 <td align="left">
-<pre class="r"><code>DF %&gt;% arrange(V1, desc(V2))</code></pre>
+<pre class="r"><code>arrange(DF, V1, desc(V2))</code></pre>
 <pre><code>## # A tibble: 9 x 4
 ##      V1    V2    V3 V4   
 ##   &lt;int&gt; &lt;int&gt; &lt;dbl&gt; &lt;chr&gt;
-## 1     1     9 -0.84 C    
-## 2     1     7 -0.63 A    
-## 3     1     5  0.18 B    
-## 4     1     3 -0.84 C    
-## 5     1     1 -0.63 A    
-## 6     2     8  0.18 B    
-## 7     2     6 -0.84 C    
-## 8     2     4 -0.63 A    
-## 9     2     2  0.18 B</code></pre>
+## 1     1     9   1.5 C    
+## 2     1     7   0.5 A    
+## 3     1     5   1   B    
+## 4     1     3   1.5 C    
+## 5     1     1   0.5 A    
+## 6     2     8   1   B    
+## 7     2     6   1.5 C    
+## 8     2     4   0.5 A    
+## 9     2     2   1   B</code></pre>
 </td>
 </tr>
 </tbody>
@@ -766,34 +773,34 @@ DF %&gt;% filter(V2 &gt;= -1:1 &amp; V2 &lt;= 1:3)</code></pre>
 <td align="left">
 <pre class="r"><code>DT[[3]] # returns a vector
 DT[, 3]  # returns a data.table</code></pre>
-<pre><code>## [1] -0.63  0.18 -0.84 -0.63  0.18 -0.84 -0.63  0.18 -0.84
-##       V3
-## 1: -0.63
-## 2:  0.18
-## 3: -0.84
-## 4: -0.63
-## 5:  0.18
-## 6: -0.84
-## 7: -0.63
-## 8:  0.18
-## 9: -0.84</code></pre>
+<pre><code>## [1] 0.5 1.0 1.5 0.5 1.0 1.5 0.5 1.0 1.5
+##     V3
+## 1: 0.5
+## 2: 1.0
+## 3: 1.5
+## 4: 0.5
+## 5: 1.0
+## 6: 1.5
+## 7: 0.5
+## 8: 1.0
+## 9: 1.5</code></pre>
 </td>
 <td align="left">
 <pre class="r"><code>DF[[3]] # returns a vector
 DF[3]   # returns a tibble</code></pre>
-<pre><code>## [1] -0.63  0.18 -0.84 -0.63  0.18 -0.84 -0.63  0.18 -0.84
+<pre><code>## [1] 0.5 1.0 1.5 0.5 1.0 1.5 0.5 1.0 1.5
 ## # A tibble: 9 x 1
 ##      V3
 ##   &lt;dbl&gt;
-## 1 -0.63
-## 2  0.18
-## 3 -0.84
-## 4 -0.63
-## 5  0.18
-## 6 -0.84
-## 7 -0.63
-## 8  0.18
-## 9 -0.84</code></pre>
+## 1   0.5
+## 2   1  
+## 3   1.5
+## 4   0.5
+## 5   1  
+## 6   1.5
+## 7   0.5
+## 8   1  
+## 9   1.5</code></pre>
 </td>
 </tr>
 </tbody>
@@ -845,8 +852,8 @@ DT[[&quot;V2&quot;]]     # returns a vector</code></pre>
 ## [1] 1 2 3 4 5 6 7 8 9</code></pre>
 </td>
 <td align="left">
-<pre class="r"><code>DF %&gt;% select(V2) # returns a tibble
-DF %&gt;% pull(V2)   # returns a vector
+<pre class="r"><code>select(DF, V2) # returns a tibble
+pull(DF, V2)   # returns a vector
 DF[, &quot;V2&quot;]        # returns a tibble
 DF[[&quot;V2&quot;]]        # returns a vector</code></pre>
 <pre><code>## # A tibble: 9 x 1
@@ -889,64 +896,64 @@ DF[[&quot;V2&quot;]]        # returns a vector</code></pre>
 <pre class="r"><code>DT[, .(V2, V3, V4)]
 DT[, list(V2, V3, V4)]
 DT[, V2:V4] # select columns between V2 and V4</code></pre>
-<pre><code>##    V2    V3 V4
-## 1:  1 -0.63  A
-## 2:  2  0.18  B
-## 3:  3 -0.84  C
-## 4:  4 -0.63  A
-## 5:  5  0.18  B
-## 6:  6 -0.84  C
-## 7:  7 -0.63  A
-## 8:  8  0.18  B
-## 9:  9 -0.84  C
-##    V2    V3 V4
-## 1:  1 -0.63  A
-## 2:  2  0.18  B
-## 3:  3 -0.84  C
-## 4:  4 -0.63  A
-## 5:  5  0.18  B
-## 6:  6 -0.84  C
-## 7:  7 -0.63  A
-## 8:  8  0.18  B
-## 9:  9 -0.84  C
-##    V2    V3 V4
-## 1:  1 -0.63  A
-## 2:  2  0.18  B
-## 3:  3 -0.84  C
-## 4:  4 -0.63  A
-## 5:  5  0.18  B
-## 6:  6 -0.84  C
-## 7:  7 -0.63  A
-## 8:  8  0.18  B
-## 9:  9 -0.84  C</code></pre>
+<pre><code>##    V2  V3 V4
+## 1:  1 0.5  A
+## 2:  2 1.0  B
+## 3:  3 1.5  C
+## 4:  4 0.5  A
+## 5:  5 1.0  B
+## 6:  6 1.5  C
+## 7:  7 0.5  A
+## 8:  8 1.0  B
+## 9:  9 1.5  C
+##    V2  V3 V4
+## 1:  1 0.5  A
+## 2:  2 1.0  B
+## 3:  3 1.5  C
+## 4:  4 0.5  A
+## 5:  5 1.0  B
+## 6:  6 1.5  C
+## 7:  7 0.5  A
+## 8:  8 1.0  B
+## 9:  9 1.5  C
+##    V2  V3 V4
+## 1:  1 0.5  A
+## 2:  2 1.0  B
+## 3:  3 1.5  C
+## 4:  4 0.5  A
+## 5:  5 1.0  B
+## 6:  6 1.5  C
+## 7:  7 0.5  A
+## 8:  8 1.0  B
+## 9:  9 1.5  C</code></pre>
 </td>
 <td align="left">
-<pre class="r"><code>DF %&gt;% select(V2, V3, V4)
-DF %&gt;% select(V2:V4) # select columns between V2 and V4</code></pre>
+<pre class="r"><code>select(DF, V2, V3, V4)
+select(DF, V2:V4) # select columns between V2 and V4</code></pre>
 <pre><code>## # A tibble: 9 x 3
 ##      V2    V3 V4   
 ##   &lt;int&gt; &lt;dbl&gt; &lt;chr&gt;
-## 1     1 -0.63 A    
-## 2     2  0.18 B    
-## 3     3 -0.84 C    
-## 4     4 -0.63 A    
-## 5     5  0.18 B    
-## 6     6 -0.84 C    
-## 7     7 -0.63 A    
-## 8     8  0.18 B    
-## 9     9 -0.84 C    
+## 1     1   0.5 A    
+## 2     2   1   B    
+## 3     3   1.5 C    
+## 4     4   0.5 A    
+## 5     5   1   B    
+## 6     6   1.5 C    
+## 7     7   0.5 A    
+## 8     8   1   B    
+## 9     9   1.5 C    
 ## # A tibble: 9 x 3
 ##      V2    V3 V4   
 ##   &lt;int&gt; &lt;dbl&gt; &lt;chr&gt;
-## 1     1 -0.63 A    
-## 2     2  0.18 B    
-## 3     3 -0.84 C    
-## 4     4 -0.63 A    
-## 5     5  0.18 B    
-## 6     6 -0.84 C    
-## 7     7 -0.63 A    
-## 8     8  0.18 B    
-## 9     9 -0.84 C</code></pre>
+## 1     1   0.5 A    
+## 2     2   1   B    
+## 3     3   1.5 C    
+## 4     4   0.5 A    
+## 5     5   1   B    
+## 6     6   1.5 C    
+## 7     7   0.5 A    
+## 8     8   1   B    
+## 9     9   1.5 C</code></pre>
 </td>
 </tr>
 </tbody>
@@ -971,7 +978,7 @@ DF %&gt;% select(V2:V4) # select columns between V2 and V4</code></pre>
 ## 9:  1  C</code></pre>
 </td>
 <td align="left">
-<pre class="r"><code>DF %&gt;% select(-V2, -V3)</code></pre>
+<pre class="r"><code>select(DF, -V2, -V3)</code></pre>
 <pre><code>## # A tibble: 9 x 2
 ##      V1 V4   
 ##   &lt;int&gt; &lt;chr&gt;
@@ -995,19 +1002,19 @@ DF %&gt;% select(V2:V4) # select columns between V2 and V4</code></pre>
 <tbody>
 <tr>
 <td align="left">
-<pre class="r"><code>cols = c(&quot;V2&quot;, &quot;V3&quot;)
+<pre class="r"><code>cols &lt;- c(&quot;V2&quot;, &quot;V3&quot;)
 DT[, ..cols] # .. prefix means &#39;one-level up&#39;
 DT[, !..cols] # or DT[, -..cols]</code></pre>
-<pre><code>##    V2    V3
-## 1:  1 -0.63
-## 2:  2  0.18
-## 3:  3 -0.84
-## 4:  4 -0.63
-## 5:  5  0.18
-## 6:  6 -0.84
-## 7:  7 -0.63
-## 8:  8  0.18
-## 9:  9 -0.84
+<pre><code>##    V2  V3
+## 1:  1 0.5
+## 2:  2 1.0
+## 3:  3 1.5
+## 4:  4 0.5
+## 5:  5 1.0
+## 6:  6 1.5
+## 7:  7 0.5
+## 8:  8 1.0
+## 9:  9 1.5
 ##    V1 V4
 ## 1:  1  A
 ## 2:  2  B
@@ -1020,21 +1027,21 @@ DT[, !..cols] # or DT[, -..cols]</code></pre>
 ## 9:  1  C</code></pre>
 </td>
 <td align="left">
-<pre class="r"><code>cols = c(&quot;V2&quot;, &quot;V3&quot;)
-DF %&gt;% select(!!cols) # unquoting
-DF %&gt;% select(-!!cols)</code></pre>
+<pre class="r"><code>cols &lt;- c(&quot;V2&quot;, &quot;V3&quot;)
+select(DF, !!cols) # unquoting
+select(DF, -!!cols)</code></pre>
 <pre><code>## # A tibble: 9 x 2
 ##      V2    V3
 ##   &lt;int&gt; &lt;dbl&gt;
-## 1     1 -0.63
-## 2     2  0.18
-## 3     3 -0.84
-## 4     4 -0.63
-## 5     5  0.18
-## 6     6 -0.84
-## 7     7 -0.63
-## 8     8  0.18
-## 9     9 -0.84
+## 1     1   0.5
+## 2     2   1  
+## 3     3   1.5
+## 4     4   0.5
+## 5     5   1  
+## 6     6   1.5
+## 7     7   0.5
+## 8     8   1  
+## 9     9   1.5
 ## # A tibble: 9 x 2
 ##      V1 V4   
 ##   &lt;int&gt; &lt;chr&gt;
@@ -1059,70 +1066,83 @@ As for row filtering, dplyr includes helper functions to select column. With dat
 <tbody>
 <tr>
 <td align="left">
-<pre class="r"><code>cols = grep(&quot;V&quot;,   names(DT))
-cols = grep(&quot;3$&quot;,  names(DT))
-cols = union(&quot;V4&quot;, names(DT))
-cols = grep(&quot;.2&quot;,  names(DT))
-cols = grep(&quot;^V1|X$&quot;,  names(DT))
-cols = grep(&quot;^(?!V2)&quot;, names(DT), perl = TRUE)
-DT[, ..cols] </code></pre>
-<pre><code>##    V1    V3 V4
-## 1:  1 -0.63  A
-## 2:  2  0.18  B
-## 3:  1 -0.84  C
-## 4:  2 -0.63  A
-## 5:  1  0.18  B
-## 6:  2 -0.84  C
-## 7:  1 -0.63  A
-## 8:  2  0.18  B
-## 9:  1 -0.84  C</code></pre>
+<pre class="r"><code>cols &lt;- paste0(&quot;V&quot;, 1:2)
+cols &lt;- union(&quot;V4&quot;, names(DT))
+cols &lt;- grep(&quot;V&quot;,   names(DT))
+cols &lt;- grep(&quot;3$&quot;,  names(DT))
+cols &lt;- grep(&quot;.2&quot;,  names(DT))
+cols &lt;- grep(&quot;^V1|X$&quot;,  names(DT))
+cols &lt;- grep(&quot;^(?!V2)&quot;, names(DT), perl = TRUE)
+DT[, ..cols]</code></pre>
+<pre><code>##    V1  V3 V4
+## 1:  1 0.5  A
+## 2:  2 1.0  B
+## 3:  1 1.5  C
+## 4:  2 0.5  A
+## 5:  1 1.0  B
+## 6:  2 1.5  C
+## 7:  1 0.5  A
+## 8:  2 1.0  B
+## 9:  1 1.5  C</code></pre>
 </td>
 <td align="left">
-<pre class="r"><code>DF %&gt;% select(contains(&quot;V&quot;))
-DF %&gt;% select(ends_with(&quot;3&quot;))
-DF %&gt;% select(V4, everything()) # reorder columns
-DF %&gt;% select(matches(&quot;.2&quot;))
-DF %&gt;% select(num_range(&quot;V&quot;, 1:2))
-DF %&gt;% select(one_of(c(&quot;V1&quot;, &quot;X&quot;)))</code></pre>
+<pre class="r"><code>select(DF, num_range(&quot;V&quot;, 1:2))
+select(DF, V4, everything()) # reorder columns
+select(DF, contains(&quot;V&quot;))
+select(DF, ends_with(&quot;3&quot;))
+select(DF, matches(&quot;.2&quot;))
+select(DF, one_of(c(&quot;V1&quot;, &quot;X&quot;)))</code></pre>
 <pre><code>## Warning: Unknown columns: `X`</code></pre>
-<pre class="r"><code>DF %&gt;% select(-starts_with(&quot;V2&quot;))
+<pre class="r"><code>select(DF, -starts_with(&quot;V2&quot;))
 # remove variables using &quot;-&quot; prior to function</code></pre>
-<pre><code>## # A tibble: 9 x 4
-##      V1    V2    V3 V4   
-##   &lt;int&gt; &lt;int&gt; &lt;dbl&gt; &lt;chr&gt;
-## 1     1     1 -0.63 A    
-## 2     2     2  0.18 B    
-## 3     1     3 -0.84 C    
-## 4     2     4 -0.63 A    
-## 5     1     5  0.18 B    
-## 6     2     6 -0.84 C    
-## 7     1     7 -0.63 A    
-## 8     2     8  0.18 B    
-## 9     1     9 -0.84 C    
-## # A tibble: 9 x 1
-##      V3
-##   &lt;dbl&gt;
-## 1 -0.63
-## 2  0.18
-## 3 -0.84
-## 4 -0.63
-## 5  0.18
-## 6 -0.84
-## 7 -0.63
-## 8  0.18
-## 9 -0.84
+<pre><code>## # A tibble: 9 x 2
+##      V1    V2
+##   &lt;int&gt; &lt;int&gt;
+## 1     1     1
+## 2     2     2
+## 3     1     3
+## 4     2     4
+## 5     1     5
+## 6     2     6
+## 7     1     7
+## 8     2     8
+## 9     1     9
 ## # A tibble: 9 x 4
 ##   V4       V1    V2    V3
 ##   &lt;chr&gt; &lt;int&gt; &lt;int&gt; &lt;dbl&gt;
-## 1 A         1     1 -0.63
-## 2 B         2     2  0.18
-## 3 C         1     3 -0.84
-## 4 A         2     4 -0.63
-## 5 B         1     5  0.18
-## 6 C         2     6 -0.84
-## 7 A         1     7 -0.63
-## 8 B         2     8  0.18
-## 9 C         1     9 -0.84
+## 1 A         1     1   0.5
+## 2 B         2     2   1  
+## 3 C         1     3   1.5
+## 4 A         2     4   0.5
+## 5 B         1     5   1  
+## 6 C         2     6   1.5
+## 7 A         1     7   0.5
+## 8 B         2     8   1  
+## 9 C         1     9   1.5
+## # A tibble: 9 x 4
+##      V1    V2    V3 V4   
+##   &lt;int&gt; &lt;int&gt; &lt;dbl&gt; &lt;chr&gt;
+## 1     1     1   0.5 A    
+## 2     2     2   1   B    
+## 3     1     3   1.5 C    
+## 4     2     4   0.5 A    
+## 5     1     5   1   B    
+## 6     2     6   1.5 C    
+## 7     1     7   0.5 A    
+## 8     2     8   1   B    
+## 9     1     9   1.5 C    
+## # A tibble: 9 x 1
+##      V3
+##   &lt;dbl&gt;
+## 1   0.5
+## 2   1  
+## 3   1.5
+## 4   0.5
+## 5   1  
+## 6   1.5
+## 7   0.5
+## 8   1  
+## 9   1.5
 ## # A tibble: 9 x 1
 ##      V2
 ##   &lt;int&gt;
@@ -1135,18 +1155,6 @@ DF %&gt;% select(one_of(c(&quot;V1&quot;, &quot;X&quot;)))</code></pre>
 ## 7     7
 ## 8     8
 ## 9     9
-## # A tibble: 9 x 2
-##      V1    V2
-##   &lt;int&gt; &lt;int&gt;
-## 1     1     1
-## 2     2     2
-## 3     1     3
-## 4     2     4
-## 5     1     5
-## 6     2     6
-## 7     1     7
-## 8     2     8
-## 9     1     9
 ## # A tibble: 9 x 1
 ##      V1
 ##   &lt;int&gt;
@@ -1162,15 +1170,15 @@ DF %&gt;% select(one_of(c(&quot;V1&quot;, &quot;X&quot;)))</code></pre>
 ## # A tibble: 9 x 3
 ##      V1    V3 V4   
 ##   &lt;int&gt; &lt;dbl&gt; &lt;chr&gt;
-## 1     1 -0.63 A    
-## 2     2  0.18 B    
-## 3     1 -0.84 C    
-## 4     2 -0.63 A    
-## 5     1  0.18 B    
-## 6     2 -0.84 C    
-## 7     1 -0.63 A    
-## 8     2  0.18 B    
-## 9     1 -0.84 C</code></pre>
+## 1     1   0.5 A    
+## 2     2   1   B    
+## 3     1   1.5 C    
+## 4     2   0.5 A    
+## 5     1   1   B    
+## 6     2   1.5 C    
+## 7     1   0.5 A    
+## 8     2   1   B    
+## 9     1   1.5 C</code></pre>
 </td>
 </tr>
 </tbody>
@@ -1198,8 +1206,8 @@ DT[, .(sumV1 = sum(V1))] # returns a data.table</code></pre>
 ## 1:    13</code></pre>
 </td>
 <td align="left">
-<pre class="r"><code>DF %&gt;% summarise(sum(V1)) # returns a tibble
-DF %&gt;% summarise(sumV1 = sum(V1)) # returns a tibble</code></pre>
+<pre class="r"><code>summarise(DF, sum(V1)) # returns a tibble
+summarise(DF, sumV1 = sum(V1)) # returns a tibble</code></pre>
 <pre><code>## # A tibble: 1 x 1
 ##   `sum(V1)`
 ##       &lt;int&gt;
@@ -1221,14 +1229,14 @@ DF %&gt;% summarise(sumV1 = sum(V1)) # returns a tibble</code></pre>
 <td align="left">
 <pre class="r"><code>DT[, .(sum(V1), sd(V3))]</code></pre>
 <pre><code>##    V1        V2
-## 1: 13 0.4664494</code></pre>
+## 1: 13 0.4330127</code></pre>
 </td>
 <td align="left">
-<pre class="r"><code>DF %&gt;% summarise(sum(V1), sd(V3))</code></pre>
+<pre class="r"><code>summarise(DF, sum(V1), sd(V3))</code></pre>
 <pre><code>## # A tibble: 1 x 2
 ##   `sum(V1)` `sd(V3)`
 ##       &lt;int&gt;    &lt;dbl&gt;
-## 1        13    0.466</code></pre>
+## 1        13    0.433</code></pre>
 </td>
 </tr>
 </tbody>
@@ -1240,16 +1248,19 @@ DF %&gt;% summarise(sumV1 = sum(V1)) # returns a tibble</code></pre>
 <tbody>
 <tr>
 <td align="left">
-<pre class="r"><code>DT[, .(sumv1 = sum(V1), sdv3 = sd(V3))]</code></pre>
+<pre class="r"><code>DT[, .(sumv1 = sum(V1),
+       sdv3  = sd(V3))]</code></pre>
 <pre><code>##    sumv1      sdv3
-## 1:    13 0.4664494</code></pre>
+## 1:    13 0.4330127</code></pre>
 </td>
 <td align="left">
-<pre class="r"><code>DF %&gt;% summarise(sumv1 = sum(V1), sdv3 = sd(V3))</code></pre>
+<pre class="r"><code>DF %&gt;%
+  summarise(sumv1 = sum(V1),
+            sdv3  = sd(V3))</code></pre>
 <pre><code>## # A tibble: 1 x 2
 ##   sumv1  sdv3
 ##   &lt;int&gt; &lt;dbl&gt;
-## 1    13 0.466</code></pre>
+## 1    13 0.433</code></pre>
 </td>
 </tr>
 </tbody>
@@ -1265,7 +1276,9 @@ DF %&gt;% summarise(sumV1 = sum(V1)) # returns a tibble</code></pre>
 <pre><code>## [1] 6</code></pre>
 </td>
 <td align="left">
-<pre class="r"><code>DF %&gt;% slice(1:4) %&gt;% summarise(sum(V1))</code></pre>
+<pre class="r"><code>DF %&gt;%
+  slice(1:4) %&gt;%
+  summarise(sum(V1))</code></pre>
 <pre><code>## # A tibble: 1 x 1
 ##   `sum(V1)`
 ##       &lt;int&gt;
@@ -1284,30 +1297,30 @@ DT[, data.table::last(V3)]
 DT[5, V3]
 DT[, uniqueN(V4)]
 uniqueN(DT)</code></pre>
-<pre><code>## [1] -0.63
-## [1] -0.84
-## [1] 0.18
+<pre><code>## [1] 0.5
+## [1] 1.5
+## [1] 1
 ## [1] 3
 ## [1] 9</code></pre>
 </td>
 <td align="left">
-<pre class="r"><code>DF %&gt;% summarise(dplyr::first(V3))
-DF %&gt;% summarise(dplyr::last(V3))
-DF %&gt;% summarise(nth(V3, 5))
-DF %&gt;% summarise(n_distinct(V4))
+<pre class="r"><code>summarise(DF, dplyr::first(V3))
+summarise(DF, dplyr::last(V3))
+summarise(DF, nth(V3, 5))
+summarise(DF, n_distinct(V4))
 n_distinct(DF)</code></pre>
 <pre><code>## # A tibble: 1 x 1
 ##   `dplyr::first(V3)`
 ##                &lt;dbl&gt;
-## 1              -0.63
+## 1                0.5
 ## # A tibble: 1 x 1
 ##   `dplyr::last(V3)`
 ##               &lt;dbl&gt;
-## 1             -0.84
+## 1               1.5
 ## # A tibble: 1 x 1
 ##   `nth(V3, 5)`
 ##          &lt;dbl&gt;
-## 1         0.18
+## 1            1
 ## # A tibble: 1 x 1
 ##   `n_distinct(V4)`
 ##              &lt;int&gt;
@@ -1332,32 +1345,32 @@ n_distinct(DF)</code></pre>
 <td align="left">
 <pre class="r"><code>DT[, V1 := V1^2]
 DT</code></pre>
-<pre><code>##    V1 V2    V3 V4
-## 1:  1  1 -0.63  A
-## 2:  4  2  0.18  B
-## 3:  1  3 -0.84  C
-## 4:  4  4 -0.63  A
-## 5:  1  5  0.18  B
-## 6:  4  6 -0.84  C
-## 7:  1  7 -0.63  A
-## 8:  4  8  0.18  B
-## 9:  1  9 -0.84  C</code></pre>
+<pre><code>##    V1 V2  V3 V4
+## 1:  1  1 0.5  A
+## 2:  4  2 1.0  B
+## 3:  1  3 1.5  C
+## 4:  4  4 0.5  A
+## 5:  1  5 1.0  B
+## 6:  4  6 1.5  C
+## 7:  1  7 0.5  A
+## 8:  4  8 1.0  B
+## 9:  1  9 1.5  C</code></pre>
 </td>
 <td align="left">
-<pre class="r"><code>DF = DF %&gt;% mutate(V1 = V1^2)
+<pre class="r"><code>DF &lt;- DF %&gt;% mutate(V1 = V1^2)
 DF</code></pre>
 <pre><code>## # A tibble: 9 x 4
 ##      V1    V2    V3 V4   
 ##   &lt;dbl&gt; &lt;int&gt; &lt;dbl&gt; &lt;chr&gt;
-## 1     1     1 -0.63 A    
-## 2     4     2  0.18 B    
-## 3     1     3 -0.84 C    
-## 4     4     4 -0.63 A    
-## 5     1     5  0.18 B    
-## 6     4     6 -0.84 C    
-## 7     1     7 -0.63 A    
-## 8     4     8  0.18 B    
-## 9     1     9 -0.84 C</code></pre>
+## 1     1     1   0.5 A    
+## 2     4     2   1   B    
+## 3     1     3   1.5 C    
+## 4     4     4   0.5 A    
+## 5     1     5   1   B    
+## 6     4     6   1.5 C    
+## 7     1     7   0.5 A    
+## 8     4     8   1   B    
+## 9     1     9   1.5 C</code></pre>
 </td>
 </tr>
 </tbody>
@@ -1370,19 +1383,19 @@ DF</code></pre>
 <tr>
 <td align="left">
 <pre class="r"><code>DT[, v5 := log(V1)][] # adding [] prints the result</code></pre>
-<pre><code>##    V1 V2    V3 V4       v5
-## 1:  1  1 -0.63  A 0.000000
-## 2:  4  2  0.18  B 1.386294
-## 3:  1  3 -0.84  C 0.000000
-## 4:  4  4 -0.63  A 1.386294
-## 5:  1  5  0.18  B 0.000000
-## 6:  4  6 -0.84  C 1.386294
-## 7:  1  7 -0.63  A 0.000000
-## 8:  4  8  0.18  B 1.386294
-## 9:  1  9 -0.84  C 0.000000</code></pre>
+<pre><code>##    V1 V2  V3 V4       v5
+## 1:  1  1 0.5  A 0.000000
+## 2:  4  2 1.0  B 1.386294
+## 3:  1  3 1.5  C 0.000000
+## 4:  4  4 0.5  A 1.386294
+## 5:  1  5 1.0  B 0.000000
+## 6:  4  6 1.5  C 1.386294
+## 7:  1  7 0.5  A 0.000000
+## 8:  4  8 1.0  B 1.386294
+## 9:  1  9 1.5  C 0.000000</code></pre>
 </td>
 <td align="left">
-<pre class="r"><code>DF = DF %&gt;% mutate(v5 = log(V1))</code></pre>
+<pre class="r"><code>DF &lt;- mutate(DF, v5 = log(V1))</code></pre>
 </td>
 </tr>
 </tbody>
@@ -1394,12 +1407,13 @@ DF</code></pre>
 <tbody>
 <tr>
 <td align="left">
-<pre class="r"><code>DT[, &#39;:=&#39;(v6 = sqrt(V1), v7 = &quot;X&quot;)] # functional form
-DT[, c(&quot;v6&quot;,&quot;v7&quot;) := .(sqrt(V1), &quot;X&quot;)] # same</code></pre>
+<pre class="r"><code>DT[, c(&quot;v6&quot;, &quot;v7&quot;) := .(sqrt(V1), &quot;X&quot;)]
+
+DT[, &#39;:=&#39;(v6 = sqrt(V1),
+          v7 = &quot;X&quot;)]     # same, functional form</code></pre>
 </td>
 <td align="left">
-<pre class="r"><code>DF = DF %&gt;% mutate(v6 = sqrt(V1), v7 = &quot;X&quot;)
-## recycling</code></pre>
+<pre class="r"><code>DF &lt;- mutate(DF, v6 = sqrt(V1), v7 = &quot;X&quot;)</code></pre>
 </td>
 </tr>
 </tbody>
@@ -1412,31 +1426,31 @@ DT[, c(&quot;v6&quot;,&quot;v7&quot;) := .(sqrt(V1), &quot;X&quot;)] # same</cod
 <tr>
 <td align="left">
 <pre class="r"><code>DT[, .(v8 = V3 + 1)]</code></pre>
-<pre><code>##      v8
-## 1: 0.37
-## 2: 1.18
-## 3: 0.16
-## 4: 0.37
-## 5: 1.18
-## 6: 0.16
-## 7: 0.37
-## 8: 1.18
-## 9: 0.16</code></pre>
+<pre><code>##     v8
+## 1: 1.5
+## 2: 2.0
+## 3: 2.5
+## 4: 1.5
+## 5: 2.0
+## 6: 2.5
+## 7: 1.5
+## 8: 2.0
+## 9: 2.5</code></pre>
 </td>
 <td align="left">
-<pre class="r"><code>DF %&gt;% transmute(v8 = V3 + 1)</code></pre>
+<pre class="r"><code>transmute(DF, v8 = V3 + 1)</code></pre>
 <pre><code>## # A tibble: 9 x 1
 ##      v8
 ##   &lt;dbl&gt;
-## 1  0.37
-## 2  1.18
-## 3  0.16
-## 4  0.37
-## 5  1.18
-## 6  0.16
-## 7  0.37
-## 8  1.18
-## 9  0.16</code></pre>
+## 1   1.5
+## 2   2  
+## 3   2.5
+## 4   1.5
+## 5   2  
+## 6   2.5
+## 7   1.5
+## 8   2  
+## 9   2.5</code></pre>
 </td>
 </tr>
 </tbody>
@@ -1448,10 +1462,10 @@ DT[, c(&quot;v6&quot;,&quot;v7&quot;) := .(sqrt(V1), &quot;X&quot;)] # same</cod
 <tbody>
 <tr>
 <td align="left">
-<pre class="r"><code>DT[, v5 := NULL] </code></pre>
+<pre class="r"><code>DT[, v5 := NULL]</code></pre>
 </td>
 <td align="left">
-<pre class="r"><code>DF = select(DF, -v5)</code></pre>
+<pre class="r"><code>DF &lt;- select(DF, -v5)</code></pre>
 </td>
 </tr>
 </tbody>
@@ -1463,10 +1477,10 @@ DT[, c(&quot;v6&quot;,&quot;v7&quot;) := .(sqrt(V1), &quot;X&quot;)] # same</cod
 <tbody>
 <tr>
 <td align="left">
-<pre class="r"><code>DT[, c(&quot;v6&quot;,&quot;v7&quot;) := NULL]</code></pre>
+<pre class="r"><code>DT[, c(&quot;v6&quot;, &quot;v7&quot;) := NULL]</code></pre>
 </td>
 <td align="left">
-<pre class="r"><code>DF = select(DF, -v6, -v7)</code></pre>
+<pre class="r"><code>DF &lt;- select(DF, -v6, -v7)</code></pre>
 </td>
 </tr>
 </tbody>
@@ -1478,12 +1492,12 @@ DT[, c(&quot;v6&quot;,&quot;v7&quot;) := .(sqrt(V1), &quot;X&quot;)] # same</cod
 <tbody>
 <tr>
 <td align="left">
-<pre class="r"><code>cols = c(&quot;V3&quot;)
+<pre class="r"><code>cols &lt;- c(&quot;V3&quot;)
 DT[, (cols) := NULL] # ! not DT[, cols := NULL]</code></pre>
 </td>
 <td align="left">
-<pre class="r"><code>cols = c(&quot;V3&quot;)
-DF = select(DF, -one_of(cols))</code></pre>
+<pre class="r"><code>cols &lt;- c(&quot;V3&quot;)
+DF &lt;- select(DF, -one_of(cols))</code></pre>
 </td>
 </tr>
 </tbody>
@@ -1509,7 +1523,7 @@ DT</code></pre>
 ## 9:  1  9  C</code></pre>
 </td>
 <td align="left">
-<pre class="r"><code>DF = DF %&gt;% mutate(V2 = base::replace(V2, V2 &lt; 4, 0L))
+<pre class="r"><code>DF &lt;- mutate(DF, V2 = base::replace(V2, V2 &lt; 4, 0L))
 DF</code></pre>
 <pre><code>## # A tibble: 9 x 3
 ##      V1    V2 V4   
@@ -1534,22 +1548,33 @@ DF</code></pre>
 <div id="by" class="section level3">
 <h3>by</h3>
 <p>The <code>dplyr::group_by()</code> function and the corresponding <code>by</code> and <code>keyby</code> statements in data.table allow to run manipulate each group of observations and combine the results. The sole difference between <code>by</code> and <code>keyby</code> is that <code>keyby</code> orders the results and creates a <code>key</code> that will allow faster subsetting (cf. the <a href="#indexing-and-keys">indexing and keys</a> section). Below, we arbitrary use one or the other.<br />
-Again, the <code>all-at-if</code> variants of <code>group_by()</code> are available in dplyr but not presented here.</p>
+Again, the <code>all-at-if</code> variants of <code>group_by()</code> are available in dplyr but not presented here.<br />
+Note that it is possible to reorder the arguments in data.table: <code>DT[i, j, by] == DT[i, by, j]</code>. This is was is done below to better highlight the similarity with dplyr.</p>
 <div id="by-group" class="section level4">
 <h4>By group</h4>
 <table class="table table-condensed">
 <tbody>
 <tr>
 <td align="left">
-<pre class="r"><code>DT[, .(sumV2 = sum(V2)), by = V4]
-# DT[, .(sumV2 = sum(V2)), by = &quot;V4&quot;]</code></pre>
+<pre class="r"><code># one-liner:
+DT[, .(sumV2 = sum(V2)), by = &quot;V4&quot;]
+# reordered and indented:
+DT[, by = V4,
+     .(sumV2 = sum(V2))]
+# </code></pre>
 <pre><code>##    V4 sumV2
+## 1:  A    11
+## 2:  B    13
+## 3:  C    15
+##    V4 sumV2
 ## 1:  A    11
 ## 2:  B    13
 ## 3:  C    15</code></pre>
 </td>
 <td align="left">
-<pre class="r"><code>DF %&gt;% group_by(V4) %&gt;% summarise(sumV2 = sum(V2))</code></pre>
+<pre class="r"><code>DF %&gt;%
+  group_by(V4) %&gt;%
+  summarise(sumV2 = sum(V2))</code></pre>
 <pre><code>## # A tibble: 3 x 2
 ##   V4    sumV2
 ##   &lt;chr&gt; &lt;int&gt;
@@ -1567,7 +1592,8 @@ Again, the <code>all-at-if</code> variants of <code>group_by()</code> are availa
 <tbody>
 <tr>
 <td align="left">
-<pre class="r"><code>DT[, .(sumV2 = sum(V2)), keyby = .(V4, V1)]</code></pre>
+<pre class="r"><code>DT[, keyby = .(V4, V1),
+     .(sumV2 = sum(V2))]</code></pre>
 <pre><code>##    V4 V1 sumV2
 ## 1:  A  1     7
 ## 2:  A  4     4
@@ -1577,7 +1603,9 @@ Again, the <code>all-at-if</code> variants of <code>group_by()</code> are availa
 ## 6:  C  4     6</code></pre>
 </td>
 <td align="left">
-<pre class="r"><code>DF %&gt;% group_by(V4, V1) %&gt;% summarise(sumV2 = sum(V2))</code></pre>
+<pre class="r"><code>DF %&gt;%
+  group_by(V4, V1) %&gt;%
+  summarise(sumV2 = sum(V2))</code></pre>
 <pre><code>## # A tibble: 6 x 3
 ## # Groups:   V4 [3]
 ##   V4       V1 sumV2
@@ -1599,14 +1627,17 @@ Again, the <code>all-at-if</code> variants of <code>group_by()</code> are availa
 <tbody>
 <tr>
 <td align="left">
-<pre class="r"><code>DT[, .(sumV1 = sum(V1)), by = tolower(V4)]</code></pre>
+<pre class="r"><code>DT[, by = tolower(V4),
+     .(sumV1 = sum(V1))]</code></pre>
 <pre><code>##    tolower sumV1
 ## 1:       a     6
 ## 2:       b     9
 ## 3:       c     6</code></pre>
 </td>
 <td align="left">
-<pre class="r"><code>DF %&gt;% group_by(tolower(V4)) %&gt;% summarise(sumV1 = sum(V1))</code></pre>
+<pre class="r"><code>DF %&gt;%
+  group_by(tolower(V4)) %&gt;%
+  summarise(sumV1 = sum(V1))</code></pre>
 <pre><code>## # A tibble: 3 x 2
 ##   `tolower(V4)` sumV1
 ##   &lt;chr&gt;         &lt;dbl&gt;
@@ -1624,14 +1655,17 @@ Again, the <code>all-at-if</code> variants of <code>group_by()</code> are availa
 <tbody>
 <tr>
 <td align="left">
-<pre class="r"><code>DT[, .(sumV1 = sum(V1)), keyby = .(abc = tolower(V4))]</code></pre>
+<pre class="r"><code>DT[, keyby = .(abc = tolower(V4)),
+     .(sumV1 = sum(V1))]</code></pre>
 <pre><code>##    abc sumV1
 ## 1:   a     6
 ## 2:   b     9
 ## 3:   c     6</code></pre>
 </td>
 <td align="left">
-<pre class="r"><code>DF %&gt;% group_by(abc = tolower(V4)) %&gt;% summarise(sumV1 = sum(V1))</code></pre>
+<pre class="r"><code>DF %&gt;%
+  group_by(abc = tolower(V4)) %&gt;%
+  summarise(sumV1 = sum(V1))</code></pre>
 <pre><code>## # A tibble: 3 x 2
 ##   abc   sumV1
 ##   &lt;chr&gt; &lt;dbl&gt;
@@ -1649,13 +1683,16 @@ Again, the <code>all-at-if</code> variants of <code>group_by()</code> are availa
 <tbody>
 <tr>
 <td align="left">
-<pre class="r"><code>DT[, sum(V1), keyby = V4 == &quot;A&quot;]</code></pre>
+<pre class="r"><code>DT[, keyby = V4 == &quot;A&quot;,
+     sum(V1)]</code></pre>
 <pre><code>##       V4 V1
 ## 1: FALSE 15
 ## 2:  TRUE  6</code></pre>
 </td>
 <td align="left">
-<pre class="r"><code>DF %&gt;% group_by(V4 == &quot;A&quot;) %&gt;% summarise(sum(V1))</code></pre>
+<pre class="r"><code>DF %&gt;%
+  group_by(V4 == &quot;A&quot;) %&gt;%
+  summarise(sum(V1))</code></pre>
 <pre><code>## # A tibble: 2 x 2
 ##   `V4 == &quot;A&quot;` `sum(V1)`
 ##   &lt;lgl&gt;           &lt;dbl&gt;
@@ -1672,7 +1709,9 @@ Again, the <code>all-at-if</code> variants of <code>group_by()</code> are availa
 <tbody>
 <tr>
 <td align="left">
-<pre class="r"><code>DT[1:5, .(sumV1 = sum(V1)), by = V4]
+<pre class="r"><code>DT[1:5,                # i
+   .(sumV1 = sum(V1)), # j
+   by = V4]            # by
 ## complete DT[i, j, by] expression!</code></pre>
 <pre><code>##    V4 sumV1
 ## 1:  A     5
@@ -1680,7 +1719,10 @@ Again, the <code>all-at-if</code> variants of <code>group_by()</code> are availa
 ## 3:  C     1</code></pre>
 </td>
 <td align="left">
-<pre class="r"><code>DF %&gt;% slice(1:5) %&gt;% group_by(V4) %&gt;% summarise(sumV1 = sum(V1))</code></pre>
+<pre class="r"><code>DF %&gt;%
+  slice(1:5) %&gt;%
+  group_by(V4) %&gt;%
+  summarise(sumV1 = sum(V1))</code></pre>
 <pre><code>## # A tibble: 3 x 2
 ##   V4    sumV1
 ##   &lt;chr&gt; &lt;dbl&gt;
@@ -1705,10 +1747,16 @@ Again, the <code>all-at-if</code> variants of <code>group_by()</code> are availa
 ## 3:  C 3</code></pre>
 </td>
 <td align="left">
-<pre class="r"><code>DF %&gt;% group_by(V4) %&gt;% tally()
-DF %&gt;% count(V4) # same
-DF %&gt;% group_by(V4) %&gt;% summarise(n())
-DF %&gt;% group_by(V4) %&gt;% group_size() # returns a vector</code></pre>
+<pre class="r"><code>count(DF, V4)
+DF %&gt;%
+  group_by(V4) %&gt;%
+  tally()
+DF %&gt;%
+  group_by(V4) %&gt;%
+  summarise(n())
+DF %&gt;%
+  group_by(V4) %&gt;%
+  group_size() # returns a vector</code></pre>
 <pre><code>## # A tibble: 3 x 2
 ##   V4        n
 ##   &lt;chr&gt; &lt;int&gt;
@@ -1753,10 +1801,11 @@ DT[, n := NULL] # rm column for consistency</code></pre>
 ## 9:  1  9  C 5</code></pre>
 </td>
 <td align="left">
-<pre class="r"><code>DF %&gt;% group_by(V1) %&gt;% add_tally()
-DF %&gt;% add_count(V1)</code></pre>
+<pre class="r"><code>add_count(DF, V1)
+DF %&gt;%
+  group_by(V1) %&gt;%
+  add_tally()</code></pre>
 <pre><code>## # A tibble: 9 x 4
-## # Groups:   V1 [2]
 ##      V1    V2 V4        n
 ##   &lt;dbl&gt; &lt;int&gt; &lt;chr&gt; &lt;int&gt;
 ## 1     1     0 A         5
@@ -1769,6 +1818,7 @@ DF %&gt;% add_count(V1)</code></pre>
 ## 8     4     8 B         4
 ## 9     1     9 C         5
 ## # A tibble: 9 x 4
+## # Groups:   V1 [2]
 ##      V1    V2 V4        n
 ##   &lt;dbl&gt; &lt;int&gt; &lt;chr&gt; &lt;int&gt;
 ## 1     1     0 A         5
@@ -1808,9 +1858,15 @@ DT[, V2[2], by = V4]</code></pre>
 ## 3:  C  6</code></pre>
 </td>
 <td align="left">
-<pre class="r"><code>DF %&gt;% group_by(V4) %&gt;% summarise(dplyr::first(V2))
-DF %&gt;% group_by(V4) %&gt;% summarise(dplyr::last(V2))
-DF %&gt;% group_by(V4) %&gt;% summarise(dplyr::nth(V2,2))</code></pre>
+<pre class="r"><code>DF %&gt;%
+  group_by(V4) %&gt;%
+  summarise(dplyr::first(V2))
+DF %&gt;%
+  group_by(V4) %&gt;%
+  summarise(dplyr::last(V2))
+DF %&gt;%
+  group_by(V4) %&gt;%
+  summarise(dplyr::nth(V2, 2))</code></pre>
 <pre><code>## # A tibble: 3 x 2
 ##   V4    `dplyr::first(V2)`
 ##   &lt;chr&gt;              &lt;int&gt;
@@ -1858,7 +1914,7 @@ With data.table, we use <code>.SD</code>, which is a <code>data.table</code> con
 ## 1:  4  9  C</code></pre>
 </td>
 <td align="left">
-<pre class="r"><code>DF %&gt;% summarise_all(max)</code></pre>
+<pre class="r"><code>summarise_all(DF, max)</code></pre>
 <pre><code>## # A tibble: 1 x 3
 ##      V1    V2 V4   
 ##   &lt;dbl&gt; &lt;dbl&gt; &lt;chr&gt;
@@ -1874,15 +1930,13 @@ With data.table, we use <code>.SD</code>, which is a <code>data.table</code> con
 <tbody>
 <tr>
 <td align="left">
-<pre class="r"><code>DT[, lapply(.SD, mean), .SDcols = c(&quot;V1&quot;, &quot;V2&quot;)]
-DT[, lapply(.SD[,.(V1,V2)], mean)] # same</code></pre>
+<pre class="r"><code>DT[, lapply(.SD, mean),
+     .SDcols = c(&quot;V1&quot;, &quot;V2&quot;)] # .SDcols is like &quot;_at&quot;</code></pre>
 <pre><code>##          V1       V2
-## 1: 2.333333 4.333333
-##          V1       V2
 ## 1: 2.333333 4.333333</code></pre>
 </td>
 <td align="left">
-<pre class="r"><code>DF %&gt;% summarise_at(c(&quot;V1&quot;, &quot;V2&quot;), mean)</code></pre>
+<pre class="r"><code>summarise_at(DF, c(&quot;V1&quot;, &quot;V2&quot;), mean)</code></pre>
 <pre><code>## # A tibble: 1 x 2
 ##      V1    V2
 ##   &lt;dbl&gt; &lt;dbl&gt;
@@ -1898,9 +1952,13 @@ DT[, lapply(.SD[,.(V1,V2)], mean)] # same</code></pre>
 <tbody>
 <tr>
 <td align="left">
-<pre class="r"><code>DT[, lapply(.SD, mean), by = V4, .SDcols = c(&quot;V1&quot;, &quot;V2&quot;)]
+<pre class="r"><code>DT[, by = V4,
+     lapply(.SD, mean),
+     .SDcols = c(&quot;V1&quot;, &quot;V2&quot;)]
 ## using patterns (regex)
-DT[, lapply(.SD, mean), by = V4, .SDcols = patterns(&quot;V1|V2&quot;)]</code></pre>
+DT[, by = V4,
+     lapply(.SD, mean),
+     .SDcols = patterns(&quot;V1|V2&quot;)]</code></pre>
 <pre><code>##    V4 V1       V2
 ## 1:  A  2 3.666667
 ## 2:  B  3 4.333333
@@ -1911,9 +1969,13 @@ DT[, lapply(.SD, mean), by = V4, .SDcols = patterns(&quot;V1|V2&quot;)]</code></
 ## 3:  C  2 5.000000</code></pre>
 </td>
 <td align="left">
-<pre class="r"><code>DF %&gt;% group_by(V4) %&gt;% summarise_at(c(&quot;V1&quot;,&quot;V2&quot;), mean)
+<pre class="r"><code>DF %&gt;%
+  group_by(V4) %&gt;%
+  summarise_at(c(&quot;V1&quot;, &quot;V2&quot;), mean)
 ## using select helpers
-DF %&gt;% group_by(V4) %&gt;% summarise_at(vars(one_of(&quot;V1&quot;, &quot;V2&quot;)), mean)</code></pre>
+DF %&gt;%
+  group_by(V4) %&gt;%
+  summarise_at(vars(one_of(&quot;V1&quot;, &quot;V2&quot;)), mean)</code></pre>
 <pre><code>## # A tibble: 3 x 3
 ##   V4       V1    V2
 ##   &lt;chr&gt; &lt;dbl&gt; &lt;dbl&gt;
@@ -1937,14 +1999,19 @@ DF %&gt;% group_by(V4) %&gt;% summarise_at(vars(one_of(&quot;V1&quot;, &quot;V2&
 <tbody>
 <tr>
 <td align="left">
-<pre class="r"><code>DT[, c(lapply(.SD, sum), lapply(.SD, mean)), by = V4]</code></pre>
+<pre class="r"><code>DT[, by = V4, 
+     c(lapply(.SD, sum),
+       lapply(.SD, mean))]</code></pre>
 <pre><code>##    V4 V1 V2 V1       V2
 ## 1:  A  6 11  2 3.666667
 ## 2:  B  9 13  3 4.333333
 ## 3:  C  6 15  2 5.000000</code></pre>
 </td>
 <td align="left">
-<pre class="r"><code>DF %&gt;% group_by(V4) %&gt;% summarise_all(list(sum, mean)) # columns named automatically</code></pre>
+<pre class="r"><code>DF %&gt;%
+  group_by(V4) %&gt;%
+  summarise_all(list(sum, mean))
+# columns named automatically</code></pre>
 <pre><code>## # A tibble: 3 x 5
 ##   V4    V1_fn1 V2_fn1 V1_fn2 V2_fn2
 ##   &lt;chr&gt;  &lt;dbl&gt;  &lt;int&gt;  &lt;dbl&gt;  &lt;dbl&gt;
@@ -1962,13 +2029,14 @@ DF %&gt;% group_by(V4) %&gt;% summarise_at(vars(one_of(&quot;V1&quot;, &quot;V2&
 <tbody>
 <tr>
 <td align="left">
-<pre class="r"><code>cols = names(DT)[sapply(DT, is.numeric)]
-DT[, lapply(.SD, mean), .SDcols = cols]</code></pre>
+<pre class="r"><code>cols &lt;- names(DT)[sapply(DT, is.numeric)]
+DT[, lapply(.SD, mean),
+     .SDcols = cols]</code></pre>
 <pre><code>##          V1       V2
 ## 1: 2.333333 4.333333</code></pre>
 </td>
 <td align="left">
-<pre class="r"><code>DF %&gt;% summarise_if(is.numeric, mean)</code></pre>
+<pre class="r"><code>summarise_if(DF, is.numeric, mean)</code></pre>
 <pre><code>## # A tibble: 1 x 2
 ##      V1    V2
 ##   &lt;dbl&gt; &lt;dbl&gt;
@@ -1997,8 +2065,8 @@ DT[, lapply(.SD, mean), .SDcols = cols]</code></pre>
 ## 9:  1  0  A</code></pre>
 </td>
 <td align="left">
-<pre class="r"><code>DF %&gt;% mutate_all(rev)
-#DF %&gt;% transmute_all(rev)</code></pre>
+<pre class="r"><code>mutate_all(DF, rev)
+# transmute_all(DF, rev)</code></pre>
 <pre><code>## # A tibble: 9 x 3
 ##      V1    V2 V4   
 ##   &lt;dbl&gt; &lt;int&gt; &lt;chr&gt;
@@ -2022,8 +2090,10 @@ DT[, lapply(.SD, mean), .SDcols = cols]</code></pre>
 <tbody>
 <tr>
 <td align="left">
-<pre class="r"><code>DT[, lapply(.SD, sqrt), .SDcols = V1:V2]
-DT[, lapply(.SD, exp), .SDcols = !&quot;V4&quot;]</code></pre>
+<pre class="r"><code>DT[, lapply(.SD, sqrt),
+     .SDcols = V1:V2]
+DT[, lapply(.SD, exp),
+     .SDcols = !&quot;V4&quot;]</code></pre>
 <pre><code>##    V1       V2
 ## 1:  1 0.000000
 ## 2:  2 0.000000
@@ -2046,8 +2116,8 @@ DT[, lapply(.SD, exp), .SDcols = !&quot;V4&quot;]</code></pre>
 ## 9:  2.718282 8103.08393</code></pre>
 </td>
 <td align="left">
-<pre class="r"><code>DF %&gt;% transmute_at(c(&quot;V1&quot;, &quot;V2&quot;), sqrt)
-DF %&gt;% transmute_at(vars(-V4), exp)</code></pre>
+<pre class="r"><code>transmute_at(DF, c(&quot;V1&quot;, &quot;V2&quot;), sqrt)
+transmute_at(DF, vars(-V4), exp)</code></pre>
 <pre><code>## # A tibble: 9 x 2
 ##      V1    V2
 ##   &lt;dbl&gt; &lt;dbl&gt;
@@ -2083,13 +2153,16 @@ DF %&gt;% transmute_at(vars(-V4), exp)</code></pre>
 <tbody>
 <tr>
 <td align="left">
-<pre class="r"><code>DT[, c(&quot;V1&quot;, &quot;V2&quot;) := lapply(.SD, &quot;+&quot;, 1L), .SDcols = c(&quot;V1&quot;, &quot;V2&quot;)]
-cols = setdiff(names(DT), &quot;V4&quot;)
-DT[, (cols) := lapply(.SD, &quot;-&quot;, 1L), .SDcols = cols]</code></pre>
+<pre class="r"><code>DT[, c(&quot;V1&quot;, &quot;V2&quot;) := lapply(.SD, sqrt),
+     .SDcols = c(&quot;V1&quot;, &quot;V2&quot;)]
+
+cols &lt;- setdiff(names(DT), &quot;V4&quot;)
+DT[, (cols) := lapply(.SD, &quot;^&quot;, 2L),
+     .SDcols = cols]</code></pre>
 </td>
 <td align="left">
-<pre class="r"><code>DF = DF %&gt;% mutate_at(c(&quot;V1&quot;, &quot;V2&quot;), &quot;+&quot;, 1L)
-DF = DF %&gt;% mutate_at(vars(-V4), &quot;-&quot;, 1L)</code></pre>
+<pre class="r"><code>DF &lt;- mutate_at(DF, c(&quot;V1&quot;, &quot;V2&quot;), sqrt)
+DF &lt;- mutate_at(DF, vars(-V4), &quot;^&quot;, 2L)</code></pre>
 </td>
 </tr>
 </tbody>
@@ -2101,8 +2174,9 @@ DF = DF %&gt;% mutate_at(vars(-V4), &quot;-&quot;, 1L)</code></pre>
 <tbody>
 <tr>
 <td align="left">
-<pre class="r"><code>cols = names(DT)[sapply(DT, is.numeric)]
-DT[, .SD - 1, .SDcols = cols]</code></pre>
+<pre class="r"><code>cols &lt;- names(DT)[sapply(DT, is.numeric)]
+DT[, .SD - 1,
+     .SDcols = cols]</code></pre>
 <pre><code>##    V1 V2
 ## 1:  0 -1
 ## 2:  3 -1
@@ -2115,19 +2189,19 @@ DT[, .SD - 1, .SDcols = cols]</code></pre>
 ## 9:  0  8</code></pre>
 </td>
 <td align="left">
-<pre class="r"><code>DF %&gt;% transmute_if(is.numeric, list(~&#39;-&#39;(., 1L)))</code></pre>
+<pre class="r"><code>transmute_if(DF, is.numeric, list(~ &#39;-&#39;(., 1L)))</code></pre>
 <pre><code>## # A tibble: 9 x 2
 ##      V1    V2
-##   &lt;dbl&gt; &lt;int&gt;
-## 1     0    -1
-## 2     3    -1
-## 3     0    -1
-## 4     3     3
-## 5     0     4
-## 6     3     5
-## 7     0     6
-## 8     3     7
-## 9     0     8</code></pre>
+##   &lt;dbl&gt; &lt;dbl&gt;
+## 1     0 -1   
+## 2     3 -1   
+## 3     0 -1   
+## 4     3  3   
+## 5     0  4.  
+## 6     3  5.00
+## 7     0  6.  
+## 8     3  7.  
+## 9     0  8</code></pre>
 </td>
 </tr>
 </tbody>
@@ -2139,10 +2213,11 @@ DT[, .SD - 1, .SDcols = cols]</code></pre>
 <tbody>
 <tr>
 <td align="left">
-<pre class="r"><code>DT[, (cols) := lapply(.SD, as.integer), .SDcols = cols]</code></pre>
+<pre class="r"><code>DT[, (cols) := lapply(.SD, as.integer),
+     .SDcols = cols]</code></pre>
 </td>
 <td align="left">
-<pre class="r"><code>DF = DF %&gt;% mutate_if(is.numeric, as.integer)</code></pre>
+<pre class="r"><code>DF &lt;- mutate_if(DF, is.numeric, as.integer)</code></pre>
 </td>
 </tr>
 </tbody>
@@ -2155,7 +2230,8 @@ DT[, .SD - 1, .SDcols = cols]</code></pre>
 <tbody>
 <tr>
 <td align="left">
-<pre class="r"><code>DT[, .(V1[1:2], &quot;X&quot;), by = V4]</code></pre>
+<pre class="r"><code>DT[, by = V4,
+     .(V1[1:2], &quot;X&quot;)]</code></pre>
 <pre><code>##    V4 V1 V2
 ## 1:  A  1  X
 ## 2:  A  4  X
@@ -2165,7 +2241,11 @@ DT[, .SD - 1, .SDcols = cols]</code></pre>
 ## 6:  C  4  X</code></pre>
 </td>
 <td align="left">
-<pre class="r"><code>DF %&gt;% group_by(V4) %&gt;% slice(1:2) %&gt;% transmute(V1 = V1, V2 = &quot;X&quot;)</code></pre>
+<pre class="r"><code>DF %&gt;%
+  group_by(V4) %&gt;%
+  slice(1:2) %&gt;%
+  transmute(V1 = V1,
+            V2 = &quot;X&quot;)</code></pre>
 <pre><code>## # A tibble: 6 x 3
 ## # Groups:   V4 [3]
 ##   V4       V1 V2   
@@ -2187,27 +2267,27 @@ DT[, .SD - 1, .SDcols = cols]</code></pre>
 <tbody>
 <tr>
 <td align="left">
-<pre class="r"><code>DT[,{print(V1) #  comments here!
-     print(summary(V1))
-     x = V1 + sum(V2)
+<pre class="r"><code>DT[, {print(V1) #  comments here!
+      print(summary(V1))
+      x &lt;- V1 + sum(V2)
      .(A = 1:.N, B = x) # last list returned as a data.table
-    }]</code></pre>
+     }]</code></pre>
 <pre><code>## [1] 1 4 1 4 1 4 1 4 1
 ##    Min. 1st Qu.  Median    Mean 3rd Qu.    Max. 
 ##   1.000   1.000   1.000   2.333   4.000   4.000 
 ##    A  B
-## 1: 1 40
-## 2: 2 43
-## 3: 3 40
-## 4: 4 43
-## 5: 5 40
-## 6: 6 43
-## 7: 7 40
-## 8: 8 43
-## 9: 9 40</code></pre>
+## 1: 1 39
+## 2: 2 42
+## 3: 3 39
+## 4: 4 42
+## 5: 5 39
+## 6: 6 42
+## 7: 7 39
+## 8: 8 42
+## 9: 9 39</code></pre>
 </td>
 <td align="left">
-<pre class="r"><code>## </code></pre>
+<pre class="r"><code>#</code></pre>
 </td>
 </tr>
 </tbody>
@@ -2225,15 +2305,19 @@ DT[, .SD - 1, .SDcols = cols]</code></pre>
 <tbody>
 <tr>
 <td align="left">
-<pre class="r"><code>DT[, .(V1sum = sum(V1)), by = V4][
-  V1sum &gt; 5]</code></pre>
+<pre class="r"><code>DT[, by = V4, 
+     .(V1sum = sum(V1)) ][
+     V1sum &gt; 5]</code></pre>
 <pre><code>##    V4 V1sum
 ## 1:  A     6
 ## 2:  B     9
 ## 3:  C     6</code></pre>
 </td>
 <td align="left">
-<pre class="r"><code>DF %&gt;% group_by(V4) %&gt;% summarise(V1sum = sum(V1)) %&gt;% filter(V1sum &gt; 5)</code></pre>
+<pre class="r"><code>DF %&gt;%
+  group_by(V4) %&gt;%
+  summarise(V1sum = sum(V1)) %&gt;%
+  filter(V1sum &gt; 5)</code></pre>
 <pre><code>## # A tibble: 3 x 2
 ##   V4    V1sum
 ##   &lt;chr&gt; &lt;int&gt;
@@ -2251,14 +2335,19 @@ DT[, .SD - 1, .SDcols = cols]</code></pre>
 <tbody>
 <tr>
 <td align="left">
-<pre class="r"><code>DT[, .(V1sum = sum(V1)), by = V4] %&gt;% .[order(-V1sum)]</code></pre>
+<pre class="r"><code>DT[, by = V4, 
+     .(V1sum = sum(V1))] %&gt;%
+  .[order(-V1sum)]</code></pre>
 <pre><code>##    V4 V1sum
 ## 1:  B     9
 ## 2:  A     6
 ## 3:  C     6</code></pre>
 </td>
 <td align="left">
-<pre class="r"><code>DF %&gt;% group_by(V4) %&gt;% summarise(V1sum = sum(V1)) %&gt;% arrange(desc(V1sum))</code></pre>
+<pre class="r"><code>DF %&gt;%
+  group_by(V4) %&gt;%
+  summarise(V1sum = sum(V1)) %&gt;%
+  arrange(desc(V1sum))</code></pre>
 <pre><code>## # A tibble: 3 x 2
 ##   V4    V1sum
 ##   &lt;chr&gt; &lt;int&gt;
@@ -2288,11 +2377,11 @@ Note: in the following code, we set both a key and an index to demonstrate their
 <tbody>
 <tr>
 <td align="left">
-<pre class="r"><code>setkey(DT,V4)
+<pre class="r"><code>setkey(DT, V4)
 setindex(DT, V4)</code></pre>
 </td>
 <td align="left">
-<pre class="r"><code>DF = DF %&gt;% arrange(V4) # ordered just for consistency</code></pre>
+<pre class="r"><code>DF &lt;- arrange(DF, V4) # ordered just for consistency</code></pre>
 </td>
 </tr>
 </tbody>
@@ -2305,7 +2394,7 @@ setindex(DT, V4)</code></pre>
 <tr>
 <td align="left">
 <pre class="r"><code>DT[&quot;A&quot;, on = &quot;V4&quot;]
-DT[c(&quot;A&quot;,&quot;C&quot;), on = .(V4)] # same as on = &quot;V4&quot;</code></pre>
+DT[c(&quot;A&quot;, &quot;C&quot;), on = .(V4)] # same as on = &quot;V4&quot;</code></pre>
 <pre><code>##    V1 V2 V4
 ## 1:  1  0  A
 ## 2:  4  4  A
@@ -2315,12 +2404,12 @@ DT[c(&quot;A&quot;,&quot;C&quot;), on = .(V4)] # same as on = &quot;V4&quot;</co
 ## 2:  4  4  A
 ## 3:  1  7  A
 ## 4:  1  0  C
-## 5:  4  6  C
+## 5:  4  5  C
 ## 6:  1  9  C</code></pre>
 </td>
 <td align="left">
 <pre class="r"><code>filter(DF, V4 == &quot;A&quot;)
-filter(DF, V4 %in% c(&quot;A&quot;, &quot;C&quot;)) %&gt;% arrange(V4)</code></pre>
+filter(DF, V4 %in% c(&quot;A&quot;, &quot;C&quot;))</code></pre>
 <pre><code>## # A tibble: 3 x 3
 ##      V1    V2 V4   
 ##   &lt;int&gt; &lt;int&gt; &lt;chr&gt;
@@ -2334,7 +2423,7 @@ filter(DF, V4 %in% c(&quot;A&quot;, &quot;C&quot;)) %&gt;% arrange(V4)</code></p
 ## 2     4     4 A    
 ## 3     1     7 A    
 ## 4     1     0 C    
-## 5     4     6 C    
+## 5     4     5 C    
 ## 6     1     9 C</code></pre>
 </td>
 </tr>
@@ -2356,7 +2445,9 @@ DT[c(&quot;B&quot;, &quot;C&quot;), on = &quot;V4&quot;, mult = &quot;first&quot
 ## 2:  1  0  C</code></pre>
 </td>
 <td align="left">
-<pre class="r"><code>DF %&gt;% filter(V4 == &quot;B&quot;) %&gt;% slice(1)
+<pre class="r"><code>DF %&gt;%
+  filter(V4 == &quot;B&quot;) %&gt;%
+  slice(1)
 # ?</code></pre>
 <pre><code>## # A tibble: 1 x 3
 ##      V1    V2 V4   
@@ -2378,7 +2469,9 @@ DT[c(&quot;B&quot;, &quot;C&quot;), on = &quot;V4&quot;, mult = &quot;first&quot
 ## 1:  1  7  A</code></pre>
 </td>
 <td align="left">
-<pre class="r"><code>DF %&gt;% filter(V4 == &quot;A&quot;) %&gt;% slice(n())</code></pre>
+<pre class="r"><code>DF %&gt;%
+  filter(V4 == &quot;A&quot;) %&gt;%
+  slice(n())</code></pre>
 <pre><code>## # A tibble: 1 x 3
 ##      V1    V2 V4   
 ##   &lt;int&gt; &lt;int&gt; &lt;chr&gt;
@@ -2394,8 +2487,10 @@ DT[c(&quot;B&quot;, &quot;C&quot;), on = &quot;V4&quot;, mult = &quot;first&quot
 <tbody>
 <tr>
 <td align="left">
-<pre class="r"><code>DT[c(&quot;A&quot;,&quot;D&quot;), on = &quot;V4&quot;, nomatch = NA] # (default) returns a row with &quot;D&quot; even if not found
-DT[c(&quot;A&quot;,&quot;D&quot;), on = &quot;V4&quot;, nomatch = 0] # no rows for unmatched values</code></pre>
+<pre class="r"><code># (default) returns a row with &quot;D&quot; even if not found
+DT[c(&quot;A&quot;, &quot;D&quot;), on = &quot;V4&quot;, nomatch = NA]
+# no rows for unmatched values
+DT[c(&quot;A&quot;, &quot;D&quot;), on = &quot;V4&quot;, nomatch = 0]</code></pre>
 <pre><code>##    V1 V2 V4
 ## 1:  1  0  A
 ## 2:  4  4  A
@@ -2407,8 +2502,8 @@ DT[c(&quot;A&quot;,&quot;D&quot;), on = &quot;V4&quot;, nomatch = 0] # no rows f
 ## 3:  1  7  A</code></pre>
 </td>
 <td align="left">
-<pre class="r"><code>##  -
-DF %&gt;% filter(V4 %in% c(&quot;A&quot;, &quot;D&quot;))</code></pre>
+<pre class="r"><code>#
+filter(DF, V4 %in% c(&quot;A&quot;, &quot;D&quot;))</code></pre>
 <pre><code>## # A tibble: 3 x 3
 ##      V1    V2 V4   
 ##   &lt;int&gt; &lt;int&gt; &lt;chr&gt;
@@ -2426,11 +2521,13 @@ DF %&gt;% filter(V4 %in% c(&quot;A&quot;, &quot;D&quot;))</code></pre>
 <tbody>
 <tr>
 <td align="left">
-<pre class="r"><code>DT[c(&quot;A&quot;,&quot;C&quot;), sum(V1), on = &quot;V4&quot;]</code></pre>
+<pre class="r"><code>DT[c(&quot;A&quot;, &quot;C&quot;), sum(V1), on = &quot;V4&quot;]</code></pre>
 <pre><code>## [1] 12</code></pre>
 </td>
 <td align="left">
-<pre class="r"><code>DF  %&gt;% filter(V4 %in% c(&quot;A&quot;, &quot;C&quot;)) %&gt;% summarise(sum(V1))</code></pre>
+<pre class="r"><code>DF %&gt;%
+  filter(V4 %in% c(&quot;A&quot;, &quot;C&quot;)) %&gt;%
+  summarise(sum(V1))</code></pre>
 <pre><code>## # A tibble: 1 x 1
 ##   `sum(V1)`
 ##       &lt;int&gt;
@@ -2456,11 +2553,13 @@ DT</code></pre>
 ## 5:  1  5  B
 ## 6:  4  8  B
 ## 7:  1  0  C
-## 8:  4  6  C
+## 8:  4  5  C
 ## 9:  1  9  C</code></pre>
 </td>
 <td align="left">
-<pre class="r"><code>DF = DF %&gt;% mutate(V1 = base::replace(V1, V4 == &quot;A&quot;, 0L)) %&gt;% arrange(V4)
+<pre class="r"><code>DF &lt;- DF %&gt;%
+  mutate(V1 = base::replace(V1, V4 == &quot;A&quot;, 0L)) %&gt;%
+  arrange(V4)
 DF</code></pre>
 <pre><code>## # A tibble: 9 x 3
 ##      V1    V2 V4   
@@ -2472,7 +2571,7 @@ DF</code></pre>
 ## 5     1     5 B    
 ## 6     4     8 B    
 ## 7     1     0 C    
-## 8     4     6 C    
+## 8     4     5 C    
 ## 9     1     9 C</code></pre>
 </td>
 </tr>
@@ -2486,7 +2585,9 @@ DF</code></pre>
 <tr>
 <td align="left">
 <pre class="r"><code>DT[!&quot;B&quot;, sum(V1), on = &quot;V4&quot;, by = .EACHI]
-DT[V4 != &quot;B&quot;, sum(V1), by = V4] # same</code></pre>
+DT[V4 != &quot;B&quot;,
+   by = V4,
+   sum(V1)]   # same</code></pre>
 <pre><code>##    V4 V1
 ## 1:  A  0
 ## 2:  C  6
@@ -2495,7 +2596,10 @@ DT[V4 != &quot;B&quot;, sum(V1), by = V4] # same</code></pre>
 ## 2:  C  6</code></pre>
 </td>
 <td align="left">
-<pre class="r"><code>DF %&gt;% filter(V4 != &quot;B&quot;) %&gt;% group_by(V4) %&gt;% summarise(sum(V1))</code></pre>
+<pre class="r"><code>DF %&gt;%
+  filter(V4 != &quot;B&quot;) %&gt;%
+  group_by(V4) %&gt;%
+  summarise(sum(V1))</code></pre>
 <pre><code>## # A tibble: 2 x 2
 ##   V4    `sum(V1)`
 ##   &lt;chr&gt;     &lt;int&gt;
@@ -2516,7 +2620,7 @@ DT[V4 != &quot;B&quot;, sum(V1), by = V4] # same</code></pre>
 setindex(DT, V4, V1) # setindexv(DT, c(&quot;V4&quot;, &quot;V1&quot;))</code></pre>
 </td>
 <td align="left">
-<pre class="r"><code>#</code></pre>
+<pre class="r"><code>DF &lt;- arrange(DF, V4, V1) # ordered just for consistency</code></pre>
 </td>
 </tr>
 </tbody>
@@ -2528,9 +2632,10 @@ setindex(DT, V4, V1) # setindexv(DT, c(&quot;V4&quot;, &quot;V1&quot;))</code></
 <tbody>
 <tr>
 <td align="left">
-<pre class="r"><code>DT[.(&quot;C&quot;, 1), on = .(V4,V1)]
+<pre class="r"><code>DT[.(&quot;C&quot;, 1), on = .(V4, V1)]
 DT[.(c(&quot;B&quot;, &quot;C&quot;), 1), on = .(V4, V1)]
-DT[.(c(&quot;B&quot;, &quot;C&quot;), 1), on = .(V4, V1), which = TRUE] # using which = TRUE only returns the matching rows indices</code></pre>
+# using which = TRUE only returns the matching rows indices
+DT[.(c(&quot;B&quot;, &quot;C&quot;), 1), on = .(V4, V1), which = TRUE]</code></pre>
 <pre><code>##    V1 V2 V4
 ## 1:  1  0  C
 ## 2:  1  9  C
@@ -2541,8 +2646,8 @@ DT[.(c(&quot;B&quot;, &quot;C&quot;), 1), on = .(V4, V1), which = TRUE] # using 
 ## [1] 4 7 8</code></pre>
 </td>
 <td align="left">
-<pre class="r"><code>DF  %&gt;% filter(V1 == 1, V4 == &quot;C&quot;)
-DF  %&gt;% filter(V1 == 1, V4 %in% c(&quot;B&quot;, &quot;C&quot;))
+<pre class="r"><code>filter(DF, V1 == 1, V4 == &quot;C&quot;)
+filter(DF, V1 == 1, V4 %in% c(&quot;B&quot;, &quot;C&quot;))
 # ?</code></pre>
 <pre><code>## # A tibble: 2 x 3
 ##      V1    V2 V4   
@@ -2591,7 +2696,7 @@ setindex(DT, NULL)</code></pre>
 <pre class="r"><code>set(DT, i = 1L, j = 2L, value = 3L)</code></pre>
 </td>
 <td align="left">
-<pre class="r"><code>DF[1, 2] = 3L</code></pre>
+<pre class="r"><code>DF[1, 2] &lt;- 3L</code></pre>
 </td>
 </tr>
 </tbody>
@@ -2607,7 +2712,7 @@ setindex(DT, NULL)</code></pre>
 setorderv(DT, c(&quot;V4&quot;, &quot;V1&quot;), c(1, -1))</code></pre>
 </td>
 <td align="left">
-<pre class="r"><code>DF = DF %&gt;% arrange(V4, desc(V1))</code></pre>
+<pre class="r"><code>DF &lt;- arrange(DF, V4, desc(V1))</code></pre>
 </td>
 </tr>
 </tbody>
@@ -2623,8 +2728,8 @@ setorderv(DT, c(&quot;V4&quot;, &quot;V1&quot;), c(1, -1))</code></pre>
 setnames(DT, old = -(c(1, 3)), new = &quot;V2&quot;)</code></pre>
 </td>
 <td align="left">
-<pre class="r"><code>DF = DF %&gt;% rename(v2 = V2)
-DF = DF %&gt;% rename(V2 = v2) # reset upper</code></pre>
+<pre class="r"><code>DF &lt;- rename(DF, v2 = V2)
+DF &lt;- rename(DF, V2 = v2) # reset upper</code></pre>
 </td>
 </tr>
 </tbody>
@@ -2639,7 +2744,7 @@ DF = DF %&gt;% rename(V2 = v2) # reset upper</code></pre>
 <pre class="r"><code>setcolorder(DT, c(&quot;V4&quot;, &quot;V1&quot;, &quot;V2&quot;))</code></pre>
 </td>
 <td align="left">
-<pre class="r"><code>DF = DF %&gt;% select(V4, V1, V2)</code></pre>
+<pre class="r"><code>DF &lt;- select(DF, V4, V1, V2)</code></pre>
 </td>
 </tr>
 </tbody>
@@ -2680,13 +2785,13 @@ DT[, tail(.SD, 2), by = V4]</code></pre>
 <pre><code>##    V4 V1 V2
 ## 1:  A  0  3
 ## 2:  B  4  0
-## 3:  C  4  6
+## 3:  C  4  5
 ##    V4 V1 V2
 ## 1:  A  0  3
 ## 2:  A  0  7
 ## 3:  B  4  0
 ## 4:  B  1  5
-## 5:  C  4  6
+## 5:  C  4  5
 ## 6:  C  1  9
 ##    V4 V1 V2
 ## 1:  A  0  4
@@ -2697,16 +2802,22 @@ DT[, tail(.SD, 2), by = V4]</code></pre>
 ## 6:  C  1  9</code></pre>
 </td>
 <td align="left">
-<pre class="r"><code>DF %&gt;% group_by(V4) %&gt;% slice(1)
-DF %&gt;% group_by(V4) %&gt;% slice(1, n())
-DF %&gt;% group_by(V4) %&gt;% group_map(~ tail(.x, 2))</code></pre>
+<pre class="r"><code>DF %&gt;%
+  group_by(V4) %&gt;%
+  slice(1)
+DF %&gt;%
+  group_by(V4) %&gt;%
+  slice(1, n())
+DF %&gt;%
+  group_by(V4) %&gt;%
+  group_map(~ tail(.x, 2))</code></pre>
 <pre><code>## # A tibble: 3 x 3
 ## # Groups:   V4 [3]
 ##   V4       V1    V2
 ##   &lt;chr&gt; &lt;int&gt; &lt;int&gt;
 ## 1 A         0     3
 ## 2 B         4     0
-## 3 C         4     6
+## 3 C         4     5
 ## # A tibble: 6 x 3
 ## # Groups:   V4 [3]
 ##   V4       V1    V2
@@ -2715,7 +2826,7 @@ DF %&gt;% group_by(V4) %&gt;% group_map(~ tail(.x, 2))</code></pre>
 ## 2 A         0     7
 ## 3 B         4     0
 ## 4 B         1     5
-## 5 C         4     6
+## 5 C         4     5
 ## 6 C         1     9
 ## # A tibble: 6 x 3
 ## # Groups:   V4 [3]
@@ -2745,7 +2856,10 @@ DF %&gt;% group_by(V4) %&gt;% group_map(~ tail(.x, 2))</code></pre>
 ## 3:  C  1  0</code></pre>
 </td>
 <td align="left">
-<pre class="r"><code>DF %&gt;% group_by(V4) %&gt;% arrange(V2) %&gt;% slice(1)</code></pre>
+<pre class="r"><code>DF %&gt;%
+  group_by(V4) %&gt;%
+  arrange(V2) %&gt;%
+  slice(1)</code></pre>
 <pre><code>## # A tibble: 3 x 3
 ## # Groups:   V4 [3]
 ##   V4       V1    V2
@@ -2773,7 +2887,7 @@ DT[, Grp := NULL] # delete for consistency</code></pre>
 ## 4:  B  4  0   2
 ## 5:  B  4  8   2
 ## 6:  B  1  5   3
-## 7:  C  4  6   4
+## 7:  C  4  5   4
 ## 8:  C  1  0   5
 ## 9:  C  1  9   5</code></pre>
 </td>
@@ -2788,7 +2902,7 @@ DT[, Grp := NULL] # delete for consistency</code></pre>
 ## 4 B         4     0     3
 ## 5 B         4     8     3
 ## 6 B         1     5     2
-## 7 C         4     6     5
+## 7 C         4     5     5
 ## 8 C         1     0     4
 ## 9 C         1     9     4</code></pre>
 </td>
@@ -2828,7 +2942,10 @@ DT[, .I[c(1, .N)], by = V4]</code></pre>
 ## 6:  C  9</code></pre>
 </td>
 <td align="left">
-<pre class="r"><code>DF %&gt;% group_by(V4) %&gt;% group_data() %&gt;% tidyr::unnest(.rows)
+<pre class="r"><code>DF %&gt;%
+  group_by(V4) %&gt;%
+  group_data() %&gt;%
+  tidyr::unnest(.rows)
 # DF %&gt;% group_by(V4) %&gt;% group_rows() # returns a list
 #
 #</code></pre>
@@ -2855,7 +2972,7 @@ DT[, .I[c(1, .N)], by = V4]</code></pre>
 <tbody>
 <tr>
 <td align="left">
-<pre class="r"><code>DT[, .(.(V1)), by = V4]  # return V1 as a list
+<pre class="r"><code>DT[, .(.(V1)),  by = V4]  # return V1 as a list
 DT[, .(.(.SD)), by = V4] # subsets of the data</code></pre>
 <pre><code>##    V4    V1
 ## 1:  A 0,0,0
@@ -2867,8 +2984,12 @@ DT[, .(.(.SD)), by = V4] # subsets of the data</code></pre>
 ## 3:  C &lt;data.table&gt;</code></pre>
 </td>
 <td align="left">
-<pre class="r"><code>DF %&gt;% group_by(V4) %&gt;% summarise(list(V1))
-DF %&gt;% group_by(V4) %&gt;% group_nest()</code></pre>
+<pre class="r"><code>DF %&gt;%
+  group_by(V4) %&gt;%
+  summarise(list(V1))
+DF %&gt;%
+  group_by(V4) %&gt;%
+  group_nest()</code></pre>
 <pre><code>## # A tibble: 3 x 2
 ##   V4    `list(V1)`
 ##   &lt;chr&gt; &lt;list&gt;    
@@ -2892,58 +3013,70 @@ DF %&gt;% group_by(V4) %&gt;% group_nest()</code></pre>
 <tbody>
 <tr>
 <td align="left">
-<pre class="r"><code>rollup(DT, .(SumV2 = sum(V2)), by = c(&quot;V1&quot;,&quot;V4&quot;)) 
-rollup(DT, .(SumV2 = sum(V2), .N), by = c(&quot;V1&quot;,&quot;V4&quot;), id = TRUE)
-cube(  DT, .(SumV2 = sum(V2), .N), by = c(&quot;V1&quot;,&quot;V4&quot;), id = TRUE)
+<pre class="r"><code>rollup(DT,
+       .(SumV2 = sum(V2)),
+       by = c(&quot;V1&quot;, &quot;V4&quot;))
+
+rollup(DT,
+       .(SumV2 = sum(V2), .N),
+       by = c(&quot;V1&quot;, &quot;V4&quot;),
+       id = TRUE)
+
+cube(DT,
+     .(SumV2 = sum(V2), .N),
+     by = c(&quot;V1&quot;, &quot;V4&quot;),
+     id = TRUE)
+
 groupingsets(DT,
-             .(SumV2 = sum(V2), .N), by = c(&quot;V1&quot;,&quot;V4&quot;), 
+             .(SumV2 = sum(V2), .N),
+             by   = c(&quot;V1&quot;, &quot;V4&quot;),
              sets = list(&quot;V1&quot;, c(&quot;V1&quot;, &quot;V4&quot;)),
-             id = TRUE)</code></pre>
+             id   = TRUE)</code></pre>
 <pre><code>##    V1   V4 SumV2
 ## 1:  0    A    14
 ## 2:  4    B     8
 ## 3:  1    B     5
-## 4:  4    C     6
+## 4:  4    C     5
 ## 5:  1    C     9
 ## 6:  0 &lt;NA&gt;    14
-## 7:  4 &lt;NA&gt;    14
+## 7:  4 &lt;NA&gt;    13
 ## 8:  1 &lt;NA&gt;    14
-## 9: NA &lt;NA&gt;    42
+## 9: NA &lt;NA&gt;    41
 ##    grouping V1   V4 SumV2 N
 ## 1:        0  0    A    14 3
 ## 2:        0  4    B     8 2
 ## 3:        0  1    B     5 1
-## 4:        0  4    C     6 1
+## 4:        0  4    C     5 1
 ## 5:        0  1    C     9 2
 ## 6:        1  0 &lt;NA&gt;    14 3
-## 7:        1  4 &lt;NA&gt;    14 3
+## 7:        1  4 &lt;NA&gt;    13 3
 ## 8:        1  1 &lt;NA&gt;    14 3
-## 9:        3 NA &lt;NA&gt;    42 9
+## 9:        3 NA &lt;NA&gt;    41 9
 ##     grouping V1   V4 SumV2 N
 ##  1:        0  0    A    14 3
 ##  2:        0  4    B     8 2
 ##  3:        0  1    B     5 1
-##  4:        0  4    C     6 1
+##  4:        0  4    C     5 1
 ##  5:        0  1    C     9 2
 ##  6:        1  0 &lt;NA&gt;    14 3
-##  7:        1  4 &lt;NA&gt;    14 3
+##  7:        1  4 &lt;NA&gt;    13 3
 ##  8:        1  1 &lt;NA&gt;    14 3
 ##  9:        2 NA    A    14 3
 ## 10:        2 NA    B    13 3
-## 11:        2 NA    C    15 3
-## 12:        3 NA &lt;NA&gt;    42 9
+## 11:        2 NA    C    14 3
+## 12:        3 NA &lt;NA&gt;    41 9
 ##    grouping V1   V4 SumV2 N
 ## 1:        1  0 &lt;NA&gt;    14 3
-## 2:        1  4 &lt;NA&gt;    14 3
+## 2:        1  4 &lt;NA&gt;    13 3
 ## 3:        1  1 &lt;NA&gt;    14 3
 ## 4:        0  0    A    14 3
 ## 5:        0  4    B     8 2
 ## 6:        0  1    B     5 1
-## 7:        0  4    C     6 1
+## 7:        0  4    C     5 1
 ## 8:        0  1    C     9 2</code></pre>
 </td>
 <td align="left">
-<pre class="r"><code># NA</code></pre>
+<pre class="r"><code>#</code></pre>
 </td>
 </tr>
 </tbody>
@@ -2973,7 +3106,8 @@ Here again, <code>fread()</code> and <code>fwrite()</code> are very versatile an
 <pre class="r"><code>fwrite(DT, &quot;DT.csv&quot;)</code></pre>
 </td>
 <td align="left">
-<pre class="r"><code>readr::write_csv(DF, &quot;DF.csv&quot;)</code></pre>
+<pre class="r"><code>readr::write_csv(DF, &quot;DF.csv&quot;)
+# see also vroom</code></pre>
 </td>
 </tr>
 </tbody>
@@ -3003,7 +3137,7 @@ Here again, <code>fread()</code> and <code>fwrite()</code> are very versatile an
 <pre class="r"><code>fwrite(setDT(list(0, list(1:5))), &quot;DT2.csv&quot;)</code></pre>
 </td>
 <td align="left">
-<pre class="r"><code># NA</code></pre>
+<pre class="r"><code>#</code></pre>
 </td>
 </tr>
 </tbody>
@@ -3025,7 +3159,7 @@ fread(&quot;DT.txt&quot;, sep = &quot;\t&quot;)</code></pre>
 ## 4:  B  4  0
 ## 5:  B  4  8
 ## 6:  B  1  5
-## 7:  C  4  6
+## 7:  C  4  5
 ## 8:  C  1  0
 ## 9:  C  1  9
 ##    V4 V1 V2
@@ -3035,7 +3169,7 @@ fread(&quot;DT.txt&quot;, sep = &quot;\t&quot;)</code></pre>
 ## 4:  B  4  0
 ## 5:  B  4  8
 ## 6:  B  1  5
-## 7:  C  4  6
+## 7:  C  4  5
 ## 8:  C  1  0
 ## 9:  C  1  9</code></pre>
 </td>
@@ -3063,7 +3197,7 @@ fread(&quot;DT.txt&quot;, sep = &quot;\t&quot;)</code></pre>
 ## 4 B         4     0
 ## 5 B         4     8
 ## 6 B         1     5
-## 7 C         4     6
+## 7 C         4     5
 ## 8 C         1     0
 ## 9 C         1     9
 ## # A tibble: 9 x 3
@@ -3075,7 +3209,7 @@ fread(&quot;DT.txt&quot;, sep = &quot;\t&quot;)</code></pre>
 ## 4 B         4     0
 ## 5 B         4     8
 ## 6 B         1     5
-## 7 C         4     6
+## 7 C         4     5
 ## 8 C         1     0
 ## 9 C         1     9</code></pre>
 </td>
@@ -3108,7 +3242,7 @@ fread(&quot;DT.csv&quot;, drop = &quot;V4&quot;)</code></pre>
 ## 4:  4  0
 ## 5:  4  8
 ## 6:  1  5
-## 7:  4  6
+## 7:  4  5
 ## 8:  1  0
 ## 9:  1  9</code></pre>
 </td>
@@ -3126,7 +3260,7 @@ fread(&quot;DT.csv&quot;, drop = &quot;V4&quot;)</code></pre>
 <tr>
 <td align="left">
 <pre class="r"><code>rbindlist(lapply(c(&quot;DT.csv&quot;, &quot;DT.csv&quot;), fread))
-#c(&quot;DT.csv&quot;, &quot;DT.csv&quot;) %&gt;% lapply(fread) %&gt;% rbindlist</code></pre>
+# c(&quot;DT.csv&quot;, &quot;DT.csv&quot;) %&gt;% lapply(fread) %&gt;% rbindlist</code></pre>
 <pre><code>##     V4 V1 V2
 ##  1:  A  0  3
 ##  2:  A  0  4
@@ -3134,7 +3268,7 @@ fread(&quot;DT.csv&quot;, drop = &quot;V4&quot;)</code></pre>
 ##  4:  B  4  0
 ##  5:  B  4  8
 ##  6:  B  1  5
-##  7:  C  4  6
+##  7:  C  4  5
 ##  8:  C  1  0
 ##  9:  C  1  9
 ## 10:  A  0  3
@@ -3143,12 +3277,13 @@ fread(&quot;DT.csv&quot;, drop = &quot;V4&quot;)</code></pre>
 ## 13:  B  4  0
 ## 14:  B  4  8
 ## 15:  B  1  5
-## 16:  C  4  6
+## 16:  C  4  5
 ## 17:  C  1  0
 ## 18:  C  1  9</code></pre>
 </td>
 <td align="left">
-<pre class="r"><code>c(&quot;DF.csv&quot;, &quot;DF.csv&quot;) %&gt;% purrr::map_dfr(readr::read_csv)</code></pre>
+<pre class="r"><code>c(&quot;DF.csv&quot;, &quot;DF.csv&quot;) %&gt;%
+  purrr::map_dfr(readr::read_csv)</code></pre>
 <pre><code>## Parsed with column specification:
 ## cols(
 ##   V4 = col_character(),
@@ -3170,7 +3305,7 @@ fread(&quot;DT.csv&quot;, drop = &quot;V4&quot;)</code></pre>
 ##  4 B         4     0
 ##  5 B         4     8
 ##  6 B         1     5
-##  7 C         4     6
+##  7 C         4     5
 ##  8 C         1     0
 ##  9 C         1     9
 ## 10 A         0     3
@@ -3179,7 +3314,7 @@ fread(&quot;DT.csv&quot;, drop = &quot;V4&quot;)</code></pre>
 ## 13 B         4     0
 ## 14 B         4     8
 ## 15 B         1     5
-## 16 C         4     6
+## 16 C         4     5
 ## 17 C         1     0
 ## 18 C         1     9</code></pre>
 </td>
@@ -3192,7 +3327,7 @@ fread(&quot;DT.csv&quot;, drop = &quot;V4&quot;)</code></pre>
 </div>
 <div id="reshape-data" class="section level3">
 <h3>Reshape data</h3>
-<p>See <a href="https://cran.r-project.org/web/packages/data.table/vignettes/datatable-reshape.html">here</a> and <a href="https://tidyr.tidyverse.org/">here</a> for more details.</p>
+<p>The following part is still a bit clunky. I need to find better examples. See <a href="https://cran.r-project.org/web/packages/data.table/vignettes/datatable-reshape.html">here</a> and <a href="https://tidyr.tidyverse.org/">here</a> for more details.</p>
 <div id="melt-data-from-wide-to-long" class="section level4">
 <h4>Melt data (from wide to long)</h4>
 <table class="table table-condensed">
@@ -3200,11 +3335,11 @@ fread(&quot;DT.csv&quot;, drop = &quot;V4&quot;)</code></pre>
 <tr>
 <td align="left">
 <pre class="r"><code>melt(DT, id.vars = &quot;V4&quot;)
-mDT = melt(DT, 
-           id.vars       = &quot;V4&quot;,
-           measure.vars  = c(&quot;V1&quot;, &quot;V2&quot;),
-           variable.name = &quot;Variable&quot;,
-           value.name    = &quot;Value&quot;)</code></pre>
+mDT &lt;- melt(DT,
+            id.vars       = &quot;V4&quot;,
+            measure.vars  = c(&quot;V1&quot;, &quot;V2&quot;),
+            variable.name = &quot;Variable&quot;,
+            value.name    = &quot;Value&quot;)</code></pre>
 <pre><code>##     V4 variable value
 ##  1:  A       V1     0
 ##  2:  A       V1     0
@@ -3221,13 +3356,16 @@ mDT = melt(DT,
 ## 13:  B       V2     0
 ## 14:  B       V2     8
 ## 15:  B       V2     5
-## 16:  C       V2     6
+## 16:  C       V2     5
 ## 17:  C       V2     0
 ## 18:  C       V2     9</code></pre>
 </td>
 <td align="left">
-<pre class="r"><code>DF %&gt;% tidyr::gather(variable, value, -V4)
-mDF = DF %&gt;% tidyr::gather(key = Variable, value = Value, -V4)
+<pre class="r"><code>tidyr::gather(DF, variable, value, -V4)
+mDF &lt;- tidyr::gather(DF,
+                     key = Variable,
+                     value = Value,
+                     -V4)
 # pivot_longer todo</code></pre>
 <pre><code>## # A tibble: 18 x 3
 ##    V4    variable value
@@ -3247,7 +3385,7 @@ mDF = DF %&gt;% tidyr::gather(key = Variable, value = Value, -V4)
 ## 13 B     V2           0
 ## 14 B     V2           8
 ## 15 B     V2           5
-## 16 C     V2           6
+## 16 C     V2           5
 ## 17 C     V2           0
 ## 18 C     V2           9</code></pre>
 </td>
@@ -3277,14 +3415,19 @@ mDF = DF %&gt;% tidyr::gather(key = Variable, value = Value, -V4)
 ##    V4 V1 V2
 ## 1:  A  0 14
 ## 2:  B  9 13
-## 3:  C  6 15
+## 3:  C  6 14
 ##    V4 FALSE TRUE
 ## 1:  A     5    1
 ## 2:  B     5    1
-## 3:  C     4    2</code></pre>
+## 3:  C     5    1</code></pre>
 </td>
 <td align="left">
-<pre class="r"><code>tidyr::spread(count(mDF, V4, Variable), Variable, n, fill = 0)
+<pre class="r"><code>tidyr::spread(data  = count(mDF, V4, Variable),
+              key   = Variable,
+              value = n,
+              fill  = 0)
+#
+#
 # pivot_wider todo</code></pre>
 <pre><code>## # A tibble: 3 x 3
 ##   V4       V1    V2
@@ -3318,7 +3461,7 @@ mDF = DF %&gt;% tidyr::gather(key = Variable, value = Value, -V4)
 ## 
 ## $C
 ##    V4 V1 V2
-## 1:  C  4  6
+## 1:  C  4  5
 ## 2:  C  1  0
 ## 3:  C  1  9</code></pre>
 </td>
@@ -3344,7 +3487,7 @@ mDF = DF %&gt;% tidyr::gather(key = Variable, value = Value, -V4)
 ## # A tibble: 3 x 3
 ##   V4       V1    V2
 ##   &lt;chr&gt; &lt;int&gt; &lt;int&gt;
-## 1 C         4     6
+## 1 C         4     5
 ## 2 C         1     0
 ## 3 C         1     9</code></pre>
 </td>
@@ -3358,7 +3501,7 @@ mDF = DF %&gt;% tidyr::gather(key = Variable, value = Value, -V4)
 <tbody>
 <tr>
 <td align="left">
-<pre class="r"><code>vec = c(&quot;A:a&quot;,&quot;B:b&quot;,&quot;C:c&quot;)
+<pre class="r"><code>vec &lt;- c(&quot;A:a&quot;, &quot;B:b&quot;, &quot;C:c&quot;)
 tstrsplit(vec, split = &quot;:&quot;, keep = 2L) # works on vector
 setDT(tstrsplit(vec, split = &quot;:&quot;))[]</code></pre>
 <pre><code>## [[1]]
@@ -3370,9 +3513,9 @@ setDT(tstrsplit(vec, split = &quot;:&quot;))[]</code></pre>
 ## 3:  C  c</code></pre>
 </td>
 <td align="left">
-<pre class="r"><code>vec = c(&quot;A:a&quot;,&quot;B:b&quot;,&quot;C:c&quot;)
+<pre class="r"><code>vec &lt;- c(&quot;A:a&quot;, &quot;B:b&quot;, &quot;C:c&quot;)
 # vector not handled
-tibble(vec) %&gt;% tidyr::separate(vec, c(&quot;V1&quot;, &quot;V2&quot;))</code></pre>
+tidyr::separate(tibble(vec), vec, c(&quot;V1&quot;, &quot;V2&quot;))</code></pre>
 <pre><code>## # A tibble: 3 x 2
 ##   V1    V2   
 ##   &lt;chr&gt; &lt;chr&gt;
@@ -3399,7 +3542,7 @@ tibble(vec) %&gt;% tidyr::separate(vec, c(&quot;V1&quot;, &quot;V2&quot;))</code
 # There&#39;s more lines of test code in data.table than there is code!</code></pre>
 </td>
 <td align="left">
-<pre class="r"><code># NA</code></pre>
+<pre class="r"><code>#</code></pre>
 </td>
 </tr>
 </tbody>
@@ -3418,7 +3561,7 @@ tibble(vec) %&gt;% tidyr::separate(vec, c(&quot;V1&quot;, &quot;V2&quot;))</code
 ## Total: 0MB</code></pre>
 </td>
 <td align="left">
-<pre class="r"><code># ?</code></pre>
+<pre class="r"><code>#</code></pre>
 </td>
 </tr>
 </tbody>
@@ -3434,7 +3577,7 @@ tibble(vec) %&gt;% tidyr::separate(vec, c(&quot;V1&quot;, &quot;V2&quot;))</code
 <pre><code>## [1] 2</code></pre>
 </td>
 <td align="left">
-<pre class="r"><code># NA</code></pre>
+<pre class="r"><code>#</code></pre>
 </td>
 </tr>
 </tbody>
@@ -3460,9 +3603,15 @@ shift(1:10, n = 1,   fill = NA, type = &quot;lead&quot;)</code></pre>
 </td>
 <td align="left">
 <pre class="r"><code>lag(1:10, n = 1, default = NA)
-# NA
+purrr::map(1:2, ~lag(1:10, n = .x))
 lead(1:10, n = 1, default = NA)</code></pre>
 <pre><code>##  [1] NA  1  2  3  4  5  6  7  8  9
+## [[1]]
+##  [1] NA  1  2  3  4  5  6  7  8  9
+## 
+## [[2]]
+##  [1] NA NA  1  2  3  4  5  6  7  8
+## 
 ##  [1]  2  3  4  5  6  7  8  9 10 NA</code></pre>
 </td>
 </tr>
@@ -3481,7 +3630,7 @@ rleid(rep(c(&quot;a&quot;, &quot;b&quot;, &quot;a&quot;), each = 3), prefix = &q
 ## [1] &quot;G1&quot; &quot;G1&quot; &quot;G1&quot; &quot;G2&quot; &quot;G2&quot; &quot;G2&quot; &quot;G3&quot; &quot;G3&quot; &quot;G3&quot;</code></pre>
 </td>
 <td align="left">
-<pre class="r"><code># NA</code></pre>
+<pre class="r"><code>#</code></pre>
 </td>
 </tr>
 </tbody>
@@ -3493,10 +3642,10 @@ rleid(rep(c(&quot;a&quot;, &quot;b&quot;, &quot;a&quot;), each = 3), prefix = &q
 <tbody>
 <tr>
 <td align="left">
-<pre class="r"><code># NA</code></pre>
+<pre class="r"><code>#</code></pre>
 </td>
 <td align="left">
-<pre class="r"><code>x = 1:10
+<pre class="r"><code>x &lt;- 1:10
 case_when(
   x %% 6 == 0 ~ &quot;fizz buzz&quot;,
   x %% 2 == 0 ~ &quot;fizz&quot;,
@@ -3538,27 +3687,22 @@ case_when(
 <h3>Join</h3>
 <p>Joining data in data.table works like the fast subsetting approach described above. It can be performed using keys, using the <em>ad hoc</em> <code>on</code> argument, or using the <code>merge.data.table</code> method. For the sake of completeness, the three methods are presented below. As previously mentioned, the <code>on</code> and <code>by</code> (in <code>merge</code>) arguments are optional with keyed data.tables, but recommended to make the code more explicit.<br />
 In the examples below, the <code>x</code>, <code>y</code>, and <code>z</code> data.tables are also used with dplyr.</p>
-<pre class="r"><code>ix = seq(2L, 8L, 2L); iy = ix - 1L
-x = data.table(Id = LETTERS[c(1,2,3,3)], X1 = iy, XY = paste0(&quot;x&quot;, ix), key = &quot;Id&quot;)
-y = data.table(Id = LETTERS[c(1,2,2,4)], Y1 = iy, XY = paste0(&quot;y&quot;, iy), key = &quot;Id&quot;)
-x; y</code></pre>
-<pre><code>##    Id X1 XY
-## 1:  A  1 x2
-## 2:  B  3 x4
-## 3:  C  5 x6
-## 4:  C  7 x8
-##    Id Y1 XY
-## 1:  A  1 y1
-## 2:  B  3 y3
-## 3:  B  5 y5
-## 4:  D  7 y7</code></pre>
+<pre class="r"><code>x &lt;- data.table(Id  = c(&quot;A&quot;, &quot;B&quot;, &quot;C&quot;, &quot;C&quot;),
+                X1  = c(1L, 3L, 5L, 7L),
+                XY  = c(&quot;x2&quot;, &quot;x4&quot;, &quot;x6&quot;, &quot;x8&quot;),
+                key = &quot;Id&quot;)
+
+y &lt;- data.table(Id  = c(&quot;A&quot;, &quot;B&quot;, &quot;B&quot;, &quot;D&quot;),
+                Y1  = c(1L, 3L, 5L, 7L),
+                XY  = c(&quot;y1&quot;, &quot;y3&quot;, &quot;y5&quot;, &quot;y7&quot;),
+                key = &quot;Id&quot;)</code></pre>
 <div id="join-matching-rows-from-y-to-x" class="section level4">
 <h4>Join matching rows from y to x</h4>
 <table class="table table-condensed">
 <tbody>
 <tr>
 <td align="left">
-<pre class="r"><code>y[x, on = &quot;Id&quot;] 
+<pre class="r"><code>y[x, on = &quot;Id&quot;]
 merge(x, y, all.x = TRUE, by = &quot;Id&quot;)
 y[x] # requires keys</code></pre>
 <pre><code>##    Id Y1   XY X1 i.XY
@@ -3768,8 +3912,12 @@ x[y, .(Id, x.XY, i.XY)] # x. prefix refers to cols in x</code></pre>
 ## 4:  D &lt;NA&gt;   y7</code></pre>
 </td>
 <td align="left">
-<pre class="r"><code>right_join(select(x, Id, X1), select(y, Id, XY), by = &quot;Id&quot;)
-right_join(select(x, Id, XY), select(y, Id, XY), by = &quot;Id&quot;)</code></pre>
+<pre class="r"><code>right_join(select(x, Id, X1),
+           select(y, Id, XY),
+           by = &quot;Id&quot;)
+right_join(select(x, Id, XY),
+           select(y, Id, XY),
+           by = &quot;Id&quot;)</code></pre>
 <pre><code>##   Id X1 XY
 ## 1  A  1 y1
 ## 2  B  3 y3
@@ -3799,8 +3947,12 @@ right_join(select(x, Id, XY), select(y, Id, XY), by = &quot;Id&quot;)</code></pr
 ## 4:  C   NA</code></pre>
 </td>
 <td align="left">
-<pre class="r"><code>y %&gt;% group_by(Id) %&gt;% summarise(SumY1 = sum(Y1)) %&gt;% 
-  right_join(x) %&gt;% mutate(X1Y1 = SumY1 * X1) %&gt;% select(Id, X1Y1)</code></pre>
+<pre class="r"><code>y %&gt;%
+ group_by(Id) %&gt;%
+ summarise(SumY1 = sum(Y1)) %&gt;%
+ right_join(x) %&gt;%
+ mutate(X1Y1 = SumY1 * X1) %&gt;%
+ select(Id, X1Y1)</code></pre>
 <pre><code>## Joining, by = &quot;Id&quot;</code></pre>
 <pre><code>## # A tibble: 4 x 2
 ##   Id     X1Y1
@@ -3825,8 +3977,11 @@ y[, SqX1 := x[.BY, X1^2, on = &quot;Id&quot;], by = Id] # more memory-efficient
 y[, SqX1 := NULL] # rm column for consistency</code></pre>
 </td>
 <td align="left">
-<pre class="r"><code>x %&gt;% select(Id, X1) %&gt;% mutate(SqX1 = X1^2) %&gt;% 
-  right_join(y, by = &quot;Id&quot;) %&gt;% select(names(y), SqX1)</code></pre>
+<pre class="r"><code>x %&gt;%
+ select(Id, X1) %&gt;%
+ mutate(SqX1 = X1^2) %&gt;%
+ right_join(y, by = &quot;Id&quot;) %&gt;%
+ select(names(y), SqX1)</code></pre>
 <pre><code>##   Id Y1 XY SqX1
 ## 1  A  1 y1    1
 ## 2  B  3 y3    9
@@ -3847,7 +4002,7 @@ y[, SqX1 := NULL] # rm column for consistency</code></pre>
 x[, y := NULL] # rm column for consistency</code></pre>
 </td>
 <td align="left">
-<pre class="r"><code>x %&gt;% nest_join(y, by = &quot;Id&quot;)</code></pre>
+<pre class="r"><code>nest_join(x, y, by = &quot;Id&quot;)</code></pre>
 <pre><code>##   Id X1 XY            y
 ## 1  A  1 x2        1, y1
 ## 2  B  3 x4 3, 5, y3, y5
@@ -3864,9 +4019,11 @@ x[, y := NULL] # rm column for consistency</code></pre>
 <tbody>
 <tr>
 <td align="left">
-<pre class="r"><code>cols  = c(&quot;NewXY&quot;, &quot;NewX1&quot;)
-icols = paste0(&quot;i.&quot;, c(&quot;XY&quot;, &quot;X1&quot;))
+<pre class="r"><code>cols  &lt;- c(&quot;NewXY&quot;, &quot;NewX1&quot;)
+icols &lt;- paste0(&quot;i.&quot;, c(&quot;XY&quot;, &quot;X1&quot;))
+
 y[x, (cols) := mget(icols)]
+
 y[, (cols) := NULL] # rm columns for consistency</code></pre>
 </td>
 <td align="left">
@@ -3878,7 +4035,7 @@ y[, (cols) := NULL] # rm columns for consistency</code></pre>
 </div>
 <div id="join-passing-columns-to-match-in-the-on-argument" class="section level4">
 <h4>Join passing columns to match in the <code>on</code> argument</h4>
-<pre class="r"><code>z = data.table(ID = &quot;C&quot;, Z1 = 5:9, Z2 = paste0(&quot;z&quot;, 5:9))
+<pre class="r"><code>z &lt;- data.table(ID = &quot;C&quot;, Z1 = 5:9, Z2 = paste0(&quot;z&quot;, 5:9))
 x[, X2 := paste0(&quot;x&quot;, X1)] # used to track the results
 z; x</code></pre>
 <pre><code>##    ID Z1 Z2
@@ -3896,9 +4053,9 @@ z; x</code></pre>
 <tbody>
 <tr>
 <td align="left">
-<pre class="r"><code>x[z, on = &quot;X1==Z1&quot;]
-x[z, on = .(X1==Z1)] # same
-x[z, on = .(Id==ID, X1==Z1)] # using two columns</code></pre>
+<pre class="r"><code>x[z, on = &quot;X1 == Z1&quot;]
+x[z, on = .(X1 == Z1)] # same
+x[z, on = .(Id == ID, X1 == Z1)] # using two columns</code></pre>
 <pre><code>##      Id X1   XY   X2 ID Z2
 ## 1:    C  5   x6   x5  C z5
 ## 2: &lt;NA&gt;  6 &lt;NA&gt; &lt;NA&gt;  C z6
@@ -3944,9 +4101,9 @@ right_join(x, z, by = c(&quot;Id&quot; = &quot;ID&quot;, &quot;X1&quot; = &quot;
 <tbody>
 <tr>
 <td align="left">
-<pre class="r"><code>x[z, on = .(Id==ID, X1&lt;=Z1)]
-x[z, on = .(Id==ID, X1&gt;Z1)]
-x[z, on = .(X1&lt;Z1), allow.cartesian = TRUE] # allows &#39;numerous&#39; matching values</code></pre>
+<pre class="r"><code>x[z, on = .(Id == ID, X1 &lt;= Z1)]
+x[z, on = .(Id == ID, X1 &gt; Z1)]
+x[z, on = .(X1 &lt; Z1), allow.cartesian = TRUE] # allows &#39;numerous&#39; matching values</code></pre>
 <pre><code>##    Id X1 XY X2 Z2
 ## 1:  C  5 x6 x5 z5
 ## 2:  C  6 x6 x5 z6
@@ -3981,7 +4138,7 @@ x[z, on = .(X1&lt;Z1), allow.cartesian = TRUE] # allows &#39;numerous&#39; match
 ## 16:  C  9 x8 x7  C z9</code></pre>
 </td>
 <td align="left">
-<pre class="r"><code># NA</code></pre>
+<pre class="r"><code>#</code></pre>
 </td>
 </tr>
 </tbody>
@@ -3994,7 +4151,7 @@ x[z, on = .(X1&lt;Z1), allow.cartesian = TRUE] # allows &#39;numerous&#39; match
 <tr>
 <td align="left">
 <pre class="r"><code># Nearest
-x[z, on = .(Id==ID, X1==Z1), roll = &quot;nearest&quot;] 
+x[z, on = .(Id == ID, X1 == Z1), roll = &quot;nearest&quot;]
 ## below, simplified examples with ad hoc subsets on a keyed data.table
 setkey(x, Id, X1)
 x[.(&quot;C&quot;, 5:9), roll = &quot;nearest&quot;]</code></pre>
@@ -4012,7 +4169,7 @@ x[.(&quot;C&quot;, 5:9), roll = &quot;nearest&quot;]</code></pre>
 ## 5:  C  9 x8 x7</code></pre>
 </td>
 <td align="left">
-<pre class="r"><code># NA</code></pre>
+<pre class="r"><code>#</code></pre>
 </td>
 </tr>
 </tbody>
@@ -4025,7 +4182,7 @@ x[.(&quot;C&quot;, 5:9), roll = &quot;nearest&quot;]</code></pre>
 x[.(&quot;C&quot;, 5:9), roll = Inf]
 x[.(&quot;C&quot;, 5:9), roll = 0.5]  # bounded
 x[.(&quot;C&quot;, 5:9), roll = Inf, rollends = c(FALSE, TRUE)]  # default
-x[.(&quot;C&quot;, 5:9), roll = Inf, rollends = c(FALSE, FALSE)] # ends not rolled </code></pre>
+x[.(&quot;C&quot;, 5:9), roll = Inf, rollends = c(FALSE, FALSE)] # ends not rolled</code></pre>
 <pre><code>##    Id X1 XY X2
 ## 1:  C  5 x6 x5
 ## 2:  C  6 x6 x5
@@ -4052,7 +4209,7 @@ x[.(&quot;C&quot;, 5:9), roll = Inf, rollends = c(FALSE, FALSE)] # ends not roll
 ## 5:  C  9 &lt;NA&gt; &lt;NA&gt;</code></pre>
 </td>
 <td align="left">
-<pre class="r"><code># NA</code></pre>
+<pre class="r"><code>#</code></pre>
 </td>
 </tr>
 </tbody>
@@ -4092,7 +4249,7 @@ x[.(&quot;C&quot;, 5:9), roll = -Inf, rollends = c(TRUE, TRUE)]  # roll both end
 ## 5:  C  9 x8 x7</code></pre>
 </td>
 <td align="left">
-<pre class="r"><code># NA</code></pre>
+<pre class="r"><code>#</code></pre>
 </td>
 </tr>
 </tbody>
@@ -4104,8 +4261,8 @@ x[.(&quot;C&quot;, 5:9), roll = -Inf, rollends = c(TRUE, TRUE)]  # roll both end
 <tbody>
 <tr>
 <td align="left">
-<pre class="r"><code>CJ(c(2,1,1), 3:2)
-CJ(c(2,1,1), 3:2, sorted = FALSE, unique = TRUE)</code></pre>
+<pre class="r"><code>CJ(c(2, 1, 1), 3:2)
+CJ(c(2, 1, 1), 3:2, sorted = FALSE, unique = TRUE)</code></pre>
 <pre><code>##    V1 V2
 ## 1:  1  2
 ## 2:  1  2
@@ -4120,8 +4277,8 @@ CJ(c(2,1,1), 3:2, sorted = FALSE, unique = TRUE)</code></pre>
 ## 4:  1  2</code></pre>
 </td>
 <td align="left">
-<pre class="r"><code># base::expand.grid(c(2,1,1), 3:2)
-# NA</code></pre>
+<pre class="r"><code># base::expand.grid(c(2, 1, 1), 3:2)
+#</code></pre>
 </td>
 </tr>
 </tbody>
@@ -4136,9 +4293,9 @@ CJ(c(2,1,1), 3:2, sorted = FALSE, unique = TRUE)</code></pre>
 </div>
 <div id="bind" class="section level3">
 <h3>Bind</h3>
-<pre class="r"><code>x = data.table(1:3)
-y = data.table(4:6)
-z = data.table(7:9, 0L)</code></pre>
+<pre class="r"><code>x &lt;- data.table(1:3)
+y &lt;- data.table(4:6)
+z &lt;- data.table(7:9, 0L)</code></pre>
 <div id="bind-rows" class="section level4">
 <h4>Bind rows</h4>
 <table class="table table-condensed">
@@ -4241,8 +4398,8 @@ bind_rows(x, z) # always fills</code></pre>
 </div>
 <div id="set-operations" class="section level3">
 <h3>Set operations</h3>
-<pre class="r"><code>x = data.table(c(1,2,2,3,3))
-y = data.table(c(2,2,3,4,4))</code></pre>
+<pre class="r"><code>x &lt;- data.table(c(1, 2, 2, 3, 3))
+y &lt;- data.table(c(2, 2, 3, 4, 4))</code></pre>
 <div id="intersection" class="section level4">
 <h4>Intersection</h4>
 <table class="table table-condensed">
@@ -4392,7 +4549,7 @@ Hopefully, this comparison is not too biased, but I must admit that my preferenc
 ## [1] methods   stats     graphics  grDevices utils     datasets  base     
 ## 
 ## other attached packages:
-## [1] dplyr_0.8.0.1     knitr_1.21        data.table_1.12.3
+## [1] dplyr_0.8.0.1     data.table_1.12.2 knitr_1.21       
 ## 
 ## loaded via a namespace (and not attached):
 ##  [1] Rcpp_1.0.0       magrittr_1.5     hms_0.4.2        tidyselect_0.2.5
@@ -4420,7 +4577,7 @@ Hopefully, this comparison is not too biased, but I must admit that my preferenc
 
         		<footer>
 			<span>
-			&copy; <time datetime="2019-06-16 17:12:31.116103 &#43;0200 CEST m=&#43;0.090500001">2019</time> . Made with <a href='https://gohugo.io'>Hugo</a> using the <a href='https://github.com/EmielH/tale-hugo/'>Tale</a> theme and the <a href='https://bookdown.org/yihui/blogdown/'>blogdown</a> R package.
+			&copy; 2019. Made with <a href='https://gohugo.io'>Hugo</a> using the <a href='https://github.com/EmielH/tale-hugo/'>Tale</a> theme and the <a href='https://bookdown.org/yihui/blogdown/'>blogdown</a> R package.
 			</span>
 		</footer>
 

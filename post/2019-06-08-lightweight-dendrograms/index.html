@@ -69,7 +69,7 @@
 <h2>Dendrograms in R</h2>
 <p>Dendrograms are diagrams useful to illustrate hierarchical relationships, such as those obtained from a hierarchical clustering. They are commonly used in biology, especially in genetics, for example to illustrate the relationships among a set of genes or taxa.</p>
 <p>Several alternatives exist in R to visualize dendrograms (reviews <a href="http://www.sthda.com/english/wiki/beautiful-dendrogram-visualizations-in-r-5-must-known-methods-unsupervised-machine-learning#plot.dendrogram-function">here</a> and <a href="http://rpubs.com/gaston/dendrograms">here</a>), like base R of course, or the <a href="http://ape-package.ird.fr/">ape</a> package. For ggplot2-based solutions, let’s mention <a href="https://cran.r-project.org/web/packages/ggdendro/index.html">ggdendro</a>, <a href="https://github.com/talgalili/dendextend">dendextend</a>, or <a href="https://guangchuangyu.github.io/software/ggtree/">ggtree</a>.<br />
-<a href="https://cran.r-project.org/web/packages/ggdendro/index.html">ggdendro</a> is stable, lightweight (no dependency other than MASS and ggplot2), and allows to access cluster data in a convenient format, but its functionalities are a bit limited in terms of visualization. On the other hand, <a href="https://github.com/talgalili/dendextend">dendextend</a> and <a href="https://guangchuangyu.github.io/software/ggtree/">ggtree</a> offers a lot of great features, but at the cost of higher dependency requirements and a steeper learning curve to use them effectively.</p>
+<a href="https://cran.r-project.org/web/packages/ggdendro/index.html">ggdendro</a> is stable, lightweight (no dependency other than MASS and ggplot2), and allows to access cluster data in a convenient format, but its functionalities are a bit limited in terms of visualization. On the other hand, <a href="https://github.com/talgalili/dendextend">dendextend</a> and <a href="https://guangchuangyu.github.io/software/ggtree/">ggtree</a> offer a lot of great features, but at the cost of higher dependency requirements and a steeper learning curve to use them effectively.</p>
 <p>I wanted a “lightweight” and flexible ggplot2-based solution to draw dendrograms, in particular with the possibility to highlight clusters using different branch colors.<br />
 Inspired by <a href="https://stackoverflow.com/questions/21474388/colorize-clusters-in-dendogram-with-ggplot2">this stackoverflow question</a>, I finally ended up writing the functions described below, using ggdendro and ggplot2 only.</p>
 <pre class="r"><code>library(ggdendro)
@@ -384,7 +384,7 @@ grid.arrange(p1, p2, ncol = 2, widths = 3:2)</code></pre>
 ## [1] methods   stats     graphics  grDevices utils     datasets  base     
 ## 
 ## other attached packages:
-## [1] gridExtra_2.3     ggplot2_3.1.0     ggdendro_0.1-20   data.table_1.12.3
+## [1] data.table_1.12.2 gridExtra_2.3     ggplot2_3.1.0     ggdendro_0.1-20  
 ## 
 ## loaded via a namespace (and not attached):
 ##  [1] Rcpp_1.0.0         pillar_1.3.1       RColorBrewer_1.1-2
@@ -417,7 +417,7 @@ grid.arrange(p1, p2, ncol = 2, widths = 3:2)</code></pre>
 
         		<footer>
 			<span>
-			&copy; <time datetime="2019-06-16 17:12:31.114103 &#43;0200 CEST m=&#43;0.088500001">2019</time> . Made with <a href='https://gohugo.io'>Hugo</a> using the <a href='https://github.com/EmielH/tale-hugo/'>Tale</a> theme and the <a href='https://bookdown.org/yihui/blogdown/'>blogdown</a> R package.
+			&copy; 2019. Made with <a href='https://gohugo.io'>Hugo</a> using the <a href='https://github.com/EmielH/tale-hugo/'>Tale</a> theme and the <a href='https://bookdown.org/yihui/blogdown/'>blogdown</a> R package.
 			</span>
 		</footer>
 

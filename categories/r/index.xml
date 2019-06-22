@@ -49,7 +49,7 @@ Ridgeline plots“Ridgeline plots are partially overlapping line plots that cr
       <pubDate>Sun, 03 Mar 2019 00:00:00 +0000</pubDate>
       
       <guid>/post/2019-03-03-datatable-dplyr/</guid>
-      <description>IntroductionAboutdata.table and dplyrCreate example dataBasic operationsFilter rowsSort rowsSelect columnsSummarise dataAdd/update/delete columnsbyGoing furtherAdvanced columns manipulationChain expressionsIndexing and Keysset*() modificationsAdvanced use of byMiscellaneousRead / Write dataReshape dataOtherJoin/Bind data setsJoinMore joinsBindSet operationsSummary-------------------------------------------------------------------------------table {width: 100%;border-top: none !</description>
+      <description>IntroductionAboutUpdatedata.table and dplyrCreate example dataBasic operationsFilter rowsSort rowsSelect columnsSummarise dataAdd/update/delete columnsbyGoing furtherAdvanced columns manipulationChain expressionsIndexing and Keysset*() modificationsAdvanced use of byMiscellaneousRead / Write dataReshape dataOtherJoin/Bind data setsJoinMore joinsBindSet operationsSummary-------------------------------------------------------------------------------table {width: 100%;border-top: none !</description>
     </item>
     
     <item>
