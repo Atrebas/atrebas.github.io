@@ -205,7 +205,7 @@ this document is independently <a href="https://github.com/Atrebas/atrebas.githu
 <div id="update" class="section level3">
 <h3>Update</h3>
 <ul>
-<li><em>2019-06-22</em>: Coding style improved (thanks <span class="citation">@tylerburleigh</span> for pointing that out). Some data.table expressions with by reordered and indented to better highlight the similarity with dplyr. Minor comments and improvements.</li>
+<li><em>2019-06-22</em>: Coding style improved (thanks to <span class="citation">@tylerburleigh</span> for pointing that out). Some data.table expressions with <code>by</code> reordered and indented to better highlight the similarity with dplyr. Minor comments and improvements.</li>
 </ul>
 <br>
 <hr>
@@ -1549,7 +1549,7 @@ DF</code></pre>
 <h3>by</h3>
 <p>The <code>dplyr::group_by()</code> function and the corresponding <code>by</code> and <code>keyby</code> statements in data.table allow to run manipulate each group of observations and combine the results. The sole difference between <code>by</code> and <code>keyby</code> is that <code>keyby</code> orders the results and creates a <code>key</code> that will allow faster subsetting (cf. the <a href="#indexing-and-keys">indexing and keys</a> section). Below, we arbitrary use one or the other.<br />
 Again, the <code>all-at-if</code> variants of <code>group_by()</code> are available in dplyr but not presented here.<br />
-Note that it is possible to reorder the arguments in data.table: <code>DT[i, j, by] == DT[i, by, j]</code>. This is was is done below to better highlight the similarity with dplyr.</p>
+Note that it is possible to reorder the arguments in data.table: <code>DT[i, j, by]</code> &lt;=&gt; <code>DT[i, by, j]</code>. This is done below to better highlight the similarity with dplyr.</p>
 <div id="by-group" class="section level4">
 <h4>By group</h4>
 <table class="table table-condensed">
@@ -3327,7 +3327,7 @@ fread(&quot;DT.csv&quot;, drop = &quot;V4&quot;)</code></pre>
 </div>
 <div id="reshape-data" class="section level3">
 <h3>Reshape data</h3>
-<p>The following part is still a bit clunky. I need to find better examples. See <a href="https://cran.r-project.org/web/packages/data.table/vignettes/datatable-reshape.html">here</a> and <a href="https://tidyr.tidyverse.org/">here</a> for more details.</p>
+<p>This part is still a bit clunky. I need to find better examples. See <a href="https://cran.r-project.org/web/packages/data.table/vignettes/datatable-reshape.html">here</a> and <a href="https://tidyr.tidyverse.org/">here</a> for more details.</p>
 <div id="melt-data-from-wide-to-long" class="section level4">
 <h4>Melt data (from wide to long)</h4>
 <table class="table table-condensed">
@@ -3426,8 +3426,6 @@ mDF &lt;- tidyr::gather(DF,
               key   = Variable,
               value = n,
               fill  = 0)
-#
-#
 # pivot_wider todo</code></pre>
 <pre><code>## # A tibble: 3 x 3
 ##   V4       V1    V2
@@ -4549,16 +4547,16 @@ Hopefully, this comparison is not too biased, but I must admit that my preferenc
 ## [1] methods   stats     graphics  grDevices utils     datasets  base     
 ## 
 ## other attached packages:
-## [1] dplyr_0.8.0.1     data.table_1.12.2 knitr_1.21       
+## [1] dplyr_0.8.0.1     data.table_1.12.2 knitr_1.23.3     
 ## 
 ## loaded via a namespace (and not attached):
-##  [1] Rcpp_1.0.0       magrittr_1.5     hms_0.4.2        tidyselect_0.2.5
-##  [5] R6_2.3.0         rlang_0.3.1      fansi_0.4.0      stringr_1.3.1   
-##  [9] tools_3.3.2      xfun_0.4.11      utf8_1.1.4       cli_1.0.1       
-## [13] htmltools_0.3.6  yaml_2.2.0       digest_0.6.18    assertthat_0.2.0
+##  [1] Rcpp_1.0.1       magrittr_1.5     hms_0.4.2        tidyselect_0.2.5
+##  [5] R6_2.3.0         rlang_0.3.1      fansi_0.4.0      stringr_1.4.0   
+##  [9] tools_3.3.2      xfun_0.7         utf8_1.1.4       cli_1.0.1       
+## [13] htmltools_0.3.6  yaml_2.2.0       digest_0.6.19    assertthat_0.2.0
 ## [17] tibble_2.0.1     crayon_1.3.4     bookdown_0.9     readr_1.2.1     
-## [21] tidyr_0.8.0      purrr_0.2.5      glue_1.3.0       evaluate_0.12   
-## [25] rmarkdown_1.11   blogdown_0.10    stringi_1.2.4    pillar_1.3.1    
+## [21] tidyr_0.8.0      purrr_0.2.5      glue_1.3.1       evaluate_0.14   
+## [25] rmarkdown_1.13.4 blogdown_0.10    stringi_1.4.3    pillar_1.3.1    
 ## [29] pkgconfig_2.0.2</code></pre>
 </div>
 

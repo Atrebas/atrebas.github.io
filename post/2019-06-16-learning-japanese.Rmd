@@ -43,13 +43,13 @@ Kanji are logograms: characters represent a word, but can have multiple meanings
 There are several tens of thousands of kanji, but approximately 2000 are commonly used to write nouns, as well as stems of verbs, adjectives, and adverbs. They are also used to write Japanese personal names.    
 Here are a few examples:     
 - 木, tree, pronounced _ki_       
-- 針, needle  + 鼠, rat/mouse =  針鼠, hedgehog, pronounced _harinezumi_     
+- 針, needle  + 鼠, rat/mouse =  針鼠, hedgehog (a mouse with needles!), pronounced _harinezumi_     
 - 田, ricefield + 中, middle = 田中, Tanaka, the fourth most common Japanese surname
 
 
 ### Kana
 Both for simplification and to better capture the Japanese language specificities, two writing systems have been derived from the kanji: the kana, with hiragana and katakana.    
-Kana are syllabic systems, each character corresponds to one sound (a mora). Hiragana and katakana represent the same sounds but with differents sets of characters. Like kanji, each kana has a given number of strokes and must be written in a precise order.    
+Kana are syllabic systems, each character corresponds to one sound. Hiragana and katakana represent the same sounds but with differents sets of characters. Like kanji, each kana has a given number of strokes and must be written in a precise order.    
 - Hiragana are used for grammatical elements and Japanese words that have no (simple) kanji. They are also used to indicate kanji pronunciation.    
 - Katakana are used for transcription of foreign words and the writing of loan words. They are also used for emphasis, in onomatopoeia, or for technical and scientific terms, ...
 
@@ -103,7 +103,7 @@ Browse the following image gallery to get further explanations ([pdf](/files/kan
 
 There are a few more things to know, related to long vowels, gemination (consonant lengthening), 
 or additional katakana combinations used in modern Japanese.
-But they are easy to understand once you get the essentials rules presented above.   
+But they are easy to understand once you get the essential rules presented above.   
 
 <br>
 
@@ -115,7 +115,7 @@ switched back to [ggplot2](https://ggplot2.tidyverse.org/) to render the plots a
 - I also gave a try to [ggpomological](https://www.garrickadenbuie.com/project/ggpomological/), but had some problems to fine-tune the appearance of the plot, so I sticked to a simple style.    
 - "Data processing" was made smooth with [data.table](https://github.com/Rdatatable/data.table/wiki).    
 - Character encoding is a pain.    
-- The code that follows was used to produce the final [pdf](/files/kana.pdf) plots for both hiragana and katakana.    
+- The code that follows has been used to produce the final [pdf](/files/kana.pdf) plots for both hiragana and katakana. The input file with all the characters can be found [here](https://raw.githubusercontent.com/Atrebas/atrebas.github.io/master/files/kana3.csv).    
 
 
 <br>
