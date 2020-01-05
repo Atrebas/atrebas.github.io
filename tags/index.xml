@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8" standalone="yes" ?>
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
 <rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
   <channel>
     <title>Tags on Home</title>
@@ -12,7 +12,7 @@
     
     
     <item>
-      <title>Data.table</title>
+      <title>data.table</title>
       <link>/tags/data.table/</link>
       <pubDate>Sun, 16 Jun 2019 00:00:00 +0000</pubDate>
       
@@ -21,16 +21,7 @@
     </item>
     
     <item>
-      <title>Dplyr</title>
-      <link>/tags/dplyr/</link>
-      <pubDate>Sun, 03 Mar 2019 00:00:00 +0000</pubDate>
-      
-      <guid>/tags/dplyr/</guid>
-      <description></description>
-    </item>
-    
-    <item>
-      <title>Ggplot2</title>
+      <title>ggplot2</title>
       <link>/tags/ggplot2/</link>
       <pubDate>Sun, 16 Jun 2019 00:00:00 +0000</pubDate>
       
@@ -39,11 +30,38 @@
     </item>
     
     <item>
-      <title>Japanese</title>
+      <title>japanese</title>
       <link>/tags/japanese/</link>
       <pubDate>Sun, 16 Jun 2019 00:00:00 +0000</pubDate>
       
       <guid>/tags/japanese/</guid>
+      <description></description>
+    </item>
+    
+    <item>
+      <title>R</title>
+      <link>/tags/r/</link>
+      <pubDate>Sun, 16 Jun 2019 00:00:00 +0000</pubDate>
+      
+      <guid>/tags/r/</guid>
+      <description></description>
+    </item>
+    
+    <item>
+      <title>visualization</title>
+      <link>/tags/visualization/</link>
+      <pubDate>Sun, 16 Jun 2019 00:00:00 +0000</pubDate>
+      
+      <guid>/tags/visualization/</guid>
+      <description></description>
+    </item>
+    
+    <item>
+      <title>dplyr</title>
+      <link>/tags/dplyr/</link>
+      <pubDate>Sun, 03 Mar 2019 00:00:00 +0000</pubDate>
+      
+      <guid>/tags/dplyr/</guid>
       <description></description>
     </item>
     
@@ -62,24 +80,6 @@
       <pubDate>Tue, 15 Jan 2019 00:00:00 +0000</pubDate>
       
       <guid>/tags/python/</guid>
-      <description></description>
-    </item>
-    
-    <item>
-      <title>R</title>
-      <link>/tags/r/</link>
-      <pubDate>Sun, 16 Jun 2019 00:00:00 +0000</pubDate>
-      
-      <guid>/tags/r/</guid>
-      <description></description>
-    </item>
-    
-    <item>
-      <title>Visualization</title>
-      <link>/tags/visualization/</link>
-      <pubDate>Sun, 16 Jun 2019 00:00:00 +0000</pubDate>
-      
-      <guid>/tags/visualization/</guid>
       <description></description>
     </item>
     

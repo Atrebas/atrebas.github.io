@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8" standalone="yes" ?>
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
 <rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
   <channel>
     <title>Learning on Home</title>
@@ -17,8 +17,7 @@
       <pubDate>Tue, 15 Jan 2019 00:00:00 +0000</pubDate>
       
       <guid>/post/2019-01-15-2018-learning/</guid>
-      <description>.figure  p {text-align: center;align: bottom;font-size: 10px;}Both for personal interest and professional development, I started to learn Python and machine learning concepts.This article summarizes my 2018 learning path.
-CoursesIn January, I completed the MOOC “Python 3: from the fundamentals to advanced concepts” that I started in November 2017. This MOOC, taught in French by two INRIA researchers, provided me with a very good introduction to the Python programming language: overview of the built-in types, functions, notions of OOP, …</description>
+      <description>Both for personal interest and professional development, I started to learn Python and machine learning concepts. This article summarizes my 2018 learning path.</description>
     </item>
     
   </channel>

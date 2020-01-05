@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8" standalone="yes" ?>
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
 <rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
   <channel>
     <title>Posts on Home</title>
@@ -17,8 +17,7 @@
       <pubDate>Sun, 16 Jun 2019 00:00:00 +0000</pubDate>
       
       <guid>/post/2019-06-16-learning-japanese/</guid>
-      <description>.hljs{background: #a7a7a71a;font-size: 90%;}.imgshow {display: none;}This post is about drawing hiragana and katakana tables using R, data.table, and ggplot2. The objective was to better illustrate the rules that underlie these two Japanese writing systems.
-Overview of the the Japanese writing systemsFor a more detailed and accurate information, Wikipedia articles are excellent and have been used as a source for this article.</description>
+      <description>This post is about drawing hiragana and katakana tables using R, data.table, and ggplot2. The objective was to better illustrate the rules that underlie these two Japanese writing systems.</description>
     </item>
     
     <item>
@@ -27,8 +26,7 @@ Overview of the the Japanese writing systemsFor a more detailed and accurate in
       <pubDate>Sat, 08 Jun 2019 00:00:00 +0000</pubDate>
       
       <guid>/post/2019-06-08-lightweight-dendrograms/</guid>
-      <description>.hljs{background: #a7a7a71a;font-size: 90%;}Dendrograms in RDendrograms are diagrams useful to illustrate hierarchical relationships, such as those obtained from a hierarchical clustering. They are commonly used in biology, especially in genetics, for example to illustrate the relationships among a set of genes or taxa.
-Several alternatives exist in R to visualize dendrograms (reviews here and here), like base R of course, or the ape package.</description>
+      <description>I wanted a &amp;ldquo;lightweight&amp;rdquo; and flexible ggplot2-based solution to draw dendrograms, in particular with the possibility to highlight clusters using different branch colors. I finally ended up writing a small set of functions, using ggdendro and ggplot2 only.</description>
     </item>
     
     <item>
@@ -37,10 +35,7 @@ Several alternatives exist in R to visualize dendrograms (reviews here and here)
       <pubDate>Sat, 18 May 2019 00:00:00 +0000</pubDate>
       
       <guid>/post/2019-05-18-images-to-ridges/</guid>
-      <description>.hljs{background: #a7a7a71a;font-size: 90%;}What if we turn images into ridgeline plots?
-Ridgeline plots“Ridgeline plots are partially overlapping line plots that create the impression of a mountain range. They can be quite useful for visualizing changes in distributions over time or space.” - Claus Wilke.
-They have been quite popular recently. Some references include:
-The work of James Cheshire to represent population density</description>
+      <description>I was wondering what images turned into ridgeline plots would look like. This post illustrates some experiments performed with ggplot2 and ggridges.</description>
     </item>
     
     <item>
@@ -49,7 +44,7 @@ Ridgeline plots“Ridgeline plots are partially overlapping line plots that cr
       <pubDate>Sun, 03 Mar 2019 00:00:00 +0000</pubDate>
       
       <guid>/post/2019-03-03-datatable-dplyr/</guid>
-      <description>IntroductionAboutUpdatedata.table and dplyrCreate example dataBasic operationsFilter rowsSort rowsSelect columnsSummarise dataAdd/update/delete columnsbyGoing furtherAdvanced columns manipulationChain expressionsIndexing and Keysset*() modificationsAdvanced use of byMiscellaneousRead / Write dataReshape dataOtherJoin/Bind data setsJoinMore joinsBindSet operationsSummary-------------------------------------------------------------------------------table {width: 100%;border-top: none !</description>
+      <description>data.table and dplyr are two R packages that both aim at an easier and more efficient manipulation of data frames. This article shows how they can be used to execute common data munging tasks. The commands are presented side-by-side to facilitate the comparison.</description>
     </item>
     
     <item>
@@ -58,8 +53,7 @@ Ridgeline plots“Ridgeline plots are partially overlapping line plots that cr
       <pubDate>Tue, 15 Jan 2019 00:00:00 +0000</pubDate>
       
       <guid>/post/2019-01-15-2018-learning/</guid>
-      <description>.figure  p {text-align: center;align: bottom;font-size: 10px;}Both for personal interest and professional development, I started to learn Python and machine learning concepts.This article summarizes my 2018 learning path.
-CoursesIn January, I completed the MOOC “Python 3: from the fundamentals to advanced concepts” that I started in November 2017. This MOOC, taught in French by two INRIA researchers, provided me with a very good introduction to the Python programming language: overview of the built-in types, functions, notions of OOP, …</description>
+      <description>Both for personal interest and professional development, I started to learn Python and machine learning concepts. This article summarizes my 2018 learning path.</description>
     </item>
     
   </channel>

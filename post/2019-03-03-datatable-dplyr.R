@@ -394,7 +394,8 @@ summarise_all(DF, max)
 
 ## @knitr advCols2.1
 DT[, lapply(.SD, mean),
-     .SDcols = c("V1", "V2")] # .SDcols is like "_at"
+     .SDcols = c("V1", "V2")]
+# .SDcols is like "_at"
 ## @knitr advCols2.2
 summarise_at(DF, c("V1", "V2"), mean)
 

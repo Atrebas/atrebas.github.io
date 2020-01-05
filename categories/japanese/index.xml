@@ -1,9 +1,9 @@
-<?xml version="1.0" encoding="utf-8" standalone="yes" ?>
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
 <rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
   <channel>
-    <title>Japanese on Home</title>
+    <title>japanese on Home</title>
     <link>/categories/japanese/</link>
-    <description>Recent content in Japanese on Home</description>
+    <description>Recent content in japanese on Home</description>
     <generator>Hugo -- gohugo.io</generator>
     <language>en-us</language>
     <lastBuildDate>Sun, 16 Jun 2019 00:00:00 +0000</lastBuildDate>
@@ -17,8 +17,7 @@
       <pubDate>Sun, 16 Jun 2019 00:00:00 +0000</pubDate>
       
       <guid>/post/2019-06-16-learning-japanese/</guid>
-      <description>.hljs{background: #a7a7a71a;font-size: 90%;}.imgshow {display: none;}This post is about drawing hiragana and katakana tables using R, data.table, and ggplot2. The objective was to better illustrate the rules that underlie these two Japanese writing systems.
-Overview of the the Japanese writing systemsFor a more detailed and accurate information, Wikipedia articles are excellent and have been used as a source for this article.</description>
+      <description>This post is about drawing hiragana and katakana tables using R, data.table, and ggplot2. The objective was to better illustrate the rules that underlie these two Japanese writing systems.</description>
     </item>
     
   </channel>
