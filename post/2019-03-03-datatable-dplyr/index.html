@@ -203,7 +203,8 @@ this document is independently <a href="https://github.com/Atrebas/atrebas.githu
 <div id="update" class="section level3">
 <h3>Update</h3>
 <ul>
-<li><em>2020-06-13</em>: Update with data.table_1.12.9 and dplyr_1.0.0. Work in progress, stay tuned.<br />
+<li><em>2020-06-13</em>: Update with data.table_1.12.9 and dplyr_1.0.0. Work in progress, stay tuned.
+‘Superseded’ dplyr code has been commented and will probably be removed in the future.<br />
 </li>
 <li><em>2019-06-22</em>: Coding style improved (thanks to <span class="citation">@tylerburleigh</span> for pointing that out). Some data.table expressions with <code>by</code> reordered and indented to better highlight the similarity with dplyr. Minor comments and improvements.</li>
 </ul>
@@ -212,10 +213,17 @@ this document is independently <a href="https://github.com/Atrebas/atrebas.githu
 </div>
 <div id="data.table-and-dplyr" class="section level3">
 <h3>data.table and dplyr</h3>
-<p>data.table and dplyr are two R packages that both aim at an easier and more efficient manipulation of data frames. But while they share a lot of functionalities, their philosophies are quite different. Below is a quick overview of the main differences (from my basic user’s perspective).</p>
+<p>data.table and dplyr are two R packages that both aim at an easier and more efficient manipulation of data frames.
+But while they share a lot of functionalities, their philosophies are quite different.
+Below is a quick overview of the main differences (from my basic user’s perspective).</p>
 <p><strong>Syntax:</strong><br />
-- The general data.table syntax is as follows: <code>DT[i, j, by, ...]</code> which means: “Take DT, subset rows using <code>i</code>, then calculate <code>j</code>, grouped by <code>by</code>” with possible extra options <code>...</code>. It allows to combine several operations in a very concise and consistent expression.<br />
-- The syntax of dplyr is based on five main functions (<code>filter()</code>, <code>arrange()</code>, <code>select()</code>, <code>mutate()</code>, <code>summarise()</code>) and <code>group_by()</code> + their scoped variants (suffixed with <code>_all</code>, <code>_at</code>, or <code>_if</code>) + a bunch of helper functions. It is a ‘do one thing at a time’ approach, chaining together functions dedicated to a specific task.</p>
+- The general data.table syntax is as follows: <code>DT[i, j, by, ...]</code> which means:
+“Take DT, subset rows using <code>i</code>, then calculate <code>j</code>, grouped by <code>by</code>” with possible extra options <code>...</code>.
+It allows to combine several operations in a very concise and consistent expression.<br />
+- The syntax of dplyr is based on key verbs corresponding to the most common operations:
+<code>filter()</code>, <code>arrange()</code>, <code>select()</code>, <code>mutate()</code>, <code>summarise()</code>, …
+These functions can be combine with <code>group_by()</code> to aggregate data ‘by group’ and a bunch of helper functions.
+It is a ‘do one thing at a time’ approach, chaining together functions dedicated to a specific task.</p>
 <p><strong>Ecosystem:</strong><br />
 The data.table package has no dependency whereas dplyr is part of the tidyverse. So, for example, while data.table includes functions to read, write, or reshape data, dplyr delegates these tasks to companion packages like readr or tidyr.<br />
 On the other hand, data.table is focused on the processing of local in-memory data, but dplyr offers a database backend.</p>
@@ -283,7 +291,8 @@ DF</code></pre>
 </tr>
 </tbody>
 </table>
-<p>Below, the data.table code uses <code>DT</code> and the dplyr code uses <code>DF</code>. Also, the dplyr code uses the <code>%&gt;%</code> operator: a basic knowledge of the <a href="https://cran.r-project.org/web/packages/magrittr/vignettes/magrittr.html">magrittr</a> syntax is assumed.</p>
+<p>Below, the data.table code uses <code>DT</code> and the dplyr code uses <code>DF</code>.
+Also, the dplyr code uses the <code>%&gt;%</code> operator: a basic knowledge of the <a href="https://cran.r-project.org/web/packages/magrittr/vignettes/magrittr.html">magrittr</a> syntax is assumed.</p>
 <!----------------------------------------------------------------------------
                              BASIC OPERATIONS
 ------------------------------------------------------------------------------->
@@ -534,7 +543,7 @@ distinct(DF, across(c(V1, V4))) # returns selected cols
 </div>
 <div id="other-filters" class="section level4">
 <h4>Other filters</h4>
-In addition to the main <code>filter()</code> function, dplyr also offers the <code>filter_all/at/if</code> variants as well as three helper functions to filter rows. With data.table, we can simply use a custom expression in <code>DT[i]</code>.<br />
+In addition to the main <code>filter()</code> function, dplyr also offers <code>slice_*()</code> helpers. With data.table, we can simply use a custom expression in <code>DT[i]</code>.<br />
 
 <table class="table table-condensed">
 <tbody>
@@ -1192,7 +1201,6 @@ select(DF, one_of(c(&quot;V1&quot;, &quot;X&quot;)))</code></pre>
 </div>
 <div id="summarise-data" class="section level3">
 <h3>Summarise data</h3>
-<p>Summary functions take vectors as input and return a single value (<em>e.g.</em> <code>min()</code>, <code>mean()</code>, <code>var()</code>, …).</p>
 <div id="summarise-one-column" class="section level4">
 <h4>Summarise one column</h4>
 <table class="table table-condensed">
@@ -1550,9 +1558,16 @@ DF</code></pre>
 </div>
 <div id="by" class="section level3">
 <h3>by</h3>
-<p>The <code>dplyr::group_by()</code> function and the corresponding <code>by</code> and <code>keyby</code> statements in data.table allow to run manipulate each group of observations and combine the results. The sole difference between <code>by</code> and <code>keyby</code> is that <code>keyby</code> orders the results and creates a <code>key</code> that will allow faster subsetting (cf. the <a href="#indexing-and-keys">indexing and keys</a> section). Below, we arbitrary use one or the other.<br />
-Again, the <code>all-at-if</code> variants of <code>group_by()</code> are available in dplyr but not presented here.<br />
-Note that it is possible to reorder the arguments in data.table: <code>DT[i, j, by]</code> &lt;=&gt; <code>DT[i, by, j]</code>. This is done below to better highlight the similarity with dplyr.</p>
+<p>The <code>dplyr::group_by()</code> function and the corresponding <code>by</code> and <code>keyby</code> statements in data.table
+allow to run manipulate each group of observations and combine the results.
+The sole difference between <code>by</code> and <code>keyby</code> is that <code>keyby</code> orders the results and
+creates a <code>key</code> that will allow faster subsetting (cf. the <a href="#indexing-and-keys">indexing and keys</a> section).
+Below, we arbitrary use one or the other.<br />
+<code>group_by()</code> takes an existing tibble and converts it into a grouped
+tibble where operations will always be performed “by group”.
+Using <code>ungroup()</code> removes grouping. With data.table, <code>by</code> is always used on the fly.<br />
+Note that it is possible to reorder the arguments in data.table: <code>DT[i, j, by]</code> &lt;=&gt; <code>DT[i, by, j]</code>.
+This is done below to better highlight the similarity with dplyr.</p>
 <div id="by-group" class="section level4">
 <h4>By group</h4>
 <table class="table table-condensed">
@@ -1916,8 +1931,12 @@ DT[, V2[2], by = V4]</code></pre>
 <h1>Going further</h1>
 <div id="advanced-columns-manipulation" class="section level3">
 <h3>Advanced columns manipulation</h3>
-<p>To further manipulate columns, dplyr includes nine functions: the <code>_all</code>, <code>_at</code>, and <code>_if</code> versions of <code>summarise()</code>, <code>mutate()</code>, and <code>transmute()</code>.<br />
-With data.table, we use <code>.SD</code>, which is a <code>data.table</code> containing the Subset of Data for each group, excluding the column(s) used in <code>by</code>. So, <code>DT[, .SD]</code> is <code>DT</code> itself and in the expression <code>DT[, .SD, by = V4]</code>, <code>.SD</code> contains all the DT columns (except V4) for each values in V4 (see <code>DT[, print(.SD), by = V4]</code>). <code>.SDcols</code> allows to select the columns included in <code>.SD</code>.</p>
+<p>To manipulate multiple columns, dplyr_1.0.0 has introduced the <code>across()</code> function,
+superseding the <code>_all</code>, <code>_at</code>, and <code>_if</code> versions of <code>summarise()</code>, <code>mutate()</code>, and <code>transmute()</code>.<br />
+With data.table, we use <code>.SD</code>, which is a <code>data.table</code> containing the Subset of Data for each group,
+excluding the column(s) used in <code>by</code>. So, <code>DT[, .SD]</code> is <code>DT</code> itself and in the expression <code>DT[, .SD, by = V4]</code>,
+<code>.SD</code> contains all the DT columns (except V4) for each values in V4 (see <code>DT[, print(.SD), by = V4]</code>).
+<code>.SDcols</code> allows to select the columns included in <code>.SD</code>.</p>
 <div id="summarise-all-the-columns" class="section level4">
 <h4>Summarise all the columns</h4>
 <table class="table table-condensed">
@@ -1953,8 +1972,7 @@ DF %&gt;% summarise(across(everything(),
 <tr>
 <td align="left">
 <pre class="r"><code>DT[, lapply(.SD, mean),
-     .SDcols = c(&quot;V1&quot;, &quot;V2&quot;)]
-# .SDcols is like &quot;_at&quot;</code></pre>
+     .SDcols = c(&quot;V1&quot;, &quot;V2&quot;)]</code></pre>
 <pre><code>##          V1       V2
 ## 1: 2.333333 4.333333</code></pre>
 </td>
@@ -2275,7 +2293,8 @@ DF &lt;- DF %&gt;%
 </tr>
 </tbody>
 </table>
-<p>The use of <code>DT[,j]</code> is very flexible, allowing to pass complex expressions in a straightforward way, or combine expressions with multiple outputs.</p>
+<p>The use of <code>DT[,j]</code> is very flexible, allowing to pass complex expressions in a straightforward way,
+or combine expressions with multiple outputs.</p>
 </div>
 <div id="use-a-complex-expression" class="section level4">
 <h4>Use a complex expression</h4>
@@ -2351,7 +2370,9 @@ DF &lt;- DF %&gt;%
 </div>
 <div id="chain-expressions" class="section level3">
 <h3>Chain expressions</h3>
-<p>The dplyr workflow relies on the magrittr pipe operator (<code>%&gt;%</code>). The magrittr package can also be used with <code>data.table</code> objects, but data.table comes with its own chaining system: <code>DT[ ... ][ ... ][ ... ]</code>.</p>
+<p>The dplyr workflow relies on the magrittr pipe operator (<code>%&gt;%</code>).
+The magrittr package can also be used with <code>data.table</code> objects,
+but data.table comes with its own chaining system: <code>DT[ ... ][ ... ][ ... ]</code>.</p>
 <div id="expression-chaining-using-dt-recommended" class="section level4">
 <h4>Expression chaining using <code>DT[][]</code> (recommended)</h4>
 <table class="table table-condensed">
@@ -2419,7 +2440,10 @@ DF &lt;- DF %&gt;%
 </div>
 <div id="indexing-and-keys" class="section level3">
 <h3>Indexing and Keys</h3>
-<p>Row subsetting in dplyr relies on the <code>filter()</code> and <code>slice()</code> functions, as shown in the first section. With data.table, in addition to the above-mentioned approach, two systems are available to make row filtering and join operations more convenient and blazingly fast (~170x speed-up): <em>keys</em> (primary ordered index) and <em>indices</em> (automatic secondary indexing).</p>
+<p>Row subsetting in dplyr relies on the <code>filter()</code> and <code>slice()</code> functions, as shown in the first section.
+With data.table, in addition to the above-mentioned approach, two systems are available
+to make row filtering and join operations more convenient and blazingly fast (~170x speed-up):
+<em>keys</em> (primary ordered index) and <em>indices</em> (automatic secondary indexing).</p>
 <p>The main differences between keys and indices are:<br />
 - When using keys, data are physically reordered in memory. When using indices, the order is stored as an attribute.<br />
 - Only one key is possible but several indices can coexist.<br />
@@ -2742,7 +2766,9 @@ setindex(DT, NULL)</code></pre>
 </div>
 <div id="set-modifications" class="section level3">
 <h3><code>set*()</code> modifications</h3>
-<p>In data.table, <code>set*()</code> functions modify objects by reference, making these operations fast and memory-efficient. In case this is not a desired behaviour, users can use <code>copy()</code>. The corresponding expressions in dplyr will be less memory-efficient.</p>
+<p>In data.table, <code>set*()</code> functions modify objects by reference, making these operations fast and memory-efficient.
+In case this is not a desired behaviour, users can use <code>copy()</code>.
+The corresponding expressions in dplyr will be less memory-efficient.</p>
 <div id="replace-values" class="section level4">
 <h4>Replace values</h4>
 <table class="table table-condensed">
@@ -3163,9 +3189,12 @@ groupingsets(DT,
 <h1>Miscellaneous</h1>
 <div id="read-write-data" class="section level3">
 <h3>Read / Write data</h3>
-<p><code>fread()</code> and <code>fwrite()</code> are among the most powerful functions of data.table. They are not only incredibly fast (see <a href="https://www.h2o.ai/blog/fast-csv-writing-for-r/">benchmarks</a>), they are also extremely robust.
+<p><code>fread()</code> and <code>fwrite()</code> are among the most powerful functions of data.table.
+They are not only incredibly fast (see <a href="https://www.h2o.ai/blog/fast-csv-writing-for-r/">benchmarks</a>),
+they are also extremely robust.
 The few commands below only scratch the surface and there are a lot of awesome features.
-For example, <code>fread()</code> accepts <code>http</code> and <code>https</code> URLs directly as well as operating system commands such as <code>sed</code> and <code>awk</code> output. Make sure to check the <a href="https://rdrr.io/cran/data.table/man/fread.html">docs</a>.<br />
+For example, <code>fread()</code> accepts <code>http</code> and <code>https</code> URLs directly as well as operating system commands such as <code>sed</code> and <code>awk</code> output.
+Make sure to check the <a href="https://rdrr.io/cran/data.table/man/fread.html">docs</a>.<br />
 Here again, <code>fread()</code> and <code>fwrite()</code> are very versatile and allow to handle different file formats while dplyr delegates file reading and writing to the readr package with several specific functions (csv, tsv, delim, …).</p>
 <div id="write-data-to-a-csv-file" class="section level4">
 <h4>Write data to a csv file</h4>

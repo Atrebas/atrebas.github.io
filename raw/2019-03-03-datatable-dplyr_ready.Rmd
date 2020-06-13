@@ -120,26 +120,18 @@ this document is independently [available](https://github.com/Atrebas/atrebas.gi
 <div style="text-align: center;"><input type='button' id='hideshow' value='Show the outputs'></div>
 
 ### Update
-- _2020-06-13_: Update with data.table_1.12.9 and dplyr_1.0.0. Work in progress, stay tuned. 
-'Superseded' dplyr code has been commented and will probably be removed in the future.    
+- _2020-06-13_: Update with data.table_1.12.9 and dplyr_1.0.0. Work in progress, stay tuned.   
 - _2019-06-22_: Coding style improved (thanks to @tylerburleigh for pointing that out). Some data.table expressions with `by` reordered and indented to better highlight the similarity with dplyr. Minor comments and improvements.  
 
 
 <br><hr>
 ### data.table and dplyr
 
-data.table and dplyr are two R packages that both aim at an easier and more efficient manipulation of data frames. 
-But while they share a lot of functionalities, their philosophies are quite different. 
-Below is a quick overview of the main differences (from my basic user's perspective).   
+data.table and dplyr are two R packages that both aim at an easier and more efficient manipulation of data frames. But while they share a lot of functionalities, their philosophies are quite different. Below is a quick overview of the main differences (from my basic user's perspective).   
 
 __Syntax:__    
-- The general data.table syntax is as follows: `DT[i, j, by, ...]` which means: 
-"Take DT, subset rows using `i`, then calculate `j`, grouped by `by`" with possible extra options `...`. 
-It allows to combine several operations in a very concise and consistent expression.    
-- The syntax of dplyr is based on key verbs corresponding to the most common operations: 
-`filter()`, `arrange()`, `select()`, `mutate()`, `summarise()`, ...
-These functions can be combine with `group_by()` to aggregate data 'by group' and a bunch of helper functions. 
-It is a 'do one thing at a time' approach, chaining together functions dedicated to a specific task.   
+- The general data.table syntax is as follows: `DT[i, j, by, ...]` which means: "Take DT, subset rows using `i`, then calculate `j`, grouped by `by`" with possible extra options `...`. It allows to combine several operations in a very concise and consistent expression.    
+- The syntax of dplyr is based on five main functions (`filter()`, `arrange()`, `select()`, `mutate()`, `summarise()`) and `group_by()` + their scoped variants (suffixed with `_all`, `_at`, or `_if`) + a bunch of helper functions. It is a 'do one thing at a time' approach, chaining together functions dedicated to a specific task.   
 
 __Ecosystem:__      
 The data.table package has no dependency whereas dplyr is part of the tidyverse. So, for example, while data.table includes functions to read, write, or reshape data, dplyr delegates these tasks to companion packages like readr or tidyr.   
@@ -163,8 +155,7 @@ Memory management, parallelism, and shrewd optimization give data.table the adva
 </td></tr></tbody></table>
 
 
-Below, the data.table code uses `DT` and the dplyr code uses `DF`. 
-Also, the dplyr code uses the `%>%` operator: a basic knowledge of the [magrittr](https://cran.r-project.org/web/packages/magrittr/vignettes/magrittr.html) syntax is assumed.    
+Below, the data.table code uses `DT` and the dplyr code uses `DF`. Also, the dplyr code uses the `%>%` operator: a basic knowledge of the [magrittr](https://cran.r-project.org/web/packages/magrittr/vignettes/magrittr.html) syntax is assumed.    
 
 
 
@@ -237,7 +228,7 @@ Also, the dplyr code uses the `%>%` operator: a basic knowledge of the [magrittr
 ```
 </td></tr></tbody></table>
 #### Other filters
-In addition to the main `filter()` function, dplyr also offers `slice_*()` helpers. With data.table, we can simply use a custom expression in `DT[i]`.     
+In addition to the main `filter()` function, dplyr also offers the `filter_all/at/if` variants as well as three helper functions to filter rows. With data.table, we can simply use a custom expression in `DT[i]`.     
 <table class="table table-condensed"><tbody><tr><td align="left">
 ```{r, eval=TRUE}
 <<filterRows7.1>>
@@ -359,6 +350,8 @@ As for row filtering, dplyr includes helper functions to select column. With dat
 
 <br><hr>
 ### Summarise data
+
+Summary functions take vectors as input and return a single value (_e.g._ `min()`, `mean()`, `var()`, ...).    
 
 #### Summarise one column
 <table class="table table-condensed"><tbody><tr><td align="left">
@@ -500,17 +493,9 @@ In the following commands, with data.table, columns are modified by reference us
 <br><hr>
 ### by
 
-The `dplyr::group_by()` function and the corresponding `by` and `keyby` statements in data.table 
-allow to run manipulate each group of observations and combine the results. 
-The sole difference between  `by` and `keyby` is that `keyby` orders the results and 
-creates a `key` that will allow faster subsetting (cf. the [indexing and keys](#indexing-and-keys) section). 
-Below, we arbitrary use one or the other.    
-`group_by()` takes an existing tibble and converts it into a grouped 
-tibble where operations will always be performed "by group". 
-Using `ungroup()` removes grouping. With data.table, `by` is always used on the fly.    
-Note that it is possible to reorder the arguments in data.table: `DT[i, j, by]` <=> `DT[i, by, j]`. 
-This is done below to better highlight the similarity with dplyr.    
-
+The `dplyr::group_by()` function and the corresponding `by` and `keyby` statements in data.table allow to run manipulate each group of observations and combine the results. The sole difference between  `by` and `keyby` is that `keyby` orders the results and creates a `key` that will allow faster subsetting (cf. the [indexing and keys](#indexing-and-keys) section). Below, we arbitrary use one or the other.    
+Again, the `all-at-if` variants of `group_by()` are available in dplyr but not presented here.    
+Note that it is possible to reorder the arguments in data.table: `DT[i, j, by]` <=> `DT[i, by, j]`. This is done below to better highlight the similarity with dplyr.    
 
 #### By group
 <table class="table table-condensed"><tbody><tr><td align="left">
@@ -613,12 +598,8 @@ This is done below to better highlight the similarity with dplyr.
 # Going further 
 
 ### Advanced columns manipulation
-To manipulate multiple columns, dplyr_1.0.0 has introduced the `across()` function, 
-superseding the `_all`, `_at`, and `_if` versions of `summarise()`, `mutate()`, and `transmute()`.    
-With data.table, we use `.SD`, which is a `data.table` containing the Subset of Data for each group, 
-excluding the column(s) used in `by`. So, `DT[, .SD]` is `DT` itself and in the expression `DT[, .SD, by = V4]`, 
-`.SD` contains all the DT columns (except V4) for each values in V4 (see `DT[, print(.SD), by = V4]`). 
-`.SDcols` allows to select the columns included in `.SD`.     
+To further manipulate columns, dplyr includes nine functions: the `_all`, `_at`, and `_if` versions of `summarise()`, `mutate()`, and `transmute()`.    
+With data.table, we use `.SD`, which is a `data.table` containing the Subset of Data for each group, excluding the column(s) used in `by`. So, `DT[, .SD]` is `DT` itself and in the expression `DT[, .SD, by = V4]`, `.SD` contains all the DT columns (except V4) for each values in V4 (see `DT[, print(.SD), by = V4]`). `.SDcols` allows to select the columns included in `.SD`.     
 
 #### Summarise all the columns
 <table class="table table-condensed"><tbody><tr><td align="left">
@@ -722,8 +703,7 @@ excluding the column(s) used in `by`. So, `DT[, .SD]` is `DT` itself and in the 
 </td></tr></tbody></table>
 
 
-The use of `DT[,j]` is very flexible, allowing to pass complex expressions in a straightforward way, 
-or combine expressions with multiple outputs.
+The use of `DT[,j]` is very flexible, allowing to pass complex expressions in a straightforward way, or combine expressions with multiple outputs.
 
 #### Use a complex expression
 <table class="table table-condensed"><tbody><tr><td align="left">
@@ -749,9 +729,7 @@ or combine expressions with multiple outputs.
 
 <br><hr>
 ### Chain expressions
-The dplyr workflow relies on the magrittr pipe operator (`%>%`). 
-The magrittr package can also be used with `data.table` objects, 
-but data.table comes with its own chaining system: `DT[ ... ][ ... ][ ... ]`.      
+The dplyr workflow relies on the magrittr pipe operator (`%>%`). The magrittr package can also be used with `data.table` objects, but data.table comes with its own chaining system: `DT[ ... ][ ... ][ ... ]`.      
 
 #### Expression chaining using `DT[][]` (recommended)
 <table class="table table-condensed"><tbody><tr><td align="left">
@@ -777,10 +755,7 @@ but data.table comes with its own chaining system: `DT[ ... ][ ... ][ ... ]`.
 
 <br><hr>
 ### Indexing and Keys
-Row subsetting in dplyr relies on the `filter()` and `slice()` functions, as shown in the first section. 
-With data.table, in addition to the above-mentioned approach, two systems are available 
-to make row filtering and join operations more convenient and blazingly fast (~170x speed-up): 
-_keys_ (primary ordered index) and _indices_ (automatic secondary indexing).    
+Row subsetting in dplyr relies on the `filter()` and `slice()` functions, as shown in the first section. With data.table, in addition to the above-mentioned approach, two systems are available to make row filtering and join operations more convenient and blazingly fast (~170x speed-up): _keys_ (primary ordered index) and _indices_ (automatic secondary indexing).    
 
 The main differences between keys and indices are:      
 - When using keys, data are physically reordered in memory. When using indices, the order is stored as an attribute.      
@@ -904,9 +879,7 @@ Note: in the following code, we set both a key and an index to demonstrate their
 
 <br><hr>
 ### `set*()` modifications
-In data.table, `set*()` functions modify objects by reference, making these operations fast and memory-efficient. 
-In case this is not a desired behaviour, users can use `copy()`. 
-The corresponding expressions in dplyr will be less memory-efficient.    
+In data.table, `set*()` functions modify objects by reference, making these operations fast and memory-efficient. In case this is not a desired behaviour, users can use `copy()`. The corresponding expressions in dplyr will be less memory-efficient.    
 
 #### Replace values
 <table class="table table-condensed"><tbody><tr><td align="left">
@@ -1034,12 +1007,9 @@ The corresponding expressions in dplyr will be less memory-efficient.
 # Miscellaneous
 
 ### Read / Write data
-`fread()` and `fwrite()` are among the most powerful functions of data.table. 
-They are not only incredibly fast (see [benchmarks](https://www.h2o.ai/blog/fast-csv-writing-for-r/)), 
-they are also extremely robust. 
+`fread()` and `fwrite()` are among the most powerful functions of data.table. They are not only incredibly fast (see [benchmarks](https://www.h2o.ai/blog/fast-csv-writing-for-r/)), they are also extremely robust. 
 The few commands below only scratch the surface and there are a lot of awesome features. 
-For example, `fread()` accepts `http` and `https` URLs directly as well as operating system commands such as `sed` and `awk` output. 
-Make sure to check the [docs](https://rdrr.io/cran/data.table/man/fread.html).     
+For example, `fread()` accepts `http` and `https` URLs directly as well as operating system commands such as `sed` and `awk` output. Make sure to check the [docs](https://rdrr.io/cran/data.table/man/fread.html).     
 Here again, `fread()` and `fwrite()` are very versatile and allow to handle different file formats while dplyr delegates file reading and writing to the readr package with several specific functions (csv, tsv, delim, ...).      
 
 #### Write data to a csv file
