@@ -1573,6 +1573,7 @@ DT[, by = V4,
 <pre class="r"><code>DF %&gt;%
   group_by(V4) %&gt;%
   summarise(sumV2 = sum(V2))</code></pre>
+<pre><code>## `summarise()` ungrouping output (override with `.groups` argument)</code></pre>
 <pre><code>## # A tibble: 3 x 2
 ##   V4    sumV2
 ##   &lt;chr&gt; &lt;int&gt;
@@ -1604,6 +1605,7 @@ DT[, by = V4,
 <pre class="r"><code>DF %&gt;%
   group_by(V4, V1) %&gt;%
   summarise(sumV2 = sum(V2))</code></pre>
+<pre><code>## `summarise()` regrouping output by &#39;V4&#39; (override with `.groups` argument)</code></pre>
 <pre><code>## # A tibble: 6 x 3
 ## # Groups:   V4 [3]
 ##   V4       V1 sumV2
@@ -1636,6 +1638,7 @@ DT[, by = V4,
 <pre class="r"><code>DF %&gt;%
   group_by(tolower(V4)) %&gt;%
   summarise(sumV1 = sum(V1))</code></pre>
+<pre><code>## `summarise()` ungrouping output (override with `.groups` argument)</code></pre>
 <pre><code>## # A tibble: 3 x 2
 ##   `tolower(V4)` sumV1
 ##   &lt;chr&gt;         &lt;dbl&gt;
@@ -1664,6 +1667,7 @@ DT[, by = V4,
 <pre class="r"><code>DF %&gt;%
   group_by(abc = tolower(V4)) %&gt;%
   summarise(sumV1 = sum(V1))</code></pre>
+<pre><code>## `summarise()` ungrouping output (override with `.groups` argument)</code></pre>
 <pre><code>## # A tibble: 3 x 2
 ##   abc   sumV1
 ##   &lt;chr&gt; &lt;dbl&gt;
@@ -1691,6 +1695,7 @@ DT[, by = V4,
 <pre class="r"><code>DF %&gt;%
   group_by(V4 == &quot;A&quot;) %&gt;%
   summarise(sum(V1))</code></pre>
+<pre><code>## `summarise()` ungrouping output (override with `.groups` argument)</code></pre>
 <pre><code>## # A tibble: 2 x 2
 ##   `V4 == &quot;A&quot;` `sum(V1)`
 ##   &lt;lgl&gt;           &lt;dbl&gt;
@@ -1721,6 +1726,7 @@ DT[, by = V4,
   slice(1:5) %&gt;%
   group_by(V4) %&gt;%
   summarise(sumV1 = sum(V1))</code></pre>
+<pre><code>## `summarise()` ungrouping output (override with `.groups` argument)</code></pre>
 <pre><code>## # A tibble: 3 x 2
 ##   V4    sumV1
 ##   &lt;chr&gt; &lt;dbl&gt;
@@ -1751,8 +1757,9 @@ DF %&gt;%
   tally()
 DF %&gt;%
   group_by(V4) %&gt;%
-  summarise(n())
-DF %&gt;%
+  summarise(n())</code></pre>
+<pre><code>## `summarise()` ungrouping output (override with `.groups` argument)</code></pre>
+<pre class="r"><code>DF %&gt;%
   group_by(V4) %&gt;%
   group_size() # returns a vector</code></pre>
 <pre><code>## # A tibble: 3 x 2
@@ -1858,13 +1865,16 @@ DT[, V2[2], by = V4]</code></pre>
 <td align="left">
 <pre class="r"><code>DF %&gt;%
   group_by(V4) %&gt;%
-  summarise(dplyr::first(V2))
-DF %&gt;%
+  summarise(dplyr::first(V2))</code></pre>
+<pre><code>## `summarise()` ungrouping output (override with `.groups` argument)</code></pre>
+<pre class="r"><code>DF %&gt;%
   group_by(V4) %&gt;%
-  summarise(dplyr::last(V2))
-DF %&gt;%
+  summarise(dplyr::last(V2))</code></pre>
+<pre><code>## `summarise()` ungrouping output (override with `.groups` argument)</code></pre>
+<pre class="r"><code>DF %&gt;%
   group_by(V4) %&gt;%
   summarise(dplyr::nth(V2, 2))</code></pre>
+<pre><code>## `summarise()` ungrouping output (override with `.groups` argument)</code></pre>
 <pre><code>## # A tibble: 3 x 2
 ##   V4    `dplyr::first(V2)`
 ##   &lt;chr&gt;              &lt;int&gt;
@@ -2317,6 +2327,7 @@ DT[, .SD - 1,
   group_by(V4) %&gt;%
   summarise(V1sum = sum(V1)) %&gt;%
   filter(V1sum &gt; 5)</code></pre>
+<pre><code>## `summarise()` ungrouping output (override with `.groups` argument)</code></pre>
 <pre><code>## # A tibble: 3 x 2
 ##   V4    V1sum
 ##   &lt;chr&gt; &lt;int&gt;
@@ -2347,6 +2358,7 @@ DT[, .SD - 1,
   group_by(V4) %&gt;%
   summarise(V1sum = sum(V1)) %&gt;%
   arrange(desc(V1sum))</code></pre>
+<pre><code>## `summarise()` ungrouping output (override with `.groups` argument)</code></pre>
 <pre><code>## # A tibble: 3 x 2
 ##   V4    V1sum
 ##   &lt;chr&gt; &lt;int&gt;
@@ -2599,6 +2611,7 @@ DT[V4 != &quot;B&quot;,
   filter(V4 != &quot;B&quot;) %&gt;%
   group_by(V4) %&gt;%
   summarise(sum(V1))</code></pre>
+<pre><code>## `summarise()` ungrouping output (override with `.groups` argument)</code></pre>
 <pre><code>## # A tibble: 2 x 2
 ##   V4    `sum(V1)`
 ##   &lt;chr&gt;     &lt;int&gt;
@@ -2901,6 +2914,10 @@ DT[, Grp := NULL] # delete for consistency</code></pre>
 </td>
 <td align="left">
 <pre class="r"><code>DF %&gt;% mutate(Grp = group_indices(., V4, V1))</code></pre>
+<pre><code>## Warning: The `...` argument of `group_keys()` is deprecated as of dplyr 1.0.0.
+## Please `group_by()` first
+## This warning is displayed once every 8 hours.
+## Call `lifecycle::last_warnings()` to see where this warning was generated.</code></pre>
 <pre><code>## # A tibble: 9 x 4
 ##   V4       V1    V2   Grp
 ##   &lt;chr&gt; &lt;int&gt; &lt;int&gt; &lt;int&gt;
@@ -2986,16 +3003,17 @@ DT[, .(.(.SD)), by = V4] # subsets of the data</code></pre>
 ## 1:  A 0,0,0
 ## 2:  B 4,4,1
 ## 3:  C 4,1,1
-##    V4           V1
-## 1:  A &lt;data.table&gt;
-## 2:  B &lt;data.table&gt;
-## 3:  C &lt;data.table&gt;</code></pre>
+##    V4                V1
+## 1:  A &lt;data.table[3x2]&gt;
+## 2:  B &lt;data.table[3x2]&gt;
+## 3:  C &lt;data.table[3x2]&gt;</code></pre>
 </td>
 <td align="left">
 <pre class="r"><code>DF %&gt;%
   group_by(V4) %&gt;%
-  summarise(list(V1))
-DF %&gt;%
+  summarise(list(V1))</code></pre>
+<pre><code>## `summarise()` ungrouping output (override with `.groups` argument)</code></pre>
+<pre class="r"><code>DF %&gt;%
   group_by(V4) %&gt;%
   group_nest()</code></pre>
 <pre><code>## # A tibble: 3 x 2
@@ -3005,11 +3023,11 @@ DF %&gt;%
 ## 2 B     &lt;int [3]&gt; 
 ## 3 C     &lt;int [3]&gt; 
 ## # A tibble: 3 x 2
-##   V4    data            
-##   &lt;chr&gt; &lt;list&gt;          
-## 1 A     &lt;tibble [3 × 2]&gt;
-## 2 B     &lt;tibble [3 × 2]&gt;
-## 3 C     &lt;tibble [3 × 2]&gt;</code></pre>
+##   V4                  data
+##   &lt;chr&gt; &lt;list&lt;tbl_df[,2]&gt;&gt;
+## 1 A                [3 × 2]
+## 2 B                [3 × 2]
+## 3 C                [3 × 2]</code></pre>
 </td>
 </tr>
 </tbody>
@@ -3473,7 +3491,14 @@ mDF &lt;- tidyr::gather(DF,
 </td>
 <td align="left">
 <pre class="r"><code>group_split(DF, V4)</code></pre>
-<pre><code>## [[1]]
+<pre><code>## &lt;list_of&lt;
+##   tbl_df&lt;
+##     V4: character
+##     V1: integer
+##     V2: integer
+##   &gt;
+## &gt;[3]&gt;
+## [[1]]
 ## # A tibble: 3 x 3
 ##   V4       V1    V2
 ##   &lt;chr&gt; &lt;int&gt; &lt;int&gt;
@@ -3495,11 +3520,7 @@ mDF &lt;- tidyr::gather(DF,
 ##   &lt;chr&gt; &lt;int&gt; &lt;int&gt;
 ## 1 C         4     5
 ## 2 C         1     0
-## 3 C         1     9
-## 
-## attr(,&quot;ptype&quot;)
-## # A tibble: 0 x 3
-## # … with 3 variables: V4 &lt;chr&gt;, V1 &lt;int&gt;, V2 &lt;int&gt;</code></pre>
+## 3 C         1     9</code></pre>
 </td>
 </tr>
 </tbody>
@@ -3736,12 +3757,12 @@ y[x] # requires keys</code></pre>
 </td>
 <td align="left">
 <pre class="r"><code>left_join(x, y, by = &quot;Id&quot;)</code></pre>
-<pre><code>##   Id X1 XY.x Y1 XY.y
-## 1  A  1   x2  1   y1
-## 2  B  3   x4  3   y3
-## 3  B  3   x4  5   y5
-## 4  C  5   x6 NA &lt;NA&gt;
-## 5  C  7   x8 NA &lt;NA&gt;</code></pre>
+<pre><code>##    Id X1 XY.x Y1 XY.y
+## 1:  A  1   x2  1   y1
+## 2:  B  3   x4  3   y3
+## 3:  B  3   x4  5   y5
+## 4:  C  5   x6 NA &lt;NA&gt;
+## 5:  C  7   x8 NA &lt;NA&gt;</code></pre>
 </td>
 </tr>
 </tbody>
@@ -3774,11 +3795,11 @@ x[y] # requires keys</code></pre>
 </td>
 <td align="left">
 <pre class="r"><code>right_join(x, y, by = &quot;Id&quot;)</code></pre>
-<pre><code>##   Id X1 XY.x Y1 XY.y
-## 1  A  1   x2  1   y1
-## 2  B  3   x4  3   y3
-## 3  B  3   x4  5   y5
-## 4  D NA &lt;NA&gt;  7   y7</code></pre>
+<pre><code>##    Id X1 XY.x Y1 XY.y
+## 1:  A  1   x2  1   y1
+## 2:  B  3   x4  3   y3
+## 3:  B  3   x4  5   y5
+## 4:  D NA &lt;NA&gt;  7   y7</code></pre>
 </td>
 </tr>
 </tbody>
@@ -3808,10 +3829,10 @@ x[y, nomatch = 0] # requires keys</code></pre>
 </td>
 <td align="left">
 <pre class="r"><code>inner_join(x, y, by = &quot;Id&quot;)</code></pre>
-<pre><code>##   Id X1 XY.x Y1 XY.y
-## 1  A  1   x2  1   y1
-## 2  B  3   x4  3   y3
-## 3  B  3   x4  5   y5</code></pre>
+<pre><code>##    Id X1 XY.x Y1 XY.y
+## 1:  A  1   x2  1   y1
+## 2:  B  3   x4  3   y3
+## 3:  B  3   x4  5   y5</code></pre>
 </td>
 </tr>
 </tbody>
@@ -3834,13 +3855,13 @@ x[y, nomatch = 0] # requires keys</code></pre>
 </td>
 <td align="left">
 <pre class="r"><code>full_join(x, y, by = &quot;Id&quot;)</code></pre>
-<pre><code>##   Id X1 XY.x Y1 XY.y
-## 1  A  1   x2  1   y1
-## 2  B  3   x4  3   y3
-## 3  B  3   x4  5   y5
-## 4  C  5   x6 NA &lt;NA&gt;
-## 5  C  7   x8 NA &lt;NA&gt;
-## 6  D NA &lt;NA&gt;  7   y7</code></pre>
+<pre><code>##    Id X1 XY.x Y1 XY.y
+## 1:  A  1   x2  1   y1
+## 2:  B  3   x4  3   y3
+## 3:  B  3   x4  5   y5
+## 4:  C  5   x6 NA &lt;NA&gt;
+## 5:  C  7   x8 NA &lt;NA&gt;
+## 6:  D NA &lt;NA&gt;  7   y7</code></pre>
 </td>
 </tr>
 </tbody>
@@ -3863,9 +3884,9 @@ unique(x[y$Id, nomatch = 0]) # requires keys</code></pre>
 </td>
 <td align="left">
 <pre class="r"><code>semi_join(x, y, by = &quot;Id&quot;)</code></pre>
-<pre><code>##   Id X1 XY
-## 1  A  1 x2
-## 2  B  3 x4</code></pre>
+<pre><code>##    Id X1 XY
+## 1:  A  1 x2
+## 2:  B  3 x4</code></pre>
 </td>
 </tr>
 </tbody>
@@ -3888,9 +3909,9 @@ x[!y] # requires keys</code></pre>
 </td>
 <td align="left">
 <pre class="r"><code>anti_join(x, y, by = &quot;Id&quot;)</code></pre>
-<pre><code>##   Id X1 XY
-## 1  C  5 x6
-## 2  C  7 x8</code></pre>
+<pre><code>##    Id X1 XY
+## 1:  C  5 x6
+## 2:  C  7 x8</code></pre>
 </td>
 </tr>
 </tbody>
@@ -3928,16 +3949,16 @@ x[y, .(Id, x.XY, i.XY)] # x. prefix refers to cols in x</code></pre>
 right_join(select(x, Id, XY),
            select(y, Id, XY),
            by = &quot;Id&quot;)</code></pre>
-<pre><code>##   Id X1 XY
-## 1  A  1 y1
-## 2  B  3 y3
-## 3  B  3 y5
-## 4  D NA y7
-##   Id XY.x XY.y
-## 1  A   x2   y1
-## 2  B   x4   y3
-## 3  B   x4   y5
-## 4  D &lt;NA&gt;   y7</code></pre>
+<pre><code>##    Id X1 XY
+## 1:  A  1 y1
+## 2:  B  3 y3
+## 3:  B  3 y5
+## 4:  D NA y7
+##    Id XY.x XY.y
+## 1:  A   x2   y1
+## 2:  B   x4   y3
+## 3:  B   x4   y5
+## 4:  D &lt;NA&gt;   y7</code></pre>
 </td>
 </tr>
 </tbody>
@@ -3963,6 +3984,7 @@ right_join(select(x, Id, XY),
  right_join(x) %&gt;%
  mutate(X1Y1 = SumY1 * X1) %&gt;%
  select(Id, X1Y1)</code></pre>
+<pre><code>## `summarise()` ungrouping output (override with `.groups` argument)</code></pre>
 <pre><code>## Joining, by = &quot;Id&quot;</code></pre>
 <pre><code>## # A tibble: 4 x 2
 ##   Id     X1Y1
@@ -3992,11 +4014,11 @@ y[, SqX1 := NULL] # rm column for consistency</code></pre>
  mutate(SqX1 = X1^2) %&gt;%
  right_join(y, by = &quot;Id&quot;) %&gt;%
  select(names(y), SqX1)</code></pre>
-<pre><code>##   Id Y1 XY SqX1
-## 1  A  1 y1    1
-## 2  B  3 y3    9
-## 3  B  5 y5    9
-## 4  D  7 y7   NA</code></pre>
+<pre><code>##    Id Y1 XY SqX1
+## 1:  A  1 y1    1
+## 2:  B  3 y3    9
+## 3:  B  5 y5    9
+## 4:  D  7 y7   NA</code></pre>
 </td>
 </tr>
 </tbody>
@@ -4013,11 +4035,11 @@ x[, y := NULL] # rm column for consistency</code></pre>
 </td>
 <td align="left">
 <pre class="r"><code>nest_join(x, y, by = &quot;Id&quot;)</code></pre>
-<pre><code>##   Id X1 XY            y
-## 1  A  1 x2        1, y1
-## 2  B  3 x4 3, 5, y3, y5
-## 3  C  5 x6             
-## 4  C  7 x8</code></pre>
+<pre><code>##    Id X1 XY             y
+## 1:  A  1 x2 &lt;tbl_df[1x2]&gt;
+## 2:  B  3 x4 &lt;tbl_df[2x2]&gt;
+## 3:  C  5 x6 &lt;tbl_df[0x2]&gt;
+## 4:  C  7 x8 &lt;tbl_df[0x2]&gt;</code></pre>
 </td>
 </tr>
 </tbody>
@@ -4088,18 +4110,18 @@ x[z, on = .(Id == ID, X1 == Z1)] # using two columns</code></pre>
 <td align="left">
 <pre class="r"><code>right_join(x, z, by = c(&quot;X1&quot; = &quot;Z1&quot;))
 right_join(x, z, by = c(&quot;Id&quot; = &quot;ID&quot;, &quot;X1&quot; = &quot;Z1&quot;))</code></pre>
-<pre><code>##     Id X1   XY   X2 ID Z2
-## 1    C  5   x6   x5  C z5
-## 2 &lt;NA&gt;  6 &lt;NA&gt; &lt;NA&gt;  C z6
-## 3    C  7   x8   x7  C z7
-## 4 &lt;NA&gt;  8 &lt;NA&gt; &lt;NA&gt;  C z8
-## 5 &lt;NA&gt;  9 &lt;NA&gt; &lt;NA&gt;  C z9
-##   Id X1   XY   X2 Z2
-## 1  C  5   x6   x5 z5
-## 2  C  6 &lt;NA&gt; &lt;NA&gt; z6
-## 3  C  7   x8   x7 z7
-## 4  C  8 &lt;NA&gt; &lt;NA&gt; z8
-## 5  C  9 &lt;NA&gt; &lt;NA&gt; z9</code></pre>
+<pre><code>##      Id X1   XY   X2 ID Z2
+## 1:    C  5   x6   x5  C z5
+## 2:    C  7   x8   x7  C z7
+## 3: &lt;NA&gt;  6 &lt;NA&gt; &lt;NA&gt;  C z6
+## 4: &lt;NA&gt;  8 &lt;NA&gt; &lt;NA&gt;  C z8
+## 5: &lt;NA&gt;  9 &lt;NA&gt; &lt;NA&gt;  C z9
+##    Id X1   XY   X2 Z2
+## 1:  C  5   x6   x5 z5
+## 2:  C  7   x8   x7 z7
+## 3:  C  6 &lt;NA&gt; &lt;NA&gt; z6
+## 4:  C  8 &lt;NA&gt; &lt;NA&gt; z8
+## 5:  C  9 &lt;NA&gt; &lt;NA&gt; z9</code></pre>
 </td>
 </tr>
 </tbody>
@@ -4394,10 +4416,13 @@ bind_rows(x, z) # always fills</code></pre>
 </td>
 <td align="left">
 <pre class="r"><code>bind_cols(x, y)</code></pre>
-<pre><code>##    V1 V11
-## 1:  1   4
-## 2:  2   5
-## 3:  3   6</code></pre>
+<pre><code>## New names:
+## * V1 -&gt; V1...1
+## * V1 -&gt; V1...2</code></pre>
+<pre><code>##    V1...1 V1...2
+## 1:      1      4
+## 2:      2      5
+## 3:      3      6</code></pre>
 </td>
 </tr>
 </tbody>
@@ -4544,9 +4569,9 @@ all_equal(x, x)</code></pre>
 There are still a lot of features not covered in this document, in particular, data.table functions to deal with time-series or dplyr vectorized functions have not been discussed, but ‘done is better than perfect’…<br />
 Hopefully, this comparison is not too biased, but I must admit that my preference is for data.table. So, I hope this post will encourage some readers to give it a try!<br />
 <br><br></p>
-<pre><code>## R version 3.6.2 (2019-12-12)
+<pre><code>## R version 3.6.3 (2020-02-29)
 ## Platform: x86_64-pc-linux-gnu (64-bit)
-## Running under: Ubuntu 18.04.3 LTS
+## Running under: Ubuntu 18.04.4 LTS
 ## 
 ## Matrix products: default
 ## BLAS:   /usr/lib/x86_64-linux-gnu/blas/libblas.so.3.7.1
@@ -4564,18 +4589,18 @@ Hopefully, this comparison is not too biased, but I must admit that my preferenc
 ## [1] stats     graphics  grDevices utils     datasets  methods   base     
 ## 
 ## other attached packages:
-## [1] dplyr_0.8.3       data.table_1.12.8 knitr_1.26       
+## [1] dplyr_1.0.0       data.table_1.12.9 knitr_1.26       
 ## 
 ## loaded via a namespace (and not attached):
-##  [1] Rcpp_1.0.3       magrittr_1.5     hms_0.5.2        tidyselect_0.2.5
-##  [5] R6_2.4.1         rlang_0.4.2      fansi_0.4.0      stringr_1.4.0   
-##  [9] tools_3.6.2      xfun_0.11        utf8_1.1.4       cli_2.0.0       
-## [13] ellipsis_0.3.0   htmltools_0.4.0  yaml_2.2.0       digest_0.6.23   
-## [17] assertthat_0.2.1 lifecycle_0.1.0  tibble_2.1.3     crayon_1.3.4    
+##  [1] Rcpp_1.0.3       magrittr_1.5     hms_0.5.2        tidyselect_1.1.0
+##  [5] R6_2.4.1         rlang_0.4.6      fansi_0.4.0      stringr_1.4.0   
+##  [9] tools_3.6.3      xfun_0.11        utf8_1.1.4       cli_2.0.0       
+## [13] ellipsis_0.3.0   htmltools_0.4.0  assertthat_0.2.1 yaml_2.2.0      
+## [17] digest_0.6.23    tibble_2.1.3     lifecycle_0.2.0  crayon_1.3.4    
 ## [21] bookdown_0.16    readr_1.3.1      tidyr_1.0.0      purrr_0.3.3     
-## [25] vctrs_0.2.1      zeallot_0.1.0    glue_1.3.1       evaluate_0.14   
-## [29] rmarkdown_2.0    blogdown_0.17    stringi_1.4.3    compiler_3.6.2  
-## [33] pillar_1.4.3     backports_1.1.5  pkgconfig_2.0.3</code></pre>
+## [25] vctrs_0.3.1      glue_1.4.1       evaluate_0.14    rmarkdown_2.0   
+## [29] blogdown_0.17    stringi_1.4.3    compiler_3.6.3   pillar_1.4.3    
+## [33] generics_0.0.2   pkgconfig_2.0.3</code></pre>
 </div>
 
 

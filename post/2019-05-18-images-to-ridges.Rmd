@@ -124,7 +124,7 @@ ggplot(data = imgdt) +
   geom_path(aes(x     = x,
                 y     = y2,
                 group = y),
-            size = 0.05) + 
+            size = 0.15) + 
   theme_void()
 ```
 
@@ -137,7 +137,7 @@ ggplot(data = imgdt) +
   geom_path(aes(x     = x,
                 y     = y2,
                 group = y),
-            size = 0.05) + 
+            size = 0.2) + 
   theme_void()
 ```
 
@@ -148,7 +148,7 @@ ggplot(data = imgdt) +
   geom_path(aes(x     = x,
                 y     = y2,
                 group = y),
-            size = 0.05) + 
+            size = 0.2) + 
   theme_void()
 ```
 
@@ -163,8 +163,7 @@ ggplot(data = imgdt) +
   geom_path(aes(x     = x + z * 5L,
                 y     = y,
                 group = x),
-            size   = 0.05,
-            colour = "gray") + 
+            size   = 0.15) + 
   theme_void()
 ```
 
@@ -177,7 +176,7 @@ ggplot(data = imgdt) +
                 y      = y,
                 group  = x,
                 colour = x),
-            size = 0.05) +
+            size = 0.2) +
   scale_colour_continuous(type = "viridis", guide = FALSE) +
   theme_void()
 ```
@@ -196,7 +195,7 @@ ggplot(data = imgdt) +
                   ymax  = y2,
                   ymin  = 0,
                   group = y),
-              size   = 0.1,
+              size   = 0.15,
               colour = "white",
               fill   = "black") + 
   theme_void()
@@ -210,7 +209,7 @@ ggplot(data = imgdt) +
                   ymax  = y2,
                   ymin  = 0,
                   group = y),
-              size   = 0.1,
+              size   = 0.15,
               colour = "white",
               fill   = "black") + 
   theme_void()
@@ -236,7 +235,7 @@ ggplot(imgdt2,
                       colour    = "white",
                       fill      = "black",
                       scale     = 7,
-                      size      = 0.01) +
+                      size      = 0.15) +
   theme_ridges() +
   theme_void() +
   theme(panel.background = element_rect(fill = 'black')) 
@@ -257,7 +256,7 @@ ggplot(imgdt2,
                       colour    = "white",
                       fill      = "black",
                       scale     = 5,
-                      size      = 0.01,
+                      size      = 0.2,
                       rel_min_height = 0.15) +
   theme_ridges() +
   theme_void() +
