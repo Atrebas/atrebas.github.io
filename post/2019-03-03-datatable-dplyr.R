@@ -71,8 +71,8 @@ unique(DT)
 unique(DT, by = c("V1", "V4")) # returns all cols
 ## @knitr filterRows5.2
 distinct(DF) # distinct_all(DF)
-distinct_at(DF, vars(V1, V4)) # returns selected cols
-# see also ?distinct_if
+distinct(DF, across(c(V1, V4))) # returns selected cols
+# distinct_at(DF, vars(V1, V4))
 
 ## @knitr filterRows6.1
 na.omit(DT, cols = 1:4)  # fast S3 method with cols argument
@@ -84,9 +84,13 @@ DT[sample(.N, 3)] # .N = nb of rows in DT
 DT[sample(.N, .N / 2)]
 DT[frankv(-V1, ties.method = "dense") < 2]
 ## @knitr filterRows7.2
-sample_n(DF, 3)      # n random rows
-sample_frac(DF, 0.5) # fraction of random rows
-top_n(DF, 1, V1)     # top n entries (includes equals)
+slice_sample(DF, n = 3)      # n random rows
+# sample_n(DF, 3)
+slice_sample(DF, prop = 0.5) # fraction of rows
+# sample_frac(DF, 0.5)
+DF %>% slice_max(V1, n = 1)
+# top_n(DF, 1, V1)
+
 
 # @knitr filterRows8.1
 DT[V4 %like% "^B"]
@@ -296,6 +300,7 @@ DT[, by = V4,
 DF %>%
   group_by(V4) %>%
   summarise(sumV2 = sum(V2))
+# ungrouped output
 
 ## @knitr by2.1
 DT[, keyby = .(V4, V1),
@@ -304,6 +309,8 @@ DT[, keyby = .(V4, V1),
 DF %>%
   group_by(V4, V1) %>%
   summarise(sumV2 = sum(V2))
+# output grouped by V4
+
 
 ## @knitr by3.1
 DT[, by = tolower(V4),
@@ -390,14 +397,18 @@ DF %>%
 ## @knitr advCols1.1
 DT[, lapply(.SD, max)]
 ## @knitr advCols1.2
-summarise_all(DF, max)
+DF %>% summarise(across(everything(), max))
+DF %>% summarise(across(everything(), 
+                        ~ max(.x, na.rm = TRUE)))
+# summarise_all(DF, max)
 
 ## @knitr advCols2.1
 DT[, lapply(.SD, mean),
      .SDcols = c("V1", "V2")]
 # .SDcols is like "_at"
 ## @knitr advCols2.2
-summarise_at(DF, c("V1", "V2"), mean)
+DF %>% summarise(across(c(V1, V2), mean))
+# summarise_at(DF, c("V1", "V2"), mean)
 
 ## @knitr advCols3.1
 DT[, by = V4,
@@ -406,37 +417,50 @@ DT[, by = V4,
 ## using patterns (regex)
 DT[, by = V4,
      lapply(.SD, mean),
-     .SDcols = patterns("V1|V2")]
+     .SDcols = patterns("V1|V2|Z0")]
 ## @knitr advCols3.2
 DF %>%
   group_by(V4) %>%
-  summarise_at(c("V1", "V2"), mean)
+  summarise(across(c(V1, V2), mean))
+# DF %>%
+#   group_by(V4) %>%
+#   summarise_at(c("V1", "V2"), mean)
 ## using select helpers
 DF %>%
   group_by(V4) %>%
-  summarise_at(vars(one_of("V1", "V2")), mean)
+  summarise(across(any_of(c("V1", "V2", "Z0")), mean))
+
 
 ## @knitr advCols4.1
-DT[, by = V4, 
+DT[, by = V4,
      c(lapply(.SD, sum),
        lapply(.SD, mean))]
 ## @knitr advCols4.2
 DF %>%
   group_by(V4) %>%
-  summarise_all(list(sum, mean))
+  summarise(across(everything(),
+                   list(sum = sum, mean = mean)))
 # columns named automatically
+# DF %>%
+#   group_by(V4) %>%
+#   summarise_all(list(sum, mean))
 
 ## @knitr advCols5.1
-cols <- names(DT)[sapply(DT, is.numeric)]
 DT[, lapply(.SD, mean),
-     .SDcols = cols]
+     .SDcols = is.numeric]
 ## @knitr advCols5.2
-summarise_if(DF, is.numeric, mean)
+DF %>%
+  summarise(across(where(is.numeric),
+                   mean))
+# summarise_if(DF, is.numeric, mean)
 
 ## @knitr advCols6.1
 DT[, lapply(.SD, rev)]
 ## @knitr advCols6.2
-mutate_all(DF, rev)
+DF %>%
+  mutate(across(everything(),
+                rev))
+# mutate_all(DF, rev)
 # transmute_all(DF, rev)
 
 ## @knitr advCols7.1
@@ -445,8 +469,12 @@ DT[, lapply(.SD, sqrt),
 DT[, lapply(.SD, exp),
      .SDcols = !"V4"]
 ## @knitr advCols7.2
-transmute_at(DF, c("V1", "V2"), sqrt)
-transmute_at(DF, vars(-V4), exp)
+DF %>% transmute(across(c(V1, V2),
+                 sqrt))
+# transmute_at(DF, c("V1", "V2"), sqrt)
+DF %>% transmute(across(-any_of("V4"),
+                 exp))
+# transmute_at(DF, vars(-V4), exp)
 
 ## @knitr advCols8.1
 DT[, c("V1", "V2") := lapply(.SD, sqrt),
@@ -456,21 +484,31 @@ cols <- setdiff(names(DT), "V4")
 DT[, (cols) := lapply(.SD, "^", 2L),
      .SDcols = cols]
 ## @knitr advCols8.2
-DF <- mutate_at(DF, c("V1", "V2"), sqrt)
-DF <- mutate_at(DF, vars(-V4), "^", 2L)
+DF <- DF %>%
+  mutate(across(all_of(c("V1", "V2")), sqrt))
+# DF <- mutate_at(DF, c("V1", "V2"), sqrt)
+DF <- DF %>%
+  mutate(across(-any_of("V4"),
+                 ~ "^"(.x, 2L)))
+# DF <- mutate_at(DF, vars(-V4), "^", 2L)
 
 ## @knitr advCols9.1
-cols <- names(DT)[sapply(DT, is.numeric)]
 DT[, .SD - 1,
-     .SDcols = cols]
+     .SDcols = is.numeric]
 ## @knitr advCols9.2
-transmute_if(DF, is.numeric, list(~ '-'(., 1L)))
+DF %>%
+  transmute(across(where(is.numeric),
+                   ~ '-'(., 1L)))
+# transmute_if(DF, is.numeric, list(~ '-'(., 1L)))
 
 ## @knitr advCols10.1
 DT[, (cols) := lapply(.SD, as.integer),
-     .SDcols = cols]
+     .SDcols = is.numeric]
 ## @knitr advCols10.2
-DF <- mutate_if(DF, is.numeric, as.integer)
+DF <- DF %>%
+  mutate(across(where(is.numeric),
+         as.integer))
+# DF <- mutate_if(DF, is.numeric, as.integer)
 
 ## @knitr advCols11.1
 DT[, by = V4,
@@ -857,7 +895,13 @@ rleid(rep(c("a", "b", "a"), each = 3), prefix = "G")
 #
 
 ## @knitr other6.1
-#
+x <- 1:10
+fcase(
+  x %% 6 == 0, "fizz buzz",
+  x %% 2 == 0, "fizz",
+  x %% 3 == 0, "buzz"
+) # default?
+
 ## @knitr other6.2
 x <- 1:10
 case_when(

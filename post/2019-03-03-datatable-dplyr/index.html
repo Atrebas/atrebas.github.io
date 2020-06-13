@@ -168,7 +168,7 @@
 <img src="/images/data.table.png" alt="data.table_logo" />
 </td>
 <td align="center">
-<img src="/images/dplyr.jpg" alt="dplyr_logo" />
+<img src="/images/dplyr2.jpg" alt="dplyr_logo" />
 </td>
 </tr>
 </tbody>
@@ -203,6 +203,8 @@ this document is independently <a href="https://github.com/Atrebas/atrebas.githu
 <div id="update" class="section level3">
 <h3>Update</h3>
 <ul>
+<li><em>2020-06-13</em>: Update with data.table_1.12.9 and dplyr_1.0.0. Work in progress, stay tuned.<br />
+</li>
 <li><em>2019-06-22</em>: Coding style improved (thanks to <span class="citation">@tylerburleigh</span> for pointing that out). Some data.table expressions with <code>by</code> reordered and indented to better highlight the similarity with dplyr. Minor comments and improvements.</li>
 </ul>
 <br>
@@ -465,8 +467,8 @@ unique(DT, by = c(&quot;V1&quot;, &quot;V4&quot;)) # returns all cols</code></pr
 </td>
 <td align="left">
 <pre class="r"><code>distinct(DF) # distinct_all(DF)
-distinct_at(DF, vars(V1, V4)) # returns selected cols
-# see also ?distinct_if</code></pre>
+distinct(DF, across(c(V1, V4))) # returns selected cols
+# distinct_at(DF, vars(V1, V4))</code></pre>
 <pre><code>## # A tibble: 9 x 4
 ##      V1    V2    V3 V4   
 ##   &lt;int&gt; &lt;int&gt; &lt;dbl&gt; &lt;chr&gt;
@@ -557,9 +559,12 @@ DT[frankv(-V1, ties.method = &quot;dense&quot;) &lt; 2]</code></pre>
 ## 4:  2  8 1.0  B</code></pre>
 </td>
 <td align="left">
-<pre class="r"><code>sample_n(DF, 3)      # n random rows
-sample_frac(DF, 0.5) # fraction of random rows
-top_n(DF, 1, V1)     # top n entries (includes equals)</code></pre>
+<pre class="r"><code>slice_sample(DF, n = 3)      # n random rows
+# sample_n(DF, 3)
+slice_sample(DF, prop = 0.5) # fraction of rows
+# sample_frac(DF, 0.5)
+DF %&gt;% slice_max(V1, n = 1)
+# top_n(DF, 1, V1)</code></pre>
 <pre><code>## # A tibble: 3 x 4
 ##      V1    V2    V3 V4   
 ##   &lt;int&gt; &lt;int&gt; &lt;dbl&gt; &lt;chr&gt;
@@ -1574,6 +1579,7 @@ DT[, by = V4,
   group_by(V4) %&gt;%
   summarise(sumV2 = sum(V2))</code></pre>
 <pre><code>## `summarise()` ungrouping output (override with `.groups` argument)</code></pre>
+<pre class="r"><code># ungrouped output</code></pre>
 <pre><code>## # A tibble: 3 x 2
 ##   V4    sumV2
 ##   &lt;chr&gt; &lt;int&gt;
@@ -1606,6 +1612,7 @@ DT[, by = V4,
   group_by(V4, V1) %&gt;%
   summarise(sumV2 = sum(V2))</code></pre>
 <pre><code>## `summarise()` regrouping output by &#39;V4&#39; (override with `.groups` argument)</code></pre>
+<pre class="r"><code># output grouped by V4</code></pre>
 <pre><code>## # A tibble: 6 x 3
 ## # Groups:   V4 [3]
 ##   V4       V1 sumV2
@@ -1922,8 +1929,15 @@ With data.table, we use <code>.SD</code>, which is a <code>data.table</code> con
 ## 1:  4  9  C</code></pre>
 </td>
 <td align="left">
-<pre class="r"><code>summarise_all(DF, max)</code></pre>
+<pre class="r"><code>DF %&gt;% summarise(across(everything(), max))
+DF %&gt;% summarise(across(everything(), 
+                        ~ max(.x, na.rm = TRUE)))
+# summarise_all(DF, max)</code></pre>
 <pre><code>## # A tibble: 1 x 3
+##      V1    V2 V4   
+##   &lt;dbl&gt; &lt;int&gt; &lt;chr&gt;
+## 1     4     9 C    
+## # A tibble: 1 x 3
 ##      V1    V2 V4   
 ##   &lt;dbl&gt; &lt;int&gt; &lt;chr&gt;
 ## 1     4     9 C</code></pre>
@@ -1945,7 +1959,8 @@ With data.table, we use <code>.SD</code>, which is a <code>data.table</code> con
 ## 1: 2.333333 4.333333</code></pre>
 </td>
 <td align="left">
-<pre class="r"><code>summarise_at(DF, c(&quot;V1&quot;, &quot;V2&quot;), mean)</code></pre>
+<pre class="r"><code>DF %&gt;% summarise(across(c(V1, V2), mean))
+# summarise_at(DF, c(&quot;V1&quot;, &quot;V2&quot;), mean)</code></pre>
 <pre><code>## # A tibble: 1 x 2
 ##      V1    V2
 ##   &lt;dbl&gt; &lt;dbl&gt;
@@ -1967,7 +1982,7 @@ With data.table, we use <code>.SD</code>, which is a <code>data.table</code> con
 ## using patterns (regex)
 DT[, by = V4,
      lapply(.SD, mean),
-     .SDcols = patterns(&quot;V1|V2&quot;)]</code></pre>
+     .SDcols = patterns(&quot;V1|V2|Z0&quot;)]</code></pre>
 <pre><code>##    V4 V1       V2
 ## 1:  A  2 3.666667
 ## 2:  B  3 4.333333
@@ -1980,11 +1995,16 @@ DT[, by = V4,
 <td align="left">
 <pre class="r"><code>DF %&gt;%
   group_by(V4) %&gt;%
-  summarise_at(c(&quot;V1&quot;, &quot;V2&quot;), mean)
+  summarise(across(c(V1, V2), mean))</code></pre>
+<pre><code>## `summarise()` ungrouping output (override with `.groups` argument)</code></pre>
+<pre class="r"><code># DF %&gt;%
+#   group_by(V4) %&gt;%
+#   summarise_at(c(&quot;V1&quot;, &quot;V2&quot;), mean)
 ## using select helpers
 DF %&gt;%
   group_by(V4) %&gt;%
-  summarise_at(vars(one_of(&quot;V1&quot;, &quot;V2&quot;)), mean)</code></pre>
+  summarise(across(any_of(c(&quot;V1&quot;, &quot;V2&quot;, &quot;Z0&quot;)), mean))</code></pre>
+<pre><code>## `summarise()` ungrouping output (override with `.groups` argument)</code></pre>
 <pre><code>## # A tibble: 3 x 3
 ##   V4       V1    V2
 ##   &lt;chr&gt; &lt;dbl&gt; &lt;dbl&gt;
@@ -2008,7 +2028,7 @@ DF %&gt;%
 <tbody>
 <tr>
 <td align="left">
-<pre class="r"><code>DT[, by = V4, 
+<pre class="r"><code>DT[, by = V4,
      c(lapply(.SD, sum),
        lapply(.SD, mean))]</code></pre>
 <pre><code>##    V4 V1 V2 V1       V2
@@ -2019,14 +2039,19 @@ DF %&gt;%
 <td align="left">
 <pre class="r"><code>DF %&gt;%
   group_by(V4) %&gt;%
-  summarise_all(list(sum, mean))
-# columns named automatically</code></pre>
+  summarise(across(everything(),
+                   list(sum = sum, mean = mean)))</code></pre>
+<pre><code>## `summarise()` ungrouping output (override with `.groups` argument)</code></pre>
+<pre class="r"><code># columns named automatically
+# DF %&gt;%
+#   group_by(V4) %&gt;%
+#   summarise_all(list(sum, mean))</code></pre>
 <pre><code>## # A tibble: 3 x 5
-##   V4    V1_fn1 V2_fn1 V1_fn2 V2_fn2
-##   &lt;chr&gt;  &lt;dbl&gt;  &lt;int&gt;  &lt;dbl&gt;  &lt;dbl&gt;
-## 1 A          6     11      2   3.67
-## 2 B          9     13      3   4.33
-## 3 C          6     15      2   5</code></pre>
+##   V4    V1_sum V1_mean V2_sum V2_mean
+##   &lt;chr&gt;  &lt;dbl&gt;   &lt;dbl&gt;  &lt;int&gt;   &lt;dbl&gt;
+## 1 A          6       2     11    3.67
+## 2 B          9       3     13    4.33
+## 3 C          6       2     15    5</code></pre>
 </td>
 </tr>
 </tbody>
@@ -2038,14 +2063,16 @@ DF %&gt;%
 <tbody>
 <tr>
 <td align="left">
-<pre class="r"><code>cols &lt;- names(DT)[sapply(DT, is.numeric)]
-DT[, lapply(.SD, mean),
-     .SDcols = cols]</code></pre>
+<pre class="r"><code>DT[, lapply(.SD, mean),
+     .SDcols = is.numeric]</code></pre>
 <pre><code>##          V1       V2
 ## 1: 2.333333 4.333333</code></pre>
 </td>
 <td align="left">
-<pre class="r"><code>summarise_if(DF, is.numeric, mean)</code></pre>
+<pre class="r"><code>DF %&gt;%
+  summarise(across(where(is.numeric),
+                   mean))
+# summarise_if(DF, is.numeric, mean)</code></pre>
 <pre><code>## # A tibble: 1 x 2
 ##      V1    V2
 ##   &lt;dbl&gt; &lt;dbl&gt;
@@ -2074,7 +2101,10 @@ DT[, lapply(.SD, mean),
 ## 9:  1  0  A</code></pre>
 </td>
 <td align="left">
-<pre class="r"><code>mutate_all(DF, rev)
+<pre class="r"><code>DF %&gt;%
+  mutate(across(everything(),
+                rev))
+# mutate_all(DF, rev)
 # transmute_all(DF, rev)</code></pre>
 <pre><code>## # A tibble: 9 x 3
 ##      V1    V2 V4   
@@ -2125,8 +2155,12 @@ DT[, lapply(.SD, exp),
 ## 9:  2.718282 8103.08393</code></pre>
 </td>
 <td align="left">
-<pre class="r"><code>transmute_at(DF, c(&quot;V1&quot;, &quot;V2&quot;), sqrt)
-transmute_at(DF, vars(-V4), exp)</code></pre>
+<pre class="r"><code>DF %&gt;% transmute(across(c(V1, V2),
+                 sqrt))
+# transmute_at(DF, c(&quot;V1&quot;, &quot;V2&quot;), sqrt)
+DF %&gt;% transmute(across(-any_of(&quot;V4&quot;),
+                 exp))
+# transmute_at(DF, vars(-V4), exp)</code></pre>
 <pre><code>## # A tibble: 9 x 2
 ##      V1    V2
 ##   &lt;dbl&gt; &lt;dbl&gt;
@@ -2170,8 +2204,13 @@ DT[, (cols) := lapply(.SD, &quot;^&quot;, 2L),
      .SDcols = cols]</code></pre>
 </td>
 <td align="left">
-<pre class="r"><code>DF &lt;- mutate_at(DF, c(&quot;V1&quot;, &quot;V2&quot;), sqrt)
-DF &lt;- mutate_at(DF, vars(-V4), &quot;^&quot;, 2L)</code></pre>
+<pre class="r"><code>DF &lt;- DF %&gt;%
+  mutate(across(all_of(c(&quot;V1&quot;, &quot;V2&quot;)), sqrt))
+# DF &lt;- mutate_at(DF, c(&quot;V1&quot;, &quot;V2&quot;), sqrt)
+DF &lt;- DF %&gt;%
+  mutate(across(-any_of(&quot;V4&quot;),
+                 ~ &quot;^&quot;(.x, 2L)))
+# DF &lt;- mutate_at(DF, vars(-V4), &quot;^&quot;, 2L)</code></pre>
 </td>
 </tr>
 </tbody>
@@ -2183,9 +2222,8 @@ DF &lt;- mutate_at(DF, vars(-V4), &quot;^&quot;, 2L)</code></pre>
 <tbody>
 <tr>
 <td align="left">
-<pre class="r"><code>cols &lt;- names(DT)[sapply(DT, is.numeric)]
-DT[, .SD - 1,
-     .SDcols = cols]</code></pre>
+<pre class="r"><code>DT[, .SD - 1,
+     .SDcols = is.numeric]</code></pre>
 <pre><code>##    V1 V2
 ## 1:  0 -1
 ## 2:  3 -1
@@ -2198,7 +2236,10 @@ DT[, .SD - 1,
 ## 9:  0  8</code></pre>
 </td>
 <td align="left">
-<pre class="r"><code>transmute_if(DF, is.numeric, list(~ &#39;-&#39;(., 1L)))</code></pre>
+<pre class="r"><code>DF %&gt;%
+  transmute(across(where(is.numeric),
+                   ~ &#39;-&#39;(., 1L)))
+# transmute_if(DF, is.numeric, list(~ &#39;-&#39;(., 1L)))</code></pre>
 <pre><code>## # A tibble: 9 x 2
 ##      V1    V2
 ##   &lt;dbl&gt; &lt;dbl&gt;
@@ -2223,10 +2264,13 @@ DT[, .SD - 1,
 <tr>
 <td align="left">
 <pre class="r"><code>DT[, (cols) := lapply(.SD, as.integer),
-     .SDcols = cols]</code></pre>
+     .SDcols = is.numeric]</code></pre>
 </td>
 <td align="left">
-<pre class="r"><code>DF &lt;- mutate_if(DF, is.numeric, as.integer)</code></pre>
+<pre class="r"><code>DF &lt;- DF %&gt;%
+  mutate(across(where(is.numeric),
+         as.integer))
+# DF &lt;- mutate_if(DF, is.numeric, as.integer)</code></pre>
 </td>
 </tr>
 </tbody>
@@ -3673,7 +3717,14 @@ rleid(rep(c(&quot;a&quot;, &quot;b&quot;, &quot;a&quot;), each = 3), prefix = &q
 <tbody>
 <tr>
 <td align="left">
-<pre class="r"><code>#</code></pre>
+<pre class="r"><code>x &lt;- 1:10
+fcase(
+  x %% 6 == 0, &quot;fizz buzz&quot;,
+  x %% 2 == 0, &quot;fizz&quot;,
+  x %% 3 == 0, &quot;buzz&quot;
+) # default?</code></pre>
+<pre><code>##  [1] NA          &quot;fizz&quot;      &quot;buzz&quot;      &quot;fizz&quot;      NA          &quot;fizz buzz&quot;
+##  [7] NA          &quot;fizz&quot;      &quot;buzz&quot;      &quot;fizz&quot;</code></pre>
 </td>
 <td align="left">
 <pre class="r"><code>x &lt;- 1:10

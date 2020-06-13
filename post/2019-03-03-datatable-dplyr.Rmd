@@ -96,7 +96,7 @@ read_chunk('2019-03-03-datatable-dplyr.R')
 <table class="table table-condensed"><tbody><tr><td align="center">
 ![data.table_logo](/images/data.table.png)
 </td><td align="center">
-![dplyr_logo](/images/dplyr.jpg)
+![dplyr_logo](/images/dplyr2.jpg)
 </td></tr></tbody></table>
 
 
@@ -120,6 +120,7 @@ this document is independently [available](https://github.com/Atrebas/atrebas.gi
 <div style="text-align: center;"><input type='button' id='hideshow' value='Show the outputs'></div>
 
 ### Update
+- _2020-06-13_: Update with data.table_1.12.9 and dplyr_1.0.0. Work in progress, stay tuned.   
 - _2019-06-22_: Coding style improved (thanks to @tylerburleigh for pointing that out). Some data.table expressions with `by` reordered and indented to better highlight the similarity with dplyr. Minor comments and improvements.  
 
 <br><hr>
