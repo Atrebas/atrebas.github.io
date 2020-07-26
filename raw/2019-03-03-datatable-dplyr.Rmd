@@ -95,8 +95,10 @@ read_chunk('2019-03-03-datatable-dplyr.R')
 <br>
 <table class="table table-condensed"><tbody><tr><td align="center">
 ![data.table_logo](/images/data.table.png)
+1.3.0
 </td><td align="center">
 ![dplyr_logo](/images/dplyr2.jpg)
+1.0.0
 </td></tr></tbody></table>
 
 
@@ -138,7 +140,7 @@ __Syntax:__
 It allows to combine several operations in a very concise and consistent expression.    
 - The syntax of dplyr is based on key verbs corresponding to the most common operations: 
 `filter()`, `arrange()`, `select()`, `mutate()`, `summarise()`, ...
-These functions can be combine with `group_by()` to aggregate data 'by group' and a bunch of helper functions. 
+These functions can be combine with `group_by()` to aggregate data 'by group' and with a bunch of helper functions. 
 It is a 'do one thing at a time' approach, chaining together functions dedicated to a specific task.   
 
 __Ecosystem:__      
@@ -948,6 +950,16 @@ The corresponding expressions in dplyr will be less memory-efficient.
 <<set4.2>>
 ```
 </td></tr></tbody></table>
+#### Relocate columns
+<table class="table table-condensed"><tbody><tr><td align="left">
+```{r, eval=TRUE}
+<<set6.1>>
+```
+</td><td align="left">
+```{r, eval=TRUE}
+<<set6.2>>
+```
+</td></tr></tbody></table>
 #### Convert data
 <table class="table table-condensed"><tbody><tr><td align="left">
 ```{r, eval=TRUE}
@@ -962,6 +974,7 @@ The corresponding expressions in dplyr will be less memory-efficient.
 
 <br><hr>
 ### Advanced use of by
+Context dependent expressions (`cur_*()`) have been introduced in dplyr 1.0.0, reflecting data.table aliases `.I`, `.GRP`, ...      
 
 #### Select first/last/... row by group
 <table class="table table-condensed"><tbody><tr><td align="left">
@@ -1203,6 +1216,16 @@ This part is still a bit clunky. I need to find better examples. See [here](http
 </td><td align="left">
 ```{r, eval=TRUE}
 <<other5.2>>
+```
+</td></tr></tbody></table>
+#### Fast version of `ifelse()`
+<table class="table table-condensed"><tbody><tr><td align="left">
+```{r, eval=TRUE}
+<<other8.1>>
+```
+</td><td align="left">
+```{r, eval=TRUE}
+<<other8.2>>
 ```
 </td></tr></tbody></table>
 #### Vectorised `ifelse` statements

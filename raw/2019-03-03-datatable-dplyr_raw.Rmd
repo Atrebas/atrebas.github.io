@@ -138,7 +138,7 @@ __Syntax:__
 It allows to combine several operations in a very concise and consistent expression.    
 - The syntax of dplyr is based on key verbs corresponding to the most common operations: 
 `filter()`, `arrange()`, `select()`, `mutate()`, `summarise()`, ...
-These functions can be combine with `group_by()` to aggregate data 'by group' and a bunch of helper functions. 
+These functions can be combine with `group_by()` to aggregate data 'by group' and with a bunch of helper functions. 
 It is a 'do one thing at a time' approach, chaining together functions dedicated to a specific task.   
 
 __Ecosystem:__      
@@ -404,12 +404,15 @@ The corresponding expressions in dplyr will be less memory-efficient.
 <<<set3.1>><<set3.2>>>
 #### Reorder columns
 <<<set4.1>><<set4.2>>>
+#### Relocate columns
+<<<set6.1>><<set6.2>>>
 #### Convert data
 <<<set5.1>><<set5.2>>>
 
 
 <br><hr>
 ### Advanced use of by
+Context dependent expressions (`cur_*()`) have been introduced in dplyr 1.0.0, reflecting data.table aliases `.I`, `.GRP`, ...      
 
 #### Select first/last/... row by group
 <<<advBy1.1>><<advBy1.2>>>
@@ -485,6 +488,8 @@ This part is still a bit clunky. I need to find better examples. See [here](http
 <<<other4.1>><<other4.2>>>
 #### Generate run-length ids
 <<<other5.1>><<other5.2>>>
+#### Fast version of `ifelse()`
+<<<other8.1>><<other8.2>>>
 #### Vectorised `ifelse` statements
 <<<other6.1>><<other6.2>>>
 #### Rolling functions

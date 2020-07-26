@@ -1,0 +1,1437 @@
+---
+title: "A data.table and pandas small stroll"
+author: "Atrebas"
+date: "2020-06-14"
+summary: data.table and pandas are two major libraries for efficient manipulation of data frames in R and Python, respectively. Being quite familiar with data.table, I wrote this post as an exercice to learn more about pandas. Commands to execute common data munging tasks are presented side-by-side to facilitate the comparison.   
+output:
+  blogdown::html_page:
+    toc: true
+categories: ["R"]
+tags: ["R", "data.table", "pandas", "Python"]
+---
+
+
+```{r  global_options, echo = FALSE}
+knitr::opts_chunk$set(results = "hold")
+```
+
+```{r echo = FALSE, message = FALSE, warning = FALSE}
+library(knitr)
+read_chunk('2019-03-03-datatable-dplyr.R')
+read_chunk('2020-06-14-pandas.py')
+```
+
+<!----------------------------------------------------------------------------
+<div id="contents" style="position:fixed;width: 200px;right:0;top:0">
+------------------------------------------------------------------------------->
+
+<script src="/js/jquery-3.3.1.min.js"></script>
+<script src="/js/show-hide-console-outputs.js"></script>
+<script src="/js/floating-toc.js"></script>
+
+
+<style>
+   table {
+      width: 100%;
+      border-top: none !important; 
+      padding: 0px;
+      border-spacing: 2px;
+      margin-bottom: 0px;
+    }
+    td {
+      width: 50%;
+      text-align: left;
+    }
+    pre {
+    padding: 5px;
+    white-space: pre-wrap;
+    }
+    .hljs.shell{
+    background: #ffffff;
+    border-style: solid;
+    border-width: 1px;
+    border-color: #a7a7a71a;
+    }
+    pre:not(.r):not(.python) {
+    display: none;
+    }
+    table {
+    margin-bottom: 0px;
+    table-layout: fixed; 
+    }
+    .table {
+    margin-bottom: 0px;
+    }
+    h4 {
+    text-align: center;
+    font-size: 12px;
+    font-weight: 600;
+    margin-top: 0px;
+    margin-bottom: 3px;
+    }
+    hr.hr2 {
+    border: 2px solid #000000;
+    }
+    .hljs{
+    background: #a7a7a71a;
+    font-size: 80%;
+    word-wrap: break-word;
+    }
+    #TOC {
+    font-size: 12px;
+    }
+    #TOC.floating {
+    position:fixed;
+    width: 200px;
+    left:0;
+    top:0;
+    margin-top: 60px;
+    }
+    pre:not(.r):not(.python) {
+    background: #a7a7a71a;
+    font-size: 80%;
+    word-wrap: break-word;
+    color: #333333;
+    }
+
+
+</style>
+ 
+<!----------------------------------------------------------------------------
+                INTRODUCTION
+------------------------------------------------------------------------------->
+
+<br>
+<table class="table table-condensed"><tbody><tr><td align="center">
+![data.table_logo](/images/data.table.png)
+</td><td align="center">
+<br><br>
+![pandas_logo](/images/pandas.png)
+</td></tr></tbody></table>
+
+
+<br><hr class = "hr2">
+# Introduction
+
+### About
+- Last year, I published a [post](https://atrebas.github.io/post/2019-03-03-datatable-dplyr/) 
+showing how to use the data.table and dplyr R packages to execute data munging tasks.    
+- I have learned some Python lately and thought it would be a could exercice to "translate" the commands using pandas.     
+- I am less familiar with Python and pandas than I am with R and data.table, and presenting the two librairies together in a logical way is a bit challenging. So, rather than going into convoluted explanations, 
+I choose the easy (and time-saving) solution: only the code is presented, no further explanation is given - hence the title.    
+- That's all it is. Just a programming exercice, not a A-vs-B post. 
+It is incomplete and not fully polished but I publish it in case it can be useful for someone and to better keep track of the files.     
+- The same [R code](https://github.com/Atrebas/atrebas.github.io/blob/master/post/2019-03-03-datatable-dplyr.R) 
+is used below and in my "data.table and dplyr tour". The Python code, available 
+[here](https://github.com/Atrebas/atrebas.github.io/blob/master/post/2020-06-14-datatable-pandas.R), is structured and labeled in the same way.     
+
+<div style="text-align: center;"><input type='button' id='hideshow' value='Show the outputs'></div>
+
+
+<br><hr>
+### Create example data
+<table class="table table-condensed"><tbody><tr><td align="left">
+```{r, message=FALSE, warning=FALSE}
+<<data1.1>>  
+```
+</td><td align="left">
+```{python, message=FALSE, warning=FALSE}
+<<data1.3>>  
+```
+</td></tr></tbody></table>
+
+
+Below, the data.table code uses `DT` and the pandas code uses `DF`. 
+
+
+<!----------------------------------------------------------------------------
+                             BASIC OPERATIONS
+------------------------------------------------------------------------------->
+
+<br><br><hr class = "hr2">
+# Basic operations
+
+### Filter rows
+#### Filter rows using indices
+<table class="table table-condensed"><tbody><tr><td align="left">
+```{r, eval=TRUE}
+<<filterRows1.1>>
+```
+</td><td align="left">
+```{python, eval=TRUE}
+<<filterRows1.3>>
+```
+</td></tr></tbody></table>
+#### Discard rows using negative indices
+<table class="table table-condensed"><tbody><tr><td align="left">
+```{r, eval=TRUE}
+<<filterRows2.1>>
+```
+</td><td align="left">
+```{python, eval=TRUE}
+<<filterRows2.3>>
+```
+</td></tr></tbody></table>
+#### Filter rows using a logical expression 
+<table class="table table-condensed"><tbody><tr><td align="left">
+```{r, eval=TRUE}
+<<filterRows3.1>>
+```
+</td><td align="left">
+```{python, eval=TRUE}
+<<filterRows3.3>>
+```
+</td></tr></tbody></table>
+#### Filter rows using multiple conditions
+<table class="table table-condensed"><tbody><tr><td align="left">
+```{r, eval=TRUE}
+<<filterRows4.1>>
+```
+</td><td align="left">
+```{python, eval=TRUE}
+<<filterRows4.3>>
+```
+</td></tr></tbody></table>
+#### Filter unique rows
+<table class="table table-condensed"><tbody><tr><td align="left">
+```{r, eval=TRUE}
+<<filterRows5.1>>
+```
+</td><td align="left">
+```{python, eval=TRUE}
+<<filterRows5.3>>
+```
+</td></tr></tbody></table>
+#### Discard rows with missing values
+<table class="table table-condensed"><tbody><tr><td align="left">
+```{r, eval=TRUE}
+<<filterRows6.1>>
+```
+</td><td align="left">
+```{python, eval=TRUE}
+<<filterRows6.3>>
+```
+</td></tr></tbody></table>
+#### Other filters
+<table class="table table-condensed"><tbody><tr><td align="left">
+```{r, eval=TRUE}
+<<filterRows7.1>>
+```
+</td><td align="left">
+```{python, eval=TRUE}
+<<filterRows7.3>>
+```
+</td></tr></tbody></table>
+<table class="table table-condensed"><tbody><tr><td align="left">
+```{r, eval=TRUE}
+<<filterRows8.1>>
+```
+</td><td align="left">
+```{python, eval=TRUE}
+<<filterRows8.3>>
+```
+</td></tr></tbody></table>
+
+<br><hr>
+### Sort rows
+#### Sort rows by column
+<table class="table table-condensed"><tbody><tr><td align="left">
+```{r, eval=TRUE}
+<<sortRows1.1>>
+```
+</td><td align="left">
+```{python, eval=TRUE}
+<<sortRows1.3>>
+```
+</td></tr></tbody></table>
+#### Sort rows in decreasing order
+<table class="table table-condensed"><tbody><tr><td align="left">
+```{r, eval=TRUE}
+<<sortRows2.1>>
+```
+</td><td align="left">
+```{python, eval=TRUE}
+<<sortRows2.3>>
+```
+</td></tr></tbody></table>
+#### Sort rows based on several columns
+<table class="table table-condensed"><tbody><tr><td align="left">
+```{r, eval=TRUE}
+<<sortRows3.1>>
+```
+</td><td align="left">
+```{python, eval=TRUE}
+<<sortRows3.3>>
+```
+</td></tr></tbody></table>
+
+
+<br><hr>
+### Select columns
+#### Select one column using an index (not recommended)
+<table class="table table-condensed"><tbody><tr><td align="left">
+```{r, eval=TRUE}
+<<selectCols1.1>>
+```
+</td><td align="left">
+```{python, eval=TRUE}
+<<selectCols1.3>>
+```
+</td></tr></tbody></table>
+#### Select one column using column name
+<table class="table table-condensed"><tbody><tr><td align="left">
+```{r, eval=TRUE}
+<<selectCols2.1>>
+```
+</td><td align="left">
+```{python, eval=TRUE}
+<<selectCols2.3>>
+```
+</td></tr></tbody></table>
+#### Select several columns
+<table class="table table-condensed"><tbody><tr><td align="left">
+```{r, eval=TRUE}
+<<selectCols3.1>>
+```
+</td><td align="left">
+```{python, eval=TRUE}
+<<selectCols3.3>>
+```
+</td></tr></tbody></table>
+#### Exclude columns
+<table class="table table-condensed"><tbody><tr><td align="left">
+```{r, eval=TRUE}
+<<selectCols4.1>>
+```
+</td><td align="left">
+```{python, eval=TRUE}
+<<selectCols4.3>>
+```
+</td></tr></tbody></table>
+#### Select/Exclude columns using a character vector
+<table class="table table-condensed"><tbody><tr><td align="left">
+```{r, eval=TRUE}
+<<selectCols5.1>>
+```
+</td><td align="left">
+```{python, eval=TRUE}
+<<selectCols5.3>>
+```
+</td></tr></tbody></table>
+#### Other selections
+<table class="table table-condensed"><tbody><tr><td align="left">
+```{r, eval=TRUE}
+<<selectCols6.1>>
+```
+</td><td align="left">
+```{python, eval=TRUE}
+<<selectCols6.3>>
+```
+</td></tr></tbody></table>
+
+<br><hr>
+### Summarise data
+
+#### Summarise one column
+<table class="table table-condensed"><tbody><tr><td align="left">
+```{r, eval=TRUE}
+<<summarise1.1>>
+```
+</td><td align="left">
+```{python, eval=TRUE}
+<<summarise1.3>>
+```
+</td></tr></tbody></table>
+#### Summarise several columns
+<table class="table table-condensed"><tbody><tr><td align="left">
+```{r, eval=TRUE}
+<<summarise2.1>>
+```
+</td><td align="left">
+```{python, eval=TRUE}
+<<summarise2.3>>
+```
+</td></tr></tbody></table>
+#### Summarise several columns and assign column names
+<table class="table table-condensed"><tbody><tr><td align="left">
+```{r, eval=TRUE}
+<<summarise3.1>>
+```
+</td><td align="left">
+```{python, eval=TRUE}
+<<summarise3.3>>
+```
+</td></tr></tbody></table>
+#### Summarise a subset of rows
+<table class="table table-condensed"><tbody><tr><td align="left">
+```{r, eval=TRUE}
+<<summarise4.1>>
+```
+</td><td align="left">
+```{python, eval=TRUE}
+<<summarise4.3>>
+```
+</td></tr></tbody></table>
+<table class="table table-condensed"><tbody><tr><td align="left">
+```{r, eval=TRUE}
+<<summarise5.1>>
+```
+</td><td align="left">
+```{python, eval=TRUE}
+<<summarise5.3>>
+```
+</td></tr></tbody></table>
+
+<br><hr>
+### Add/update/delete columns
+
+#### Modify a column
+<table class="table table-condensed"><tbody><tr><td align="left">
+```{r, eval=TRUE}
+<<cols1.1>>
+```
+</td><td align="left">
+```{python, eval=TRUE}
+<<cols1.3>>
+```
+</td></tr></tbody></table>
+#### Add one column
+<table class="table table-condensed"><tbody><tr><td align="left">
+```{r, eval=TRUE}
+<<cols2.1>>
+```
+</td><td align="left">
+```{python, eval=TRUE}
+<<cols2.3>>
+```
+</td></tr></tbody></table>
+#### Add several columns 
+<table class="table table-condensed"><tbody><tr><td align="left">
+```{r, eval=TRUE}
+<<cols3.1>>
+```
+</td><td align="left">
+```{python, eval=TRUE}
+<<cols3.3>>
+```
+</td></tr></tbody></table>
+#### Create one column and remove the others
+<table class="table table-condensed"><tbody><tr><td align="left">
+```{r, eval=TRUE}
+<<cols4.1>>
+```
+</td><td align="left">
+```{python, eval=TRUE}
+<<cols4.3>>
+```
+</td></tr></tbody></table>
+#### Remove one column
+<table class="table table-condensed"><tbody><tr><td align="left">
+```{r, eval=TRUE}
+<<cols5.1>>
+```
+</td><td align="left">
+```{python, eval=TRUE}
+<<cols5.3>>
+```
+</td></tr></tbody></table>
+#### Remove several columns
+<table class="table table-condensed"><tbody><tr><td align="left">
+```{r, eval=TRUE}
+<<cols6.1>>
+```
+</td><td align="left">
+```{python, eval=TRUE}
+<<cols6.3>>
+```
+</td></tr></tbody></table>
+#### Remove columns using a vector of colnames
+<table class="table table-condensed"><tbody><tr><td align="left">
+```{r, eval=TRUE}
+<<cols7.1>>
+```
+</td><td align="left">
+```{python, eval=TRUE}
+<<cols7.3>>
+```
+</td></tr></tbody></table>
+#### Replace values for rows matching a condition
+<table class="table table-condensed"><tbody><tr><td align="left">
+```{r, eval=TRUE}
+<<cols8.1>>
+```
+</td><td align="left">
+```{python, eval=TRUE}
+<<cols8.3>>
+```
+</td></tr></tbody></table>
+
+
+<br><hr>
+### by
+
+#### By group
+<table class="table table-condensed"><tbody><tr><td align="left">
+```{r, eval=TRUE}
+<<by1.1>>
+```
+</td><td align="left">
+```{python, eval=TRUE}
+<<by1.3>>
+```
+</td></tr></tbody></table>
+#### By several groups
+<table class="table table-condensed"><tbody><tr><td align="left">
+```{r, eval=TRUE}
+<<by2.1>>
+```
+</td><td align="left">
+```{python, eval=TRUE}
+<<by2.3>>
+```
+</td></tr></tbody></table>
+#### Calling function in by
+<table class="table table-condensed"><tbody><tr><td align="left">
+```{r, eval=TRUE}
+<<by3.1>>
+```
+</td><td align="left">
+```{python, eval=TRUE}
+<<by3.3>>
+```
+</td></tr></tbody></table>
+#### Assigning column name in by
+<table class="table table-condensed"><tbody><tr><td align="left">
+```{r, eval=TRUE}
+<<by4.1>>
+```
+</td><td align="left">
+```{python, eval=TRUE}
+<<by4.3>>
+```
+</td></tr></tbody></table>
+#### Using a condition in by
+<table class="table table-condensed"><tbody><tr><td align="left">
+```{r, eval=TRUE}
+<<by5.1>>
+```
+</td><td align="left">
+```{python, eval=TRUE}
+<<by5.3>>
+```
+</td></tr></tbody></table>
+#### By on a subset of rows
+<table class="table table-condensed"><tbody><tr><td align="left">
+```{r, eval=TRUE}
+<<by6.1>>
+```
+</td><td align="left">
+```{python, eval=TRUE}
+<<by6.3>>
+```
+</td></tr></tbody></table>
+#### Count number of observations for each group
+<table class="table table-condensed"><tbody><tr><td align="left">
+```{r, eval=TRUE}
+<<by7.1>>
+```
+</td><td align="left">
+```{python, eval=TRUE}
+<<by7.3>>
+```
+</td></tr></tbody></table>
+#### Add a column with number of observations for each group
+<table class="table table-condensed"><tbody><tr><td align="left">
+```{r, eval=TRUE}
+<<by8.1>>
+```
+</td><td align="left">
+```{python, eval=TRUE}
+<<by8.3>>
+```
+</td></tr></tbody></table>
+#### Retrieve the first/last/nth observation for each group
+<table class="table table-condensed"><tbody><tr><td align="left">
+```{r, eval=TRUE}
+<<by9.1>>
+```
+</td><td align="left">
+```{python, eval=TRUE}
+<<by9.3>>
+```
+</td></tr></tbody></table>
+
+
+
+<!----------------------------------------------------------------------------
+                           GOING FURTHER
+------------------------------------------------------------------------------->
+
+<br><br><hr class = "hr2">
+# Going further 
+
+### Advanced columns manipulation
+
+#### Summarise all the columns
+<table class="table table-condensed"><tbody><tr><td align="left">
+```{r, eval=TRUE}
+<<advCols1.1>>
+```
+</td><td align="left">
+```{python, eval=TRUE}
+<<advCols1.3>>
+```
+</td></tr></tbody></table>
+#### Summarise several columns
+<table class="table table-condensed"><tbody><tr><td align="left">
+```{r, eval=TRUE}
+<<advCols2.1>>
+```
+</td><td align="left">
+```{python, eval=TRUE}
+<<advCols2.3>>
+```
+</td></tr></tbody></table>
+#### Summarise several columns by group
+<table class="table table-condensed"><tbody><tr><td align="left">
+```{r, eval=TRUE}
+<<advCols3.1>>
+```
+</td><td align="left">
+```{python, eval=TRUE}
+<<advCols3.3>>
+```
+</td></tr></tbody></table>
+#### Summarise with more than one function by group
+<table class="table table-condensed"><tbody><tr><td align="left">
+```{r, eval=TRUE}
+<<advCols4.1>>
+```
+</td><td align="left">
+```{python, eval=TRUE}
+<<advCols4.3>>
+```
+</td></tr></tbody></table>
+#### Summarise using a condition
+<table class="table table-condensed"><tbody><tr><td align="left">
+```{r, eval=TRUE}
+<<advCols5.1>>
+```
+</td><td align="left">
+```{python, eval=TRUE}
+<<advCols5.3>>
+```
+</td></tr></tbody></table>
+#### Modify all the columns
+<table class="table table-condensed"><tbody><tr><td align="left">
+```{r, eval=TRUE}
+<<advCols6.1>>
+```
+</td><td align="left">
+```{python, eval=TRUE}
+<<advCols6.3>>
+```
+</td></tr></tbody></table>
+#### Modify several columns (dropping the others)
+<table class="table table-condensed"><tbody><tr><td align="left">
+```{r, eval=TRUE}
+<<advCols7.1>>
+```
+</td><td align="left">
+```{python, eval=TRUE}
+<<advCols7.3>>
+```
+</td></tr></tbody></table>
+#### Modify several columns (keeping the others)
+<table class="table table-condensed"><tbody><tr><td align="left">
+```{r, eval=TRUE}
+<<advCols8.1>>
+```
+</td><td align="left">
+```{python, eval=TRUE}
+<<advCols8.3>>
+```
+</td></tr></tbody></table>
+#### Modify columns using a condition (dropping the others)
+<table class="table table-condensed"><tbody><tr><td align="left">
+```{r, eval=TRUE}
+<<advCols9.1>>
+```
+</td><td align="left">
+```{python, eval=TRUE}
+<<advCols9.3>>
+```
+</td></tr></tbody></table>
+#### Modify columns using a condition (keeping the others)
+<table class="table table-condensed"><tbody><tr><td align="left">
+```{r, eval=TRUE}
+<<advCols10.1>>
+```
+</td><td align="left">
+```{python, eval=TRUE}
+<<advCols10.3>>
+```
+</td></tr></tbody></table>
+
+
+#### Use a complex expression
+<table class="table table-condensed"><tbody><tr><td align="left">
+```{r, eval=TRUE}
+<<advCols11.1>>
+```
+</td><td align="left">
+```{python, eval=TRUE}
+<<advCols11.3>>
+```
+</td></tr></tbody></table>
+#### Use multiple expressions (with `DT[,{j}]`)
+<table class="table table-condensed"><tbody><tr><td align="left">
+```{r, eval=TRUE}
+<<advCols12.1>>
+```
+</td><td align="left">
+```{python, eval=TRUE}
+<<advCols12.3>>
+```
+</td></tr></tbody></table>
+
+
+<br><hr>
+### Chain expressions
+
+#### Expression chaining using `DT[][]` (recommended)
+<table class="table table-condensed"><tbody><tr><td align="left">
+```{r, eval=TRUE}
+<<chain1.1>>
+```
+</td><td align="left">
+```{python, eval=TRUE}
+<<chain1.3>>
+```
+</td></tr></tbody></table>
+
+
+<br><hr>
+### Indexing and Keys
+
+#### Set the key/index   
+<table class="table table-condensed"><tbody><tr><td align="left">
+```{r, eval=TRUE}
+<<key1.1>>
+```
+</td><td align="left">
+```{python, eval=TRUE}
+<<key1.3>>
+```
+</td></tr></tbody></table>
+#### Select the matching rows
+<table class="table table-condensed"><tbody><tr><td align="left">
+```{r, eval=TRUE}
+<<key2.1>>
+```
+</td><td align="left">
+```{python, eval=TRUE}
+<<key2.3>>
+```
+</td></tr></tbody></table>
+#### Select the first matching row
+<table class="table table-condensed"><tbody><tr><td align="left">
+```{r, eval=TRUE}
+<<key3.1>>
+```
+</td><td align="left">
+```{python, eval=TRUE}
+<<key3.3>>
+```
+</td></tr></tbody></table>
+#### Select the last matching row
+<table class="table table-condensed"><tbody><tr><td align="left">
+```{r, eval=TRUE}
+<<key4.1>>
+```
+</td><td align="left">
+```{python, eval=TRUE}
+<<key4.3>>
+```
+</td></tr></tbody></table>
+#### Nomatch argument
+<table class="table table-condensed"><tbody><tr><td align="left">
+```{r, eval=TRUE}
+<<key5.1>>
+```
+</td><td align="left">
+```{python, eval=TRUE}
+<<key5.3>>
+```
+</td></tr></tbody></table>
+#### Apply a function on the matching rows
+<table class="table table-condensed"><tbody><tr><td align="left">
+```{r, eval=TRUE}
+<<key6.1>>
+```
+</td><td align="left">
+```{python, eval=TRUE}
+<<key6.3>>
+```
+</td></tr></tbody></table>
+#### Modify values for matching rows
+<table class="table table-condensed"><tbody><tr><td align="left">
+```{r, eval=TRUE}
+<<key7.1>>
+```
+</td><td align="left">
+```{python, eval=TRUE}
+<<key7.3>>
+```
+</td></tr></tbody></table>
+#### Use keys in by
+<table class="table table-condensed"><tbody><tr><td align="left">
+```{r, eval=TRUE}
+<<key8.1>>
+```
+</td><td align="left">
+```{python, eval=TRUE}
+<<key8.3>>
+```
+</td></tr></tbody></table>
+#### Set keys/indices for multiple columns
+<table class="table table-condensed"><tbody><tr><td align="left">
+```{r, eval=TRUE}
+<<key9.1>>
+```
+</td><td align="left">
+```{python, eval=TRUE}
+<<key9.3>>
+```
+</td></tr></tbody></table>
+#### Subset using multiple keys/indices
+<table class="table table-condensed"><tbody><tr><td align="left">
+```{r, eval=TRUE}
+<<key10.1>>
+```
+</td><td align="left">
+```{python, eval=TRUE}
+<<key10.3>>
+```
+</td></tr></tbody></table>
+#### Remove keys/indices
+<table class="table table-condensed"><tbody><tr><td align="left">
+```{r, eval=TRUE}
+<<key11.1>>
+```
+</td><td align="left">
+```{python, eval=TRUE}
+<<key11.3>>
+```
+</td></tr></tbody></table>
+
+
+<br><hr>
+### `set*()` modifications
+
+#### Replace values
+<table class="table table-condensed"><tbody><tr><td align="left">
+```{r, eval=TRUE}
+<<set1.1>>
+```
+</td><td align="left">
+```{python, eval=TRUE}
+<<set1.3>>
+```
+</td></tr></tbody></table>
+#### Reorder rows
+<table class="table table-condensed"><tbody><tr><td align="left">
+```{r, eval=TRUE}
+<<set2.1>>
+```
+</td><td align="left">
+```{python, eval=TRUE}
+<<set2.3>>
+```
+</td></tr></tbody></table>
+#### Modify colnames
+<table class="table table-condensed"><tbody><tr><td align="left">
+```{r, eval=TRUE}
+<<set3.1>>
+```
+</td><td align="left">
+```{python, eval=TRUE}
+<<set3.3>>
+```
+</td></tr></tbody></table>
+#### Reorder columns
+<table class="table table-condensed"><tbody><tr><td align="left">
+```{r, eval=TRUE}
+<<set4.1>>
+```
+</td><td align="left">
+```{python, eval=TRUE}
+<<set4.3>>
+```
+</td></tr></tbody></table>
+#### Convert data
+<table class="table table-condensed"><tbody><tr><td align="left">
+```{r, eval=TRUE}
+<<set5.1>>
+```
+</td><td align="left">
+```{python, eval=TRUE}
+<<set5.3>>
+```
+</td></tr></tbody></table>
+
+
+<br><hr>
+### Advanced use of by
+
+#### Select first/last/... row by group
+<table class="table table-condensed"><tbody><tr><td align="left">
+```{r, eval=TRUE}
+<<advBy1.1>>
+```
+</td><td align="left">
+```{python, eval=TRUE}
+<<advBy1.3>>
+```
+</td></tr></tbody></table>
+#### Select rows using a nested query
+<table class="table table-condensed"><tbody><tr><td align="left">
+```{r, eval=TRUE}
+<<advBy2.1>>
+```
+</td><td align="left">
+```{python, eval=TRUE}
+<<advBy2.3>>
+```
+</td></tr></tbody></table>
+#### Add a group counter column
+<table class="table table-condensed"><tbody><tr><td align="left">
+```{r, eval=TRUE}
+<<advBy3.1>>
+```
+</td><td align="left">
+```{python, eval=TRUE}
+<<advBy3.3>>
+```
+</td></tr></tbody></table>
+#### Get row number of first (and last) observation by group
+<table class="table table-condensed"><tbody><tr><td align="left">
+```{r, eval=TRUE}
+<<advBy4.1>>
+```
+</td><td align="left">
+```{python, eval=TRUE}
+<<advBy4.3>>
+```
+</td></tr></tbody></table>
+#### Handle list-columns by group
+<table class="table table-condensed"><tbody><tr><td align="left">
+```{r, eval=TRUE}
+<<advBy5.1>>
+```
+</td><td align="left">
+```{python, eval=TRUE}
+<<advBy5.3>>
+```
+</td></tr></tbody></table>
+#### Grouping sets (multiple by at once)
+<table class="table table-condensed"><tbody><tr><td align="left">
+```{r, eval=TRUE}
+<<advBy6.1>>
+```
+</td><td align="left">
+```{python, eval=TRUE}
+<<advBy6.3>>
+```
+</td></tr></tbody></table>
+
+
+
+<!----------------------------------------------------------------------------
+                               MISCELLANEOUS
+------------------------------------------------------------------------------->
+
+<br><br><hr class = "hr2">
+# Miscellaneous
+
+### Read / Write data
+
+#### Write data to a csv file
+<table class="table table-condensed"><tbody><tr><td align="left">
+```{r, eval=TRUE}
+<<readwrite1.1>>
+```
+</td><td align="left">
+```{python, eval=TRUE}
+<<readwrite1.3>>
+```
+</td></tr></tbody></table>
+#### Write data to a tab-delimited file
+<table class="table table-condensed"><tbody><tr><td align="left">
+```{r, eval=TRUE}
+<<readwrite2.1>>
+```
+</td><td align="left">
+```{python, eval=TRUE}
+<<readwrite2.3>>
+```
+</td></tr></tbody></table>
+#### Write list-column data to a csv file
+<table class="table table-condensed"><tbody><tr><td align="left">
+```{r, eval=TRUE}
+<<readwrite3.1>>
+```
+</td><td align="left">
+```{python, eval=TRUE}
+<<readwrite3.3>>
+```
+</td></tr></tbody></table>
+#### Read a csv / tab-delimited file
+<table class="table table-condensed"><tbody><tr><td align="left">
+```{r, eval=TRUE}
+<<readwrite4.1>>
+```
+</td><td align="left">
+```{python, eval=TRUE}
+<<readwrite4.3>>
+```
+</td></tr></tbody></table>
+#### Read a csv file selecting / droping columns
+<table class="table table-condensed"><tbody><tr><td align="left">
+```{r, eval=TRUE}
+<<readwrite5.1>>
+```
+</td><td align="left">
+```{python, eval=TRUE}
+<<readwrite5.3>>
+```
+</td></tr></tbody></table>
+#### Read and rbind several files
+<table class="table table-condensed"><tbody><tr><td align="left">
+```{r, eval=TRUE}
+<<readwrite6.1>>
+```
+</td><td align="left">
+```{python, eval=TRUE}
+<<readwrite6.3>>
+```
+</td></tr></tbody></table>
+```{r, eval = TRUE, message = FALSE, warning = FALSE, echo = FALSE, results = "hide"}
+<<readwrite7>>
+```
+
+
+<br><hr>
+### Reshape data
+
+#### Melt data (from wide to long)
+<table class="table table-condensed"><tbody><tr><td align="left">
+```{r, eval=TRUE}
+<<reshape1.1>>
+```
+</td><td align="left">
+```{python, eval=TRUE}
+<<reshape1.3>>
+```
+</td></tr></tbody></table>
+#### Cast data (from long to wide)
+<table class="table table-condensed"><tbody><tr><td align="left">
+```{r, eval=TRUE}
+<<reshape2.1>>
+```
+</td><td align="left">
+```{python, eval=TRUE}
+<<reshape2.3>>
+```
+</td></tr></tbody></table>
+#### Split
+<table class="table table-condensed"><tbody><tr><td align="left">
+```{r, eval=TRUE}
+<<reshape3.1>>
+```
+</td><td align="left">
+```{python, eval=TRUE}
+<<reshape3.3>>
+```
+</td></tr></tbody></table>
+#### Split and transpose a vector/column
+<table class="table table-condensed"><tbody><tr><td align="left">
+```{r, eval=TRUE}
+<<reshape4.1>>
+```
+</td><td align="left">
+```{python, eval=TRUE}
+<<reshape4.3>>
+```
+</td></tr></tbody></table>
+
+
+<br><hr>
+### Other
+#### Check package installation
+<table class="table table-condensed"><tbody><tr><td align="left">
+```{r, eval=TRUE}
+<<other1.1>>
+```
+</td><td align="left">
+```{python, eval=TRUE}
+<<other1.3>>
+```
+</td></tr></tbody></table>
+#### List data.tables/tibbles
+<table class="table table-condensed"><tbody><tr><td align="left">
+```{r, eval=TRUE}
+<<other2.1>>
+```
+</td><td align="left">
+```{python, eval=TRUE}
+<<other2.3>>
+```
+</td></tr></tbody></table>
+#### Get/Set number of threads when parallelized 
+<table class="table table-condensed"><tbody><tr><td align="left">
+```{r, eval=TRUE}
+<<other3.1>>
+```
+</td><td align="left">
+```{python, eval=TRUE}
+<<other3.3>>
+```
+</td></tr></tbody></table>
+#### Lead/Lag
+<table class="table table-condensed"><tbody><tr><td align="left">
+```{r, eval=TRUE}
+<<other4.1>>
+```
+</td><td align="left">
+```{python, eval=TRUE}
+<<other4.3>>
+```
+</td></tr></tbody></table>
+#### Generate run-length ids
+<table class="table table-condensed"><tbody><tr><td align="left">
+```{r, eval=TRUE}
+<<other5.1>>
+```
+</td><td align="left">
+```{python, eval=TRUE}
+<<other5.3>>
+```
+</td></tr></tbody></table>
+#### Vectorised `ifelse` statements
+<table class="table table-condensed"><tbody><tr><td align="left">
+```{r, eval=TRUE}
+<<other6.1>>
+```
+</td><td align="left">
+```{python, eval=TRUE}
+<<other6.3>>
+```
+</td></tr></tbody></table>
+#### Rolling functions
+<table class="table table-condensed"><tbody><tr><td align="left">
+```{r, eval=TRUE}
+<<other7.1>>
+```
+</td><td align="left">
+```{python, eval=TRUE}
+<<other7.3>>
+```
+</td></tr></tbody></table>
+
+
+
+<!----------------------------------------------------------------------------
+                           JOIN/BIND DATA SETS
+------------------------------------------------------------------------------->
+
+<br><br><hr class = "hr2">
+# Join/Bind data sets
+
+### Join
+
+<table class="table table-condensed"><tbody><tr><td align="left">
+```{r, eval=TRUE}
+<<join1>>
+```
+</td><td align="left">
+```{python, eval=TRUE}
+<<join1.3>>
+```
+</td></tr></tbody></table>
+#### Join matching rows from y to x
+<table class="table table-condensed"><tbody><tr><td align="left">
+```{r, eval=TRUE}
+<<join2.1>>
+```
+</td><td align="left">
+```{python, eval=TRUE}
+<<join2.3>>
+```
+</td></tr></tbody></table>
+#### Join matching rows from x to y
+<table class="table table-condensed"><tbody><tr><td align="left">
+```{r, eval=TRUE}
+<<join3.1>>
+```
+</td><td align="left">
+```{python, eval=TRUE}
+<<join3.3>>
+```
+</td></tr></tbody></table>
+#### Join matching rows from both x and y
+<table class="table table-condensed"><tbody><tr><td align="left">
+```{r, eval=TRUE}
+<<join4.1>>
+```
+</td><td align="left">
+```{python, eval=TRUE}
+<<join4.3>>
+```
+</td></tr></tbody></table>
+#### Join keeping all the rows
+<table class="table table-condensed"><tbody><tr><td align="left">
+```{r, eval=TRUE}
+<<join5.1>>
+```
+</td><td align="left">
+```{python, eval=TRUE}
+<<join5.3>>
+```
+</td></tr></tbody></table>
+#### Return rows from x matching y
+<table class="table table-condensed"><tbody><tr><td align="left">
+```{r, eval=TRUE}
+<<join6.1>>
+```
+</td><td align="left">
+```{python, eval=TRUE}
+<<join6.3>>
+```
+</td></tr></tbody></table>
+#### Return rows from x not matching y
+<table class="table table-condensed"><tbody><tr><td align="left">
+```{r, eval=TRUE}
+<<join7.1>>
+```
+</td><td align="left">
+```{python, eval=TRUE}
+<<join7.3>>
+```
+</td></tr></tbody></table>
+
+
+<br><hr>
+### More joins
+
+#### Select columns while joining
+<table class="table table-condensed"><tbody><tr><td align="left">
+```{r, eval=TRUE}
+<<morejoins1.1>>
+```
+</td><td align="left">
+```{python, eval=TRUE}
+<<morejoins1.3>>
+```
+</td></tr></tbody></table>
+#### Aggregate columns while joining
+<table class="table table-condensed"><tbody><tr><td align="left">
+```{r, eval=TRUE}
+<<morejoins2.1>>
+```
+</td><td align="left">
+```{python, eval=TRUE}
+<<morejoins2.3>>
+```
+</td></tr></tbody></table>
+#### Update columns while joining
+<table class="table table-condensed"><tbody><tr><td align="left">
+```{r, eval=TRUE}
+<<morejoins3.1>>
+```
+</td><td align="left">
+```{python, eval=TRUE}
+<<morejoins3.3>>
+```
+</td></tr></tbody></table>
+#### Adds a list column with rows from y matching x (nest-join)
+<table class="table table-condensed"><tbody><tr><td align="left">
+```{r, eval=TRUE}
+<<morejoins4.1>>
+```
+</td><td align="left">
+```{python, eval=TRUE}
+<<morejoins4.3>>
+```
+</td></tr></tbody></table>
+#### Update columns while joining (using vectors of colnames)
+<table class="table table-condensed"><tbody><tr><td align="left">
+```{r, eval=TRUE}
+<<morejoins5.1>>
+```
+</td><td align="left">
+```{python, eval=TRUE}
+<<morejoins5.3>>
+```
+</td></tr></tbody></table>
+#### Join passing columns to match in the `on` argument
+```{r, eval=TRUE, message=FALSE, warning=FALSE}
+<<morejoins6>>
+```
+<table class="table table-condensed"><tbody><tr><td align="left">
+```{r, eval=TRUE}
+<<morejoins6.1>>
+```
+</td><td align="left">
+```{python, eval=TRUE}
+<<morejoins6.3>>
+```
+</td></tr></tbody></table>
+#### Non-equi joins
+<table class="table table-condensed"><tbody><tr><td align="left">
+```{r, eval=TRUE}
+<<morejoins7.1>>
+```
+</td><td align="left">
+```{python, eval=TRUE}
+<<morejoins7.3>>
+```
+</td></tr></tbody></table>
+#### Rolling joins/subsets (performed on the last numeric column)
+<table class="table table-condensed"><tbody><tr><td align="left">
+```{r, eval=TRUE}
+<<morejoins8.1>>
+```
+</td><td align="left">
+```{python, eval=TRUE}
+<<morejoins8.3>>
+```
+</td></tr></tbody></table>
+<table class="table table-condensed"><tbody><tr><td align="left">
+```{r, eval=TRUE}
+<<morejoins9.1>>
+```
+</td><td align="left">
+```{python, eval=TRUE}
+<<morejoins9.3>>
+```
+</td></tr></tbody></table>
+<table class="table table-condensed"><tbody><tr><td align="left">
+```{r, eval=TRUE}
+<<morejoins10.1>>
+```
+</td><td align="left">
+```{python, eval=TRUE}
+<<morejoins10.3>>
+```
+</td></tr></tbody></table>
+#### Cross join (`CJ` ~ `expand.grid`)
+<table class="table table-condensed"><tbody><tr><td align="left">
+```{r, eval=TRUE}
+<<morejoins11.1>>
+```
+</td><td align="left">
+```{python, eval=TRUE}
+<<morejoins11.3>>
+```
+</td></tr></tbody></table>
+
+
+<br><hr>
+### Bind
+```{r, eval = TRUE, message = FALSE, warning = FALSE}
+<<bind1>>
+```
+#### Bind rows
+<table class="table table-condensed"><tbody><tr><td align="left">
+```{r, eval=TRUE}
+<<bind2.1>>
+```
+</td><td align="left">
+```{python, eval=TRUE}
+<<bind2.3>>
+```
+</td></tr></tbody></table>
+#### Bind rows using a list
+<table class="table table-condensed"><tbody><tr><td align="left">
+```{r, eval=TRUE}
+<<bind3.1>>
+```
+</td><td align="left">
+```{python, eval=TRUE}
+<<bind3.3>>
+```
+</td></tr></tbody></table>
+#### Bind columns
+<table class="table table-condensed"><tbody><tr><td align="left">
+```{r, eval=TRUE}
+<<bind4.1>>
+```
+</td><td align="left">
+```{python, eval=TRUE}
+<<bind4.3>>
+```
+</td></tr></tbody></table>
+
+
+<br><hr>
+### Set operations
+```{r, eval = TRUE, message = FALSE, warning = FALSE}
+<<setOps0>>
+```
+#### Intersection
+<table class="table table-condensed"><tbody><tr><td align="left">
+```{r, eval=TRUE}
+<<setOps1.1>>
+```
+</td><td align="left">
+```{python, eval=TRUE}
+<<setOps1.3>>
+```
+</td></tr></tbody></table>
+#### Difference
+<table class="table table-condensed"><tbody><tr><td align="left">
+```{r, eval=TRUE}
+<<setOps2.1>>
+```
+</td><td align="left">
+```{python, eval=TRUE}
+<<setOps2.3>>
+```
+</td></tr></tbody></table>
+#### Union
+<table class="table table-condensed"><tbody><tr><td align="left">
+```{r, eval=TRUE}
+<<setOps3.1>>
+```
+</td><td align="left">
+```{python, eval=TRUE}
+<<setOps3.3>>
+```
+</td></tr></tbody></table>
+#### Equality
+<table class="table table-condensed"><tbody><tr><td align="left">
+```{r, eval=TRUE}
+<<setOps4.1>>
+```
+</td><td align="left">
+```{python, eval=TRUE}
+<<setOps4.3>>
+```
+</td></tr></tbody></table>
+
+
+
+<!----------------------------------------------------------------------------
+                                 SUMMARY
+------------------------------------------------------------------------------->
+
+<br><br><hr class = "hr2">
+
+<br><br>
+
+```{r, echo = FALSE, eval = TRUE, message = FALSE, warning = FALSE}
+<<sessionInfo>>
+```
+
+

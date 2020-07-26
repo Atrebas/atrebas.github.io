@@ -1,0 +1,534 @@
+---
+title: "A data.table and pandas small stroll"
+author: "Atrebas"
+date: "2020-06-14"
+summary: data.table and pandas are two major libraries for efficient manipulation of data frames in R and Python, respectively. Being quite familiar with data.table, I wrote this post as an exercice to learn more about pandas. Commands to execute common data munging tasks are presented side-by-side to facilitate the comparison.   
+output:
+  blogdown::html_page:
+    toc: true
+categories: ["R"]
+tags: ["R", "data.table", "pandas", "Python"]
+---
+
+
+```{r  global_options, echo = FALSE}
+knitr::opts_chunk$set(results = "hold")
+```
+
+```{r echo = FALSE, message = FALSE, warning = FALSE}
+library(knitr)
+read_chunk('2019-03-03-datatable-dplyr.R')
+read_chunk('2020-06-14-pandas.py')
+```
+
+<!----------------------------------------------------------------------------
+<div id="contents" style="position:fixed;width: 200px;right:0;top:0">
+------------------------------------------------------------------------------->
+
+<script src="/js/jquery-3.3.1.min.js"></script>
+<script src="/js/show-hide-console-outputs.js"></script>
+<script src="/js/floating-toc.js"></script>
+
+
+<style>
+   table {
+      width: 100%;
+      border-top: none !important; 
+      padding: 0px;
+      border-spacing: 2px;
+      margin-bottom: 0px;
+    }
+    td {
+      width: 50%;
+      text-align: left;
+    }
+    pre {
+    padding: 5px;
+    white-space: pre-wrap;
+    }
+    .hljs.shell{
+    background: #ffffff;
+    border-style: solid;
+    border-width: 1px;
+    border-color: #a7a7a71a;
+    }
+    pre:not(.r):not(.python) {
+    display: none;
+    }
+    table {
+    margin-bottom: 0px;
+    table-layout: fixed; 
+    }
+    .table {
+    margin-bottom: 0px;
+    }
+    h4 {
+    text-align: center;
+    font-size: 12px;
+    font-weight: 600;
+    margin-top: 0px;
+    margin-bottom: 3px;
+    }
+    hr.hr2 {
+    border: 2px solid #000000;
+    }
+    .hljs{
+    background: #a7a7a71a;
+    font-size: 80%;
+    word-wrap: break-word;
+    }
+    #TOC {
+    font-size: 12px;
+    }
+    #TOC.floating {
+    position:fixed;
+    width: 200px;
+    left:0;
+    top:0;
+    margin-top: 60px;
+    }
+    pre:not(.r):not(.python) {
+    background: #a7a7a71a;
+    font-size: 80%;
+    word-wrap: break-word;
+    color: #333333;
+    }
+
+
+</style>
+ 
+<!----------------------------------------------------------------------------
+                INTRODUCTION
+------------------------------------------------------------------------------->
+
+<br>
+<table class="table table-condensed"><tbody><tr><td align="center">
+![data.table_logo](/images/data.table.png)
+</td><td align="center">
+<br><br>
+![pandas_logo](/images/pandas.png)
+</td></tr></tbody></table>
+
+
+<br><hr class = "hr2">
+# Introduction
+
+### About
+- Last year, I published a [post](https://atrebas.github.io/post/2019-03-03-datatable-dplyr/) 
+showing how to use the data.table and dplyr R packages to execute data munging tasks.    
+- I have learned some Python lately and thought it would be a could exercice to "translate" the commands using pandas.     
+- I am less familiar with Python and pandas than I am with R and data.table, and presenting the two librairies together in a logical way is a bit challenging. So, rather than going into convoluted explanations, 
+I choose the easy (and time-saving) solution: only the code is presented, no further explanation is given - hence the title.    
+- That's all it is. Just a programming exercice, not a A-vs-B post. 
+It is incomplete and not fully polished but I publish it in case it can be useful for someone and to better keep track of the files.     
+- The same [R code](https://github.com/Atrebas/atrebas.github.io/blob/master/post/2019-03-03-datatable-dplyr.R) 
+is used below and in my "data.table and dplyr tour". The Python code, available 
+[here](https://github.com/Atrebas/atrebas.github.io/blob/master/post/2020-06-14-datatable-pandas.R), is structured and labeled in the same way.     
+
+<div style="text-align: center;"><input type='button' id='hideshow' value='Show the outputs'></div>
+
+
+<br><hr>
+### Create example data
+<table class="table table-condensed"><tbody><tr><td align="left">
+```{r, message=FALSE, warning=FALSE}
+<<data1.1>>  
+```
+</td><td align="left">
+```{python, message=FALSE, warning=FALSE}
+<<data1.3>>  
+```
+</td></tr></tbody></table>
+
+
+Below, the data.table code uses `DT` and the pandas code uses `DF`. 
+
+
+<!----------------------------------------------------------------------------
+                             BASIC OPERATIONS
+------------------------------------------------------------------------------->
+
+<br><br><hr class = "hr2">
+# Basic operations
+
+### Filter rows
+#### Filter rows using indices
+<<<filterRows1.1>><<filterRows1.3>>>
+#### Discard rows using negative indices
+<<<filterRows2.1>><<filterRows2.3>>>
+#### Filter rows using a logical expression 
+<<<filterRows3.1>><<filterRows3.3>>>
+#### Filter rows using multiple conditions
+<<<filterRows4.1>><<filterRows4.3>>>
+#### Filter unique rows
+<<<filterRows5.1>><<filterRows5.3>>>
+#### Discard rows with missing values
+<<<filterRows6.1>><<filterRows6.3>>>
+#### Other filters
+<<<filterRows7.1>><<filterRows7.3>>>
+<<<filterRows8.1>><<filterRows8.3>>>
+
+<br><hr>
+### Sort rows
+#### Sort rows by column
+<<<sortRows1.1>><<sortRows1.3>>>
+#### Sort rows in decreasing order
+<<<sortRows2.1>><<sortRows2.3>>>
+#### Sort rows based on several columns
+<<<sortRows3.1>><<sortRows3.3>>>
+
+
+<br><hr>
+### Select columns
+#### Select one column using an index (not recommended)
+<<<selectCols1.1>><<selectCols1.3>>>
+#### Select one column using column name
+<<<selectCols2.1>><<selectCols2.3>>>
+#### Select several columns
+<<<selectCols3.1>><<selectCols3.3>>>
+#### Exclude columns
+<<<selectCols4.1>><<selectCols4.3>>>
+#### Select/Exclude columns using a character vector
+<<<selectCols5.1>><<selectCols5.3>>>
+#### Other selections
+<<<selectCols6.1>><<selectCols6.3>>>
+
+<br><hr>
+### Summarise data
+
+#### Summarise one column
+<<<summarise1.1>><<summarise1.3>>>
+#### Summarise several columns
+<<<summarise2.1>><<summarise2.3>>>
+#### Summarise several columns and assign column names
+<<<summarise3.1>><<summarise3.3>>>
+#### Summarise a subset of rows
+<<<summarise4.1>><<summarise4.3>>>
+<<<summarise5.1>><<summarise5.3>>>
+
+<br><hr>
+### Add/update/delete columns
+
+#### Modify a column
+<<<cols1.1>><<cols1.3>>>
+#### Add one column
+<<<cols2.1>><<cols2.3>>>
+#### Add several columns 
+<<<cols3.1>><<cols3.3>>>
+#### Create one column and remove the others
+<<<cols4.1>><<cols4.3>>>
+#### Remove one column
+<<<cols5.1>><<cols5.3>>>
+#### Remove several columns
+<<<cols6.1>><<cols6.3>>>
+#### Remove columns using a vector of colnames
+<<<cols7.1>><<cols7.3>>>
+#### Replace values for rows matching a condition
+<<<cols8.1>><<cols8.3>>>
+
+
+<br><hr>
+### by
+
+#### By group
+<<<by1.1>><<by1.3>>>
+#### By several groups
+<<<by2.1>><<by2.3>>>
+#### Calling function in by
+<<<by3.1>><<by3.3>>>
+#### Assigning column name in by
+<<<by4.1>><<by4.3>>>
+#### Using a condition in by
+<<<by5.1>><<by5.3>>>
+#### By on a subset of rows
+<<<by6.1>><<by6.3>>>
+#### Count number of observations for each group
+<<<by7.1>><<by7.3>>>
+#### Add a column with number of observations for each group
+<<<by8.1>><<by8.3>>>
+#### Retrieve the first/last/nth observation for each group
+<<<by9.1>><<by9.3>>>
+
+
+
+<!----------------------------------------------------------------------------
+                           GOING FURTHER
+------------------------------------------------------------------------------->
+
+<br><br><hr class = "hr2">
+# Going further 
+
+### Advanced columns manipulation
+
+#### Summarise all the columns
+<<<advCols1.1>><<advCols1.3>>>
+#### Summarise several columns
+<<<advCols2.1>><<advCols2.3>>>
+#### Summarise several columns by group
+<<<advCols3.1>><<advCols3.3>>>
+#### Summarise with more than one function by group
+<<<advCols4.1>><<advCols4.3>>>
+#### Summarise using a condition
+<<<advCols5.1>><<advCols5.3>>>
+#### Modify all the columns
+<<<advCols6.1>><<advCols6.3>>>
+#### Modify several columns (dropping the others)
+<<<advCols7.1>><<advCols7.3>>>
+#### Modify several columns (keeping the others)
+<<<advCols8.1>><<advCols8.3>>>
+#### Modify columns using a condition (dropping the others)
+<<<advCols9.1>><<advCols9.3>>>
+#### Modify columns using a condition (keeping the others)
+<<<advCols10.1>><<advCols10.3>>>
+
+
+#### Use a complex expression
+<<<advCols11.1>><<advCols11.3>>>
+#### Use multiple expressions (with `DT[,{j}]`)
+<<<advCols12.1>><<advCols12.3>>>
+
+
+<br><hr>
+### Chain expressions
+
+#### Expression chaining using `DT[][]` (recommended)
+<<<chain1.1>><<chain1.3>>>
+
+
+<br><hr>
+### Indexing and Keys
+
+#### Set the key/index   
+<<<key1.1>><<key1.3>>>
+#### Select the matching rows
+<<<key2.1>><<key2.3>>>
+#### Select the first matching row
+<<<key3.1>><<key3.3>>>
+#### Select the last matching row
+<<<key4.1>><<key4.3>>>
+#### Nomatch argument
+<<<key5.1>><<key5.3>>>
+#### Apply a function on the matching rows
+<<<key6.1>><<key6.3>>>
+#### Modify values for matching rows
+<<<key7.1>><<key7.3>>>
+#### Use keys in by
+<<<key8.1>><<key8.3>>>
+#### Set keys/indices for multiple columns
+<<<key9.1>><<key9.3>>>
+#### Subset using multiple keys/indices
+<<<key10.1>><<key10.3>>>
+#### Remove keys/indices
+<<<key11.1>><<key11.3>>>
+
+
+<br><hr>
+### `set*()` modifications
+
+#### Replace values
+<<<set1.1>><<set1.3>>>
+#### Reorder rows
+<<<set2.1>><<set2.3>>>
+#### Modify colnames
+<<<set3.1>><<set3.3>>>
+#### Reorder columns
+<<<set4.1>><<set4.3>>>
+#### Convert data
+<<<set5.1>><<set5.3>>>
+
+
+<br><hr>
+### Advanced use of by
+
+#### Select first/last/... row by group
+<<<advBy1.1>><<advBy1.3>>>
+#### Select rows using a nested query
+<<<advBy2.1>><<advBy2.3>>>
+#### Add a group counter column
+<<<advBy3.1>><<advBy3.3>>>
+#### Get row number of first (and last) observation by group
+<<<advBy4.1>><<advBy4.3>>>
+#### Handle list-columns by group
+<<<advBy5.1>><<advBy5.3>>>
+#### Grouping sets (multiple by at once)
+<<<advBy6.1>><<advBy6.3>>>
+
+
+
+<!----------------------------------------------------------------------------
+                               MISCELLANEOUS
+------------------------------------------------------------------------------->
+
+<br><br><hr class = "hr2">
+# Miscellaneous
+
+### Read / Write data
+
+#### Write data to a csv file
+<<<readwrite1.1>><<readwrite1.3>>>
+#### Write data to a tab-delimited file
+<<<readwrite2.1>><<readwrite2.3>>>
+#### Write list-column data to a csv file
+<<<readwrite3.1>><<readwrite3.3>>>
+#### Read a csv / tab-delimited file
+<<<readwrite4.1>><<readwrite4.3>>>
+#### Read a csv file selecting / droping columns
+<<<readwrite5.1>><<readwrite5.3>>>
+#### Read and rbind several files
+<<<readwrite6.1>><<readwrite6.3>>>
+```{r, eval = TRUE, message = FALSE, warning = FALSE, echo = FALSE, results = "hide"}
+<<readwrite7>>
+```
+
+
+<br><hr>
+### Reshape data
+
+#### Melt data (from wide to long)
+<<<reshape1.1>><<reshape1.3>>>
+#### Cast data (from long to wide)
+<<<reshape2.1>><<reshape2.3>>>
+#### Split
+<<<reshape3.1>><<reshape3.3>>>
+#### Split and transpose a vector/column
+<<<reshape4.1>><<reshape4.3>>>
+
+
+<br><hr>
+### Other
+#### Check package installation
+<<<other1.1>><<other1.3>>>
+#### List data.tables/tibbles
+<<<other2.1>><<other2.3>>>
+#### Get/Set number of threads when parallelized 
+<<<other3.1>><<other3.3>>>
+#### Lead/Lag
+<<<other4.1>><<other4.3>>>
+#### Generate run-length ids
+<<<other5.1>><<other5.3>>>
+#### Vectorised `ifelse` statements
+<<<other6.1>><<other6.3>>>
+#### Rolling functions
+<<<other7.1>><<other7.3>>>
+
+
+
+<!----------------------------------------------------------------------------
+                           JOIN/BIND DATA SETS
+------------------------------------------------------------------------------->
+
+<br><br><hr class = "hr2">
+# Join/Bind data sets
+
+### Join
+
+<<<join1>><<join1.3>>>
+#### Join matching rows from y to x
+<<<join2.1>><<join2.3>>>
+#### Join matching rows from x to y
+<<<join3.1>><<join3.3>>>
+#### Join matching rows from both x and y
+<<<join4.1>><<join4.3>>>
+#### Join keeping all the rows
+<<<join5.1>><<join5.3>>>
+#### Return rows from x matching y
+<<<join6.1>><<join6.3>>>
+#### Return rows from x not matching y
+<<<join7.1>><<join7.3>>>
+
+
+<br><hr>
+### More joins
+
+#### Select columns while joining
+<<<morejoins1.1>><<morejoins1.3>>>
+#### Aggregate columns while joining
+<<<morejoins2.1>><<morejoins2.3>>>
+#### Update columns while joining
+<<<morejoins3.1>><<morejoins3.3>>>
+#### Adds a list column with rows from y matching x (nest-join)
+<<<morejoins4.1>><<morejoins4.3>>>
+#### Update columns while joining (using vectors of colnames)
+<<<morejoins5.1>><<morejoins5.3>>>
+#### Join passing columns to match in the `on` argument
+```{r, eval=TRUE, message=FALSE, warning=FALSE}
+<<morejoins6>>
+```
+<<<morejoins6.1>><<morejoins6.3>>>
+#### Non-equi joins
+<<<morejoins7.1>><<morejoins7.3>>>
+#### Rolling joins/subsets (performed on the last numeric column)
+<<<morejoins8.1>><<morejoins8.3>>>
+<<<morejoins9.1>><<morejoins9.3>>>
+<<<morejoins10.1>><<morejoins10.3>>>
+#### Cross join (`CJ` ~ `expand.grid`)
+<<<morejoins11.1>><<morejoins11.3>>>
+
+
+<br><hr>
+### Bind
+```{r, eval = TRUE, message = FALSE, warning = FALSE}
+<<bind1>>
+```
+#### Bind rows
+<<<bind2.1>><<bind2.3>>>
+#### Bind rows using a list
+<<<bind3.1>><<bind3.3>>>
+#### Bind columns
+<<<bind4.1>><<bind4.3>>>
+
+
+<br><hr>
+### Set operations
+```{r, eval = TRUE, message = FALSE, warning = FALSE}
+<<setOps0>>
+```
+#### Intersection
+<<<setOps1.1>><<setOps1.3>>>
+#### Difference
+<<<setOps2.1>><<setOps2.3>>>
+#### Union
+<<<setOps3.1>><<setOps3.3>>>
+#### Equality
+<<<setOps4.1>><<setOps4.3>>>
+
+
+
+<!----------------------------------------------------------------------------
+                                 SUMMARY
+------------------------------------------------------------------------------->
+
+<br><br><hr class = "hr2">
+
+<br><br>
+
+```{r, echo = FALSE, eval = TRUE, message = FALSE, warning = FALSE}
+<<sessionInfo>>
+```
+
+
+
+
+
+
+
+<!----------------------------------------------------------------------------
+
+## Below is the R code used to create the final 2019-03-03-datatable-dplyr.Rmd file.
+## The 2019-03-03-datatable-dplyr_raw.Rmd file is processed to include the R code chunks
+## in a table so as to get the two-column layout. 
+# run the code below
+# move the final Rmd file to content/post
+
+library(magrittr)
+library(rmarkdown)
+
+readLines("2020-06-14-datatable-pandas_raw.Rmd") %>%
+gsub("<<<", '<table class="table table-condensed"><tbody><tr><td align="left">\n```{r, eval=TRUE}\n<<', .) %>%
+gsub(">><<", '>>\n```\n</td><td align="left">\n```{python, eval=TRUE}\n<<', .) %>%
+gsub(">>>", '>>\n```\n</td></tr></tbody></table>', .) %>% 
+head(-25) %>% 
+cat(file="2020-06-14-datatable-pandas.Rmd", sep="\n")
+#render("2020-06-14-datatable-pandas_ready.Rmd")
+
+------------------------------------------------------------------------------->

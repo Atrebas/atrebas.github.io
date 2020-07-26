@@ -6,10 +6,28 @@
     <description>Recent content in R on Home</description>
     <generator>Hugo -- gohugo.io</generator>
     <language>en-us</language>
-    <lastBuildDate>Sun, 16 Jun 2019 00:00:00 +0000</lastBuildDate>
+    <lastBuildDate>Wed, 17 Jun 2020 00:00:00 +0000</lastBuildDate>
     
 	<atom:link href="/tags/r/index.xml" rel="self" type="application/rss+xml" />
     
+    
+    <item>
+      <title>A gentle introduction to data.table</title>
+      <link>/post/2020-06-17-datatable-introduction/</link>
+      <pubDate>Wed, 17 Jun 2020 00:00:00 +0000</pubDate>
+      
+      <guid>/post/2020-06-17-datatable-introduction/</guid>
+      <description>This post presents a quick introduction to data.table, an indispensable package for data wrangling in R. The main objective is to present the data.table syntax, showing how to perform basic but essential data manipulation tasks.</description>
+    </item>
+    
+    <item>
+      <title>A data.table and pandas small stroll</title>
+      <link>/post/2020-06-14-datatable-pandas/</link>
+      <pubDate>Sun, 14 Jun 2020 00:00:00 +0000</pubDate>
+      
+      <guid>/post/2020-06-14-datatable-pandas/</guid>
+      <description>data.table and pandas are two major libraries for efficient manipulation of data frames in R and Python, respectively. Being quite familiar with data.table, I wrote this post as an exercice to learn more about pandas. Commands to execute common data munging tasks are presented side-by-side to facilitate the comparison.</description>
+    </item>
     
     <item>
       <title>Learning Japanese with data.table and ggplot2</title>

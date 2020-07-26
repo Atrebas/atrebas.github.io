@@ -6,10 +6,19 @@
     <description>Recent content in Python on Home</description>
     <generator>Hugo -- gohugo.io</generator>
     <language>en-us</language>
-    <lastBuildDate>Tue, 15 Jan 2019 00:00:00 +0000</lastBuildDate>
+    <lastBuildDate>Sun, 14 Jun 2020 00:00:00 +0000</lastBuildDate>
     
 	<atom:link href="/tags/python/index.xml" rel="self" type="application/rss+xml" />
     
+    
+    <item>
+      <title>A data.table and pandas small stroll</title>
+      <link>/post/2020-06-14-datatable-pandas/</link>
+      <pubDate>Sun, 14 Jun 2020 00:00:00 +0000</pubDate>
+      
+      <guid>/post/2020-06-14-datatable-pandas/</guid>
+      <description>data.table and pandas are two major libraries for efficient manipulation of data frames in R and Python, respectively. Being quite familiar with data.table, I wrote this post as an exercice to learn more about pandas. Commands to execute common data munging tasks are presented side-by-side to facilitate the comparison.</description>
+    </item>
     
     <item>
       <title>Self-studying Python and Machine Learning: 2018 in review</title>

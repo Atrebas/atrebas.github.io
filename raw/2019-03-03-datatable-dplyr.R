@@ -142,7 +142,7 @@ DT[, V2]       # returns a vector
 DT[["V2"]]     # returns a vector
 ## @knitr selectCols2.2
 select(DF, V2) # returns a tibble
-pull(DF, V2)   # returns a vector
+pull(DF, V2, name = V4)   # returns a (named) vector
 DF[, "V2"]        # returns a tibble
 DF[["V2"]]        # returns a vector
 
@@ -247,6 +247,7 @@ DF
 DT[, v5 := log(V1)][] # adding [] prints the result
 ## @knitr cols2.2
 DF <- mutate(DF, v5 = log(V1))
+# see ?mutate for options (.keep, .before, ...)
 
 ## @knitr cols3.1
 DT[, c("v6", "v7") := .(sqrt(V1), "X")]
@@ -398,8 +399,6 @@ DF %>%
 DT[, lapply(.SD, max)]
 ## @knitr advCols1.2
 DF %>% summarise(across(everything(), max))
-DF %>% summarise(across(everything(), 
-                        ~ max(.x, na.rm = TRUE)))
 # summarise_all(DF, max)
 
 ## @knitr advCols2.1
@@ -424,7 +423,6 @@ DF %>%
 # DF %>%
 #   group_by(V4) %>%
 #   summarise_at(c("V1", "V2"), mean)
-## using select helpers
 DF %>%
   group_by(V4) %>%
   summarise(across(any_of(c("V1", "V2", "Z0")), mean))
@@ -447,11 +445,16 @@ DF %>%
 ## @knitr advCols5.1
 DT[, lapply(.SD, mean),
      .SDcols = is.numeric]
+foo <- function(x) {is.numeric(x) && mean(x) > 3}
+DT[, lapply(.SD, mean),
+   .SDcols = foo]
 ## @knitr advCols5.2
 DF %>%
   summarise(across(where(is.numeric),
                    mean))
 # summarise_if(DF, is.numeric, mean)
+DF %>% summarise(across(where(~ is.numeric(.x) && mean(.x) > 3), 
+                        mean))
 
 ## @knitr advCols6.1
 DT[, lapply(.SD, rev)]
@@ -672,11 +675,17 @@ setcolorder(DT, c("V4", "V1", "V2"))
 DF <- select(DF, V4, V1, V2)
 
 ## @knitr set5.1
-?setDT # data.frame or list to data.table
-?setDF # data.table to data.frame
-?setattr # modify attributes
+# ?setDT # data.frame or list to data.table
+# ?setDF # data.table to data.frame
+# ?setattr # modify attributes
 ## @knitr set5.2
 # 
+
+## @knitr set6.1
+# coming soon (#4358)
+## @knitr set6.2
+DF %>%
+  relocate(V4, .after = V2)
 
 
 ## @knitr advBy
@@ -709,7 +718,10 @@ DF %>%
 DT[, Grp := .GRP, by = .(V4, V1)][]
 DT[, Grp := NULL] # delete for consistency
 ## @knitr advBy3.2
-DF %>% mutate(Grp = group_indices(., V4, V1))
+DF %>%
+  group_by(V4, V1) %>%
+  mutate(Grp = cur_group_id())
+# DF %>% mutate(Grp = group_indices(., V4, V1))
 
 ## @knitr advBy4.1
 DT[, .I, by = V4] # returns a data.table
@@ -718,11 +730,19 @@ DT[, .I[c(1, .N)], by = V4]
 ## @knitr advBy4.2
 DF %>%
   group_by(V4) %>%
-  group_data() %>%
-  tidyr::unnest(.rows)
+  mutate(cur_group_rows())
+#DF %>%
+#  group_by(V4) %>%
+#  group_data() %>%
+#  tidyr::unnest(.rows)
+DF %>%
+  group_by(V4) %>%
+  summarize(cur_group_rows()[1])
+DF %>%
+  group_by(V4) %>%
+  summarize(cur_group_rows()[c(1, n())])
 # DF %>% group_by(V4) %>% group_rows() # returns a list
-#
-#
+
 
 ## @knitr advBy5.1
 DT[, .(.(V1)),  by = V4]  # return V1 as a list
@@ -761,7 +781,7 @@ groupingsets(DT,
 ## @knitr advBy7.1
 # DT[, .BY, by = V4]
 ## @knitr advBy7.2
-# DF %>% group_by(V4) %>% group_keys()
+# DF %>% group_by(V4) %>% cur_group() 
 
 
 
@@ -898,8 +918,9 @@ x <- 1:10
 fcase(
   x %% 6 == 0, "fizz buzz",
   x %% 2 == 0, "fizz",
-  x %% 3 == 0, "buzz"
-) # default?
+  x %% 3 == 0, "buzz",
+  default = NA_character_
+)
 
 ## @knitr other6.2
 x <- 1:10
@@ -916,10 +937,18 @@ case_when(
 #
 
 ## @knitr other8.1
-# ?rowid
-## @knitr other8.2
-#
+x <- c(-3:3, NA)
+fifelse(test = x < 0,
+        yes  = "neg",
+        no   = "pos",
+        na   = "NA")
 
+## @knitr other8.2
+x <- c(-3:3, NA)
+if_else(condition = x < 0,
+        true      = "neg",
+        false     = "pos",
+        missing   = "NA")
 
 
 ## @knitr JOINS

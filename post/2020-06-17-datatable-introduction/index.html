@@ -1,0 +1,714 @@
+<!DOCTYPE html>
+<html lang="en-us">
+    <head>
+		<meta charset="UTF-8">
+		<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+		<title>A gentle introduction to data.table &middot; Home</title>
+
+		
+  		<link rel="stylesheet" href="/css/style.css">
+		<link rel="stylesheet" href="/css/fonts.css">
+		
+		<link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32.png">
+		<link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16.png">
+		<link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon.png">
+
+		
+		<link href="" rel="alternate" type="application/rss+xml" title="Home" />
+
+                
+                <link rel="stylesheet" href="/css/github-gist.css" rel="stylesheet" id="theme-stylesheet">
+                <script src="/js/highlight.pack.js"></script>
+                <script>hljs.initHighlightingOnLoad();</script>
+	</head>
+
+    <body>
+        		<nav class="nav">
+			<div class="nav-container">
+				<a href="/">
+					<h2 class="nav-title">Home</h2>
+				</a>
+				<ul>
+    
+    
+    <li><a href="/about">About</a></li>
+    <li><a href="/">Posts</a></li>
+</ul>
+			</div>
+		</nav>
+
+        
+
+<main>
+	<div class="post">
+		<div class="post-info">
+    <span>Written by</span>
+        Atrebas
+        <br>
+        <span>on&nbsp;</span><time datetime="2020-06-17 00:00:00 &#43;0000 UTC">June 17, 2020</time>
+</div>
+		<h1 class="post-title">A gentle introduction to data.table</h1>
+<div class="post-line"></div>
+
+		
+
+		
+
+<div id="TOC">
+<ul>
+<li><a href="#the-basics">The basics</a><ul>
+<li><a href="#operations-on-rows">Operations on rows</a></li>
+<li><a href="#operations-on-columns">Operations on columns</a><ul>
+<li><a href="#select-columns">Select columns</a></li>
+<li><a href="#computation-on-columns">Computation on columns</a></li>
+<li><a href="#modify-add-delete-columns">Modify / Add / Delete columns</a></li>
+</ul></li>
+<li><a href="#operations-on-both-rows-and-columns">Operations on both rows and columns</a></li>
+</ul></li>
+<li><a href="#by">by</a><ul>
+<li><a href="#aggregation-by-group">Aggregation by group</a></li>
+<li><a href="#code-indentation-and-reordering">Code indentation and reordering</a></li>
+<li><a href="#modify-a-data.table-by-group">Modify a data.table by group</a></li>
+</ul></li>
+<li><a href="#chaining-commands">Chaining commands</a></li>
+<li><a href="#recap">Recap</a></li>
+<li><a href="#more-details-about-dt-j">More details about <code>DT[, j]</code></a></li>
+<li><a href="#sd">.SD</a><ul>
+<li><a href="#iterate-over-several-columns">Iterate over several columns</a></li>
+<li><a href="#selecting-columns-with-.sdcols">Selecting columns with <code>.SDcols</code></a></li>
+</ul></li>
+<li><a href="#to-infinity-and-beyond">To infinity and beyond!</a></li>
+</ul>
+</div>
+
+<!-- 
+<script src="/js/set-target-blank-links.js"></script>
+<script src="/js/jquery-3.3.1.min.js"></script>
+-->
+<style>
+  .hljs{
+    background: #a7a7a71a;
+    font-size: 90%;
+    word-wrap: break-word;
+  }
+  pre:not(.r):not(.python) {
+    background: #a7a7a71a;
+    word-wrap: break-word;
+    color: #333333;
+  }
+
+
+</style>
+<p>data.table is one of the greatest R package. It provides an enhanced version of base R’s <code>data.frame</code> with syntax and feature enhancements, making data manipulation concise, consistent, efficient, and fun!</p>
+<p>This post gives a quick introduction to data.table. The main objective is to present the data.table syntax, showing how to perform basic, but essential, data wrangling tasks.</p>
+<p>Let’s start by creating a simple data.table.</p>
+<pre class="r"><code>library(data.table) # version 1.13.0
+
+DT &lt;- data.table(Fruit = rep(c(&quot;banana&quot;, &quot;apple&quot;, &quot;orange&quot;), 3:1),
+                 Year  = c(2008, 2009, 2010, 2009, 2010, 2010),
+                 Count = 1:6)
+DT</code></pre>
+<pre><code>##     Fruit Year Count
+## 1: banana 2008     1
+## 2: banana 2009     2
+## 3: banana 2010     3
+## 4:  apple 2009     4
+## 5:  apple 2010     5
+## 6: orange 2010     6</code></pre>
+<pre class="r"><code>class(DT)</code></pre>
+<pre><code>## [1] &quot;data.table&quot; &quot;data.frame&quot;</code></pre>
+<p>How we can select the first two rows and the first two columns of a data.table? Well, that’s simple:</p>
+<pre class="r"><code>DT[1:2, 1:2]</code></pre>
+<pre><code>##     Fruit Year
+## 1: banana 2008
+## 2: banana 2009</code></pre>
+<p>In base R, we can access elements of a matrix or a data.frame using the square brackets indexing method. It’s the same with data.table.</p>
+<p>To start, think <code>DT[rows, columns]</code>, also presented in a short way: <code>DT[i, j]</code>. With data.table, most of the things take place within these square brackets.<br />
+The magic is that you can do much more with the simple command <code>DT[i, j]</code>. In particular, rows and columns can be referred to without using any quotes or <code>$</code> symbol, making the code very clear.</p>
+<div id="the-basics" class="section level1">
+<h1>The basics</h1>
+<div id="operations-on-rows" class="section level2">
+<h2>Operations on rows</h2>
+<p>For example, to select rows using a condition:</p>
+<pre class="r"><code>DT[Fruit == &quot;banana&quot;, ]                  # select rows where Fruit equals banana</code></pre>
+<pre><code>##     Fruit Year Count
+## 1: banana 2008     1
+## 2: banana 2009     2
+## 3: banana 2010     3</code></pre>
+<pre class="r"><code>DT[Fruit == &quot;banana&quot; &amp; Year &gt; 2008]      # select rows where Fruit equals banana and Year is higher than 2008</code></pre>
+<pre><code>##     Fruit Year Count
+## 1: banana 2009     2
+## 2: banana 2010     3</code></pre>
+<p>When performing operations on rows only, the <code>j</code> element is left empty (<code>DT[i,]</code>), as in the first command, or simply ignored (<code>DT[i]</code>) as in the second command.</p>
+<p>Likewise, we can order the data:</p>
+<pre class="r"><code>DT[order(Fruit), ]          # order according to the Fruit column, in ascending order</code></pre>
+<pre><code>##     Fruit Year Count
+## 1:  apple 2009     4
+## 2:  apple 2010     5
+## 3: banana 2008     1
+## 4: banana 2009     2
+## 5: banana 2010     3
+## 6: orange 2010     6</code></pre>
+<pre class="r"><code>DT[order(Fruit, -Year)]     # order according to the Fruit and Year columns, in ascending and descending order, respectively</code></pre>
+<pre><code>##     Fruit Year Count
+## 1:  apple 2010     5
+## 2:  apple 2009     4
+## 3: banana 2010     3
+## 4: banana 2009     2
+## 5: banana 2008     1
+## 6: orange 2010     6</code></pre>
+<p>Or sample rows:</p>
+<pre class="r"><code>DT[sample(nrow(DT), 3)]     # randomly sample three rows</code></pre>
+<pre><code>##     Fruit Year Count
+## 1:  apple 2010     5
+## 2: banana 2010     3
+## 3: banana 2008     1</code></pre>
+<p>The command above can be abbreviated as follows:</p>
+<pre class="r"><code>DT[sample(.N, 3), ]        # randomly sample three rows</code></pre>
+<pre><code>##     Fruit Year Count
+## 1: orange 2010     6
+## 2:  apple 2010     5
+## 3: banana 2010     3</code></pre>
+<p><code>.N</code> is an alias for the number of rows. data.table offers several syntactic sugars like this, as we will see below.</p>
+<p><br></p>
+</div>
+<div id="operations-on-columns" class="section level2">
+<h2>Operations on columns</h2>
+<div id="select-columns" class="section level3">
+<h3>Select columns</h3>
+<p>To select a column, we just specify the name in <code>DT[, j]</code>.</p>
+<pre class="r"><code>DT[, Count]            # select the Count column, returns a vector</code></pre>
+<pre><code>## [1] 1 2 3 4 5 6</code></pre>
+<p>The previous command returns a vector, if you want the result to be a data.table, you have to use <code>list()</code>, or more simply the <code>.</code> alias.</p>
+<pre class="r"><code>DT[, list(Count)]       # select the Count column, returns a data.table</code></pre>
+<pre><code>##    Count
+## 1:     1
+## 2:     2
+## 3:     3
+## 4:     4
+## 5:     5
+## 6:     6</code></pre>
+<pre class="r"><code>DT[, .(Count)]          # ditto</code></pre>
+<pre><code>##    Count
+## 1:     1
+## 2:     2
+## 3:     3
+## 4:     4
+## 5:     5
+## 6:     6</code></pre>
+<pre class="r"><code>DT[, .(Fruit, Count)]   # select the Fruit and Count columns</code></pre>
+<pre><code>##     Fruit Count
+## 1: banana     1
+## 2: banana     2
+## 3: banana     3
+## 4:  apple     4
+## 5:  apple     5
+## 6: orange     6</code></pre>
+<p>To select columns using a vector of column names, one should use the <code>..</code> prefix. It indicates to search the corresponding vector ‘one level up’ (<em>i.e.</em> in the global environment).</p>
+<pre class="r"><code>cols &lt;- c(&quot;Fruit&quot;, &quot;Year&quot;)
+DT[, ..cols]   # select the columns provided in the cols vector</code></pre>
+<pre><code>##     Fruit Year
+## 1: banana 2008
+## 2: banana 2009
+## 3: banana 2010
+## 4:  apple 2009
+## 5:  apple 2010
+## 6: orange 2010</code></pre>
+</div>
+<div id="computation-on-columns" class="section level3">
+<h3>Computation on columns</h3>
+<p>To apply a function on a column:</p>
+<pre class="r"><code>DT[, max(Year)]                # sum the Count values</code></pre>
+<pre><code>## [1] 2010</code></pre>
+<pre class="r"><code>DT[, cumsum(Count)]</code></pre>
+<pre><code>## [1]  1  3  6 10 15 21</code></pre>
+<p>By default, the result is returned as a vector. Just like above with column selection, to obtain the result as a data.table, it is necessary to use <code>.()</code>.
+Doing so, we can also assign colnames to the result. When no column names are provided, they are automatically generated as V1, V2, …</p>
+<pre class="r"><code>DT[, .(cumsum(Count))]                # sum the Count values</code></pre>
+<pre><code>##    V1
+## 1:  1
+## 2:  3
+## 3:  6
+## 4: 10
+## 5: 15
+## 6: 21</code></pre>
+<pre class="r"><code>DT[, .(CumsumCount = cumsum(Count))]     # sum the Count values with column name CumsumCount</code></pre>
+<pre><code>##    CumsumCount
+## 1:           1
+## 2:           3
+## 3:           6
+## 4:          10
+## 5:          15
+## 6:          21</code></pre>
+<p>To apply a function on several columns:</p>
+<pre class="r"><code>DT[, .(sum(Count), max(Year))]   # sum the Count values and get the maximum Year value</code></pre>
+<pre><code>##    V1   V2
+## 1: 21 2010</code></pre>
+<p>Assigning colunm names and indenting the code:</p>
+<pre class="r"><code>DT[, .(SUM = sum(Count),
+       MAX = max(Year))]         # sum the Count values and get the maximum Year value, assigning column names</code></pre>
+<pre><code>##    SUM  MAX
+## 1:  21 2010</code></pre>
+</div>
+<div id="modify-add-delete-columns" class="section level3">
+<h3>Modify / Add / Delete columns</h3>
+<p>Note that the previous commands create a new data.table. To modify an existing column, or create a new one, use the <code>:=</code> operator.</p>
+<pre class="r"><code>DT[, Year := Year + 1]               # modify the Year column
+DT[, Cumsum_Count := cumsum(Count)]  # create a new Cumsum_Count column</code></pre>
+<p>As you can see below, <code>DT</code> has been modified even if we did not assign the result:</p>
+<pre class="r"><code>DT</code></pre>
+<pre><code>##     Fruit Year Count Cumsum_Count
+## 1: banana 2009     1            1
+## 2: banana 2010     2            3
+## 3: banana 2011     3            6
+## 4:  apple 2010     4           10
+## 5:  apple 2011     5           15
+## 6: orange 2011     6           21</code></pre>
+<p>Using the data.table <code>:=</code> operator modifies the existing object ‘in place’, which has the benefit of being memory-efficient. Memory management is an important aspect of data.table. There is a dedicated <a href="https://rdatatable.gitlab.io/data.table/articles/datatable-reference-semantics.html">vignette</a> to learn more about it.</p>
+<p>The principle is the same to modify or add several columns:</p>
+<pre class="r"><code>DT[, c(&quot;CountX3&quot;, &quot;CountX4&quot;) := .(Count * 3, Count * 4)]
+DT</code></pre>
+<pre><code>##     Fruit Year Count Cumsum_Count CountX3 CountX4
+## 1: banana 2009     1            1       3       4
+## 2: banana 2010     2            3       6       8
+## 3: banana 2011     3            6       9      12
+## 4:  apple 2010     4           10      12      16
+## 5:  apple 2011     5           15      15      20
+## 6: orange 2011     6           21      18      24</code></pre>
+<p>It is also possible to use the functional form, which, combined with indentation, offers a more readable alternative:</p>
+<pre class="r"><code>DT[, &#39;:=&#39;(CountX3 = Count * 3,
+          CountX4 = Count * 4)]
+DT</code></pre>
+<pre><code>##     Fruit Year Count Cumsum_Count CountX3 CountX4
+## 1: banana 2009     1            1       3       4
+## 2: banana 2010     2            3       6       8
+## 3: banana 2011     3            6       9      12
+## 4:  apple 2010     4           10      12      16
+## 5:  apple 2011     5           15      15      20
+## 6: orange 2011     6           21      18      24</code></pre>
+<p>With a predefined vector of column names, the corresponding object must be put in parentheses.</p>
+<pre class="r"><code>cols &lt;- c(&quot;CountX3&quot;, &quot;CountX4&quot;)
+DT[, (cols) := .(Count * 3, Count * 4)]</code></pre>
+<p>And finally, to remove columns, we assign them a <code>NULL</code> value:</p>
+<pre class="r"><code>DT[, Cumsum_Count := NULL]
+DT[, c(&quot;CountX3&quot;, &quot;CountX4&quot;) := NULL]</code></pre>
+<pre class="r"><code>DT</code></pre>
+<pre><code>##     Fruit Year Count
+## 1: banana 2009     1
+## 2: banana 2010     2
+## 3: banana 2011     3
+## 4:  apple 2010     4
+## 5:  apple 2011     5
+## 6: orange 2011     6</code></pre>
+<p><br></p>
+</div>
+</div>
+<div id="operations-on-both-rows-and-columns" class="section level2">
+<h2>Operations on both rows and columns</h2>
+<p>Obviously, the operations on rows and columns can be combined in <code>DT[i, j]</code>.
+Operations on <code>j</code> are then performed after the condition in <code>i</code> has been applied.</p>
+<pre class="r"><code>DT[Fruit != &quot;apple&quot;, sum(Count)]</code></pre>
+<pre><code>## [1] 12</code></pre>
+<pre class="r"><code>DT[Fruit == &quot;banana&quot; &amp; Year &lt; 2011, .(sum(Count))]</code></pre>
+<pre><code>##    V1
+## 1:  3</code></pre>
+<p>Combining <code>i</code> and <code>j</code> in a same expression is particularly useful because it allows to modify some values only for rows matching the condition in <code>i</code>,
+or to create a new column, assigning a given value for matching rows, other rows being left as <code>NA</code>.</p>
+<pre class="r"><code>DT[Fruit == &quot;banana&quot; &amp; Year &lt; 2010, Count := Count + 1] # modify only the matching rows
+DT[Fruit == &quot;orange&quot;, Orange := &quot;orange&quot;] # add a new column, non-matching rows will be NA</code></pre>
+<pre class="r"><code>DT</code></pre>
+<pre><code>##     Fruit Year Count Orange
+## 1: banana 2009     2   &lt;NA&gt;
+## 2: banana 2010     2   &lt;NA&gt;
+## 3: banana 2011     3   &lt;NA&gt;
+## 4:  apple 2010     4   &lt;NA&gt;
+## 5:  apple 2011     5   &lt;NA&gt;
+## 6: orange 2011     6 orange</code></pre>
+<p><br></p>
+</div>
+</div>
+<div id="by" class="section level1">
+<h1>by</h1>
+<p>Now that you are familiar with <code>DT[i, j]</code>, let’s introduce <code>DT[i, j, by]</code>.<br />
+<code>by</code> can somewhat be viewed as a “third virtual dimension”. The data can be aggregated by group using a single additional argument: <code>by</code>. That’s it. How could it be more simple?</p>
+<div id="aggregation-by-group" class="section level2">
+<h2>Aggregation by group</h2>
+<pre class="r"><code>DT[, sum(Count), by = Fruit]</code></pre>
+<pre><code>##     Fruit V1
+## 1: banana  7
+## 2:  apple  9
+## 3: orange  6</code></pre>
+<p>A condition or a function call can also be used in <code>by</code>.</p>
+<pre class="r"><code>DT[, sum(Count), by = (IsApple = Fruit == &quot;apple&quot;)] </code></pre>
+<pre><code>##    IsApple V1
+## 1:   FALSE 13
+## 2:    TRUE  9</code></pre>
+<pre class="r"><code>DT[, .(MeanCount = mean(Count)), by = (OddYear = Year %% 2 == 1)]</code></pre>
+<pre><code>##    OddYear MeanCount
+## 1:    TRUE         4
+## 2:   FALSE         3</code></pre>
+<p>Aggregating on several columns is just as simple, with a character vector in <code>by</code>:</p>
+<pre class="r"><code>DT[, sum(Count), by = c(&quot;Fruit&quot;, &quot;Year&quot;)]</code></pre>
+<pre><code>##     Fruit Year V1
+## 1: banana 2009  2
+## 2: banana 2010  2
+## 3: banana 2011  3
+## 4:  apple 2010  4
+## 5:  apple 2011  5
+## 6: orange 2011  6</code></pre>
+<p>Or using <code>.(...)</code> in by:</p>
+<pre class="r"><code>DT[, .(SumCount = sum(Count)), by = .(Fruit, Before2011 = Year &lt; 2011)]</code></pre>
+<pre><code>##     Fruit Before2011 SumCount
+## 1: banana       TRUE        4
+## 2: banana      FALSE        3
+## 3:  apple       TRUE        4
+## 4:  apple      FALSE        5
+## 5: orange      FALSE        6</code></pre>
+<p>And here is a full <code>DT[i, j, by]</code> command:</p>
+<pre class="r"><code>DT[Fruit != &quot;orange&quot;, max(Count), by = Fruit]</code></pre>
+<pre><code>##     Fruit V1
+## 1: banana  3
+## 2:  apple  5</code></pre>
+<p>Once again, this is just one single argument: <code>by = ...</code>. Much more simple and practical than <code>base::tapply()</code> in my opinion. This is one of the key features that got me hooked on data.table.</p>
+</div>
+<div id="code-indentation-and-reordering" class="section level2">
+<h2>Code indentation and reordering</h2>
+<p>Because data.table offers a consise syntax, commands easily fit on a single line. But it is possible to indent the code for more readability and also to reorder the elements (<code>DT[i, by, j]</code>).</p>
+<pre class="r"><code>DT[Fruit != &quot;orange&quot;,   # select the rows that are not oranges
+   max(Count),          # then return the maximum value of Count
+   by = Fruit]          # for each fruit</code></pre>
+<pre><code>##     Fruit V1
+## 1: banana  3
+## 2:  apple  5</code></pre>
+<pre class="r"><code>DT[Fruit != &quot;orange&quot;,   # select the rows that are not oranges
+   by = Fruit,          # then, for each fruit,
+   max(Count)]          # return the maximum value of Count</code></pre>
+<pre><code>##     Fruit V1
+## 1: banana  3
+## 2:  apple  5</code></pre>
+</div>
+<div id="modify-a-data.table-by-group" class="section level2">
+<h2>Modify a data.table by group</h2>
+<p>In the previous commands, <code>by</code> has been used to aggregate data, returning a new data.table as output.
+It is of course possible to use <code>by</code> when modifying an existing data.table and to return the output for each observation of the groups.<br />
+For example, to add a column with the number of observations for each group (the <code>.N</code> alias mentioned earlier can also be used in <code>j</code>!):</p>
+<pre class="r"><code>DT[, N := .N, by = Fruit]</code></pre>
+<p>Here is another example:</p>
+<pre class="r"><code>DT[, MeanCountByFruit := round(mean(Count), 2), by = Fruit]</code></pre>
+<pre class="r"><code>DT</code></pre>
+<pre><code>##     Fruit Year Count Orange N MeanCountByFruit
+## 1: banana 2009     2   &lt;NA&gt; 3             2.33
+## 2: banana 2010     2   &lt;NA&gt; 3             2.33
+## 3: banana 2011     3   &lt;NA&gt; 3             2.33
+## 4:  apple 2010     4   &lt;NA&gt; 2             4.50
+## 5:  apple 2011     5   &lt;NA&gt; 2             4.50
+## 6: orange 2011     6 orange 1             6.00</code></pre>
+<p><br></p>
+</div>
+</div>
+<div id="chaining-commands" class="section level1">
+<h1>Chaining commands</h1>
+<p>Commands can be chained together using <code>DT[ ... ][ ... ]</code> “horizontally”:</p>
+<pre class="r"><code>DT[, MeanCountByFruit := round(mean(Count), 2), by = Fruit][MeanCountByFruit &gt; 2]</code></pre>
+<pre><code>##     Fruit Year Count Orange N MeanCountByFruit
+## 1: banana 2009     2   &lt;NA&gt; 3             2.33
+## 2: banana 2010     2   &lt;NA&gt; 3             2.33
+## 3: banana 2011     3   &lt;NA&gt; 3             2.33
+## 4:  apple 2010     4   &lt;NA&gt; 2             4.50
+## 5:  apple 2011     5   &lt;NA&gt; 2             4.50
+## 6: orange 2011     6 orange 1             6.00</code></pre>
+<p>Or “vertically”:</p>
+<pre class="r"><code>DT[, by = Fruit,
+     MeanCountByFruit := round(mean(Count), 2)
+  ][
+     MeanCountByFruit &gt; 2
+   ]</code></pre>
+<pre><code>##     Fruit Year Count Orange N MeanCountByFruit
+## 1: banana 2009     2   &lt;NA&gt; 3             2.33
+## 2: banana 2010     2   &lt;NA&gt; 3             2.33
+## 3: banana 2011     3   &lt;NA&gt; 3             2.33
+## 4:  apple 2010     4   &lt;NA&gt; 2             4.50
+## 5:  apple 2011     5   &lt;NA&gt; 2             4.50
+## 6: orange 2011     6 orange 1             6.00</code></pre>
+<p>Adding an empty <code>[]</code> at the end of a command will print the result. This is useful for example when modifying columns by reference using <code>:=</code>.</p>
+<pre class="r"><code>DT[, c(&quot;Orange&quot;, &quot;N&quot;, &quot;MeanCountByFruit&quot;) := NULL][]</code></pre>
+<pre><code>##     Fruit Year Count
+## 1: banana 2009     2
+## 2: banana 2010     2
+## 3: banana 2011     3
+## 4:  apple 2010     4
+## 5:  apple 2011     5
+## 6: orange 2011     6</code></pre>
+<p><br></p>
+</div>
+<div id="recap" class="section level1">
+<h1>Recap</h1>
+<p>Let’s recap the main commands we have seen so far:</p>
+<pre class="r"><code># operations on rows
+DT[Fruit == &quot;banana&quot;, ]
+DT[Fruit == &quot;banana&quot; &amp; Year &gt; 2008]
+DT[order(Fruit), ]
+DT[order(Fruit, -Year)]
+DT[sample(.N, 3), ]
+
+# operations on columns
+DT[, Count]
+DT[, list(Count)]
+DT[, .(Count)]
+DT[, .(Fruit, Count)]
+cols &lt;- c(&quot;Fruit&quot;, &quot;Year&quot;)
+DT[, ..cols]
+DT[, cumsum(Count)]
+DT[, .(cumsum(Count))]
+DT[, .(CumsumCount = cumsum(Count))]
+DT[, .(sum(Count), max(Year))]
+DT[, .(SUM = sum(Count),
+       MAX = max(Year))]
+
+# operations on columns (modifying the data.table)
+DT[, Cumsum_Count := cumsum(Count)]
+DT[, &#39;:=&#39;(CountX3 = Count * 3,
+          CountX4 = Count * 4)]
+cols &lt;- c(&quot;CountX3&quot;, &quot;CountX4&quot;)
+DT[, (cols) := .(Count * 3, Count * 4)]
+DT[, Cumsum_Count := NULL]
+
+# operations on both rows and columns
+DT[Fruit != &quot;apple&quot;, sum(Count)]
+DT[Fruit == &quot;banana&quot; &amp; Year &lt; 2011, .(sum(Count))]
+DT[Fruit == &quot;banana&quot; &amp; Year &lt; 2010, Count := Count + 1]
+DT[Fruit == &quot;orange&quot;, Orange := &quot;orange&quot;]
+
+# aggregation by group
+DT[, sum(Count), by = Fruit]
+DT[, sum(Count), by = (IsApple = Fruit == &quot;apple&quot;)] 
+DT[, sum(Count), by = c(&quot;Fruit&quot;, &quot;Year&quot;)]
+DT[, .(SumCount = sum(Count)), by = .(Fruit, Before2011 = Year &lt; 2011)]
+DT[Fruit != &quot;orange&quot;,
+   max(Count),
+   by = Fruit]
+DT[, N := .N, by = Fruit]
+DT[, MeanCountByFruit := round(mean(Count), 2), by = Fruit]
+
+# chaining
+DT[, MeanCountByFruit := round(mean(Count), 2), by = Fruit][MeanCountByFruit &gt; 2]
+DT[, c(&quot;Orange&quot;, &quot;N&quot;, &quot;MeanCountByFruit&quot;) := NULL][]</code></pre>
+<p>That’s the beauty of data.table: simplicity and consistency. <code>DT[rows, columns, by]</code>.<br />
+No quoted column names, no <code>$</code> symbol, and no new function. The only new thing is <code>:=</code>, used to assign column(s) by reference. <code>.()</code> is just an alias for <code>list()</code> and <code>.N</code> is an alias for the number of rows.</p>
+<p>When we look at the commands above, it appears that data.table is so expressive that very little code is needed. In fact, with so much little text and a regular alignment, brackets, commas, and symbols somehow stand out. Removing the “uncessary” stuff makes the structure more visible. This structure is a guide to read data.table code. I think data.table is more about understanding than memorizing.</p>
+<pre class="r"><code># DT[operation on rows, ]
+# DT[, operation on columns]
+# DT[, .(extract or compute new columns)]
+# DT[, newcolumn := assignment]
+# DT[, some computation, by = group]
+# ...</code></pre>
+<p><br></p>
+</div>
+<div id="more-details-about-dt-j" class="section level1">
+<h1>More details about <code>DT[, j]</code></h1>
+<p>So far <code>DT[, j]</code> has been used to select, modify, summarize, or compute new columns. But it is even more flexible: the <code>j</code> element can be any arbitrary expression, or set of expressions written within curly braces. For example:</p>
+<pre class="r"><code>DT[, 1 + 1]</code></pre>
+<pre><code>## [1] 2</code></pre>
+<pre class="r"><code>DT[, plot(Year, Count)]</code></pre>
+<p><img src="/post/2020-06-17-datatable-introduction_files/figure-html/unnamed-chunk-39-1.png" width="672" /></p>
+<pre><code>## NULL</code></pre>
+<pre class="r"><code>DT[, {sum_count &lt;- sum(Count)
+      print(&quot;The sum of the Count column is:&quot;)
+      sum_count}]</code></pre>
+<pre><code>## [1] &quot;The sum of the Count column is:&quot;</code></pre>
+<pre><code>## [1] 22</code></pre>
+<p>Note that passing several expressions within curly braces is valid base R code to evaluate several commands, but only return the last result:</p>
+<pre class="r"><code>{sum123 &lt;- sum(1:3); 1 + 2; sum123}</code></pre>
+<pre><code>## [1] 6</code></pre>
+<p>Also, as long as the <code>j</code> expression returns a list of equal-length elements (or elements of length one), each element of the list will be converted to a column in the resulting data.table. This is important! Keep that in mind, we’ll see the implication in the next section. But note that it also explains why we used the <code>list()</code> alias <code>.()</code> earlier for operations on columns.</p>
+<pre class="r"><code>DT[, list(1:3, 4:6, 7)]</code></pre>
+<pre><code>##    V1 V2 V3
+## 1:  1  4  7
+## 2:  2  5  7
+## 3:  3  6  7</code></pre>
+<pre class="r"><code>DT[, {2 + 3             # this command is evaluated but not returned
+      list(Col1 = 1:3,
+           Col2 = 4:6,
+           Col3 = 7)}]</code></pre>
+<pre><code>##    Col1 Col2 Col3
+## 1:    1    4    7
+## 2:    2    5    7
+## 3:    3    6    7</code></pre>
+<p><br></p>
+</div>
+<div id="sd" class="section level1">
+<h1>.SD</h1>
+<p>Just like <code>.N</code> is an alias refering to the number of rows, <code>.SD</code> is an alias refering to the Subset of Data for each group, excluding the column(s) used in <code>by</code>. Said differently, <code>.SD</code> corresponds to “the current data for the current group (excluding grouping variables)”. It offers a convenient way to iterate over the columns of a data.table.</p>
+<p>To better see it, just print it!</p>
+<pre class="r"><code>DT[, print(.SD), by = Fruit]</code></pre>
+<pre><code>##    Year Count
+## 1: 2009     2
+## 2: 2010     2
+## 3: 2011     3
+##    Year Count
+## 1: 2010     4
+## 2: 2011     5
+##    Year Count
+## 1: 2011     6</code></pre>
+<pre><code>## Empty data.table (0 rows and 1 cols): Fruit</code></pre>
+<p>If there is no <code>by</code>, then <code>.SD</code> is <code>DT</code> itself.</p>
+<pre class="r"><code>DT[, .SD]</code></pre>
+<pre><code>##     Fruit Year Count
+## 1: banana 2009     2
+## 2: banana 2010     2
+## 3: banana 2011     3
+## 4:  apple 2010     4
+## 5:  apple 2011     5
+## 6: orange 2011     6</code></pre>
+<div id="iterate-over-several-columns" class="section level2">
+<h2>Iterate over several columns</h2>
+<p>To run a function over all the columns of a data.table, we can use the following expression:</p>
+<pre class="r"><code>DT[, lapply(.SD, min)]</code></pre>
+<pre><code>##    Fruit Year Count
+## 1: apple 2009     2</code></pre>
+<p>Let’s take some time to explain it step by step:<br />
+- iterating over the columns of a data.frame using <code>lapply()</code> is a valid base R expression (<em>e.g.</em> <code>lapply(mtcars, min)</code>)<br />
+- <code>DT[,j]</code> can take any arbitrary expression as mentioned earlier, so <code>lapply(.SD, min)</code> is used as the <code>j</code> expression<br />
+- <code>.SD</code> is, once again, just an alias for the subset of data for each group - no group is used in this first example, so <code>.SD</code> contains all the <code>DT</code> columns)<br />
+- iterating over the columns of <code>.SD</code> using <code>lapply</code> obviously returns a list<br />
+- as described in the previous section, as long as the <code>j</code> expression returns a list (of equal-length or length-one elements), each element of the list will be converted to a column in the resulting data.table<br />
+- so finally, the command above returns a data.table with the minimum value for each column of <code>.SD</code></p>
+<p>Let’s run the same expression, this time by group:</p>
+<pre class="r"><code>DT[, lapply(.SD, min), by = Fruit]</code></pre>
+<pre><code>##     Fruit Year Count
+## 1: banana 2009     2
+## 2:  apple 2010     4
+## 3: orange 2011     6</code></pre>
+<p>And of course, we can also select the rows using a <code>DT[i, j, by]</code> command:</p>
+<pre class="r"><code>DT[Fruit != &quot;apple&quot;, lapply(.SD, min), by = Fruit]</code></pre>
+<pre><code>##     Fruit Year Count
+## 1: banana 2009     2
+## 2: orange 2011     6</code></pre>
+<p>It is possible to append the result of the aggregation to the current data.table, the values will then be recycled for each observation of a given group:</p>
+<pre class="r"><code>DT[, c(&quot;MeanYear&quot;, &quot;MeanCount&quot;) := lapply(.SD, mean),
+     by = Fruit]
+DT</code></pre>
+<pre><code>##     Fruit Year Count MeanYear MeanCount
+## 1: banana 2009     2   2010.0  2.333333
+## 2: banana 2010     2   2010.0  2.333333
+## 3: banana 2011     3   2010.0  2.333333
+## 4:  apple 2010     4   2010.5  4.500000
+## 5:  apple 2011     5   2010.5  4.500000
+## 6: orange 2011     6   2011.0  6.000000</code></pre>
+</div>
+<div id="selecting-columns-with-.sdcols" class="section level2">
+<h2>Selecting columns with <code>.SDcols</code></h2>
+<p>By default, <code>.SD</code> contains all the columns that are not provided in <code>by</code>. To run a function on specific columns, use <code>.SDcols</code> to pass a vector of colnames.</p>
+<pre class="r"><code>DT[, lapply(.SD, min), by = Fruit, .SDcols = c(&quot;Count&quot;, &quot;MeanCount&quot;)]</code></pre>
+<pre><code>##     Fruit Count MeanCount
+## 1: banana     2  2.333333
+## 2:  apple     4  4.500000
+## 3: orange     6  6.000000</code></pre>
+<pre class="r"><code>selected_cols &lt;- &quot;Year&quot;
+# indenting the code
+DT[, by = Fruit,               # for each fruit
+     lapply(.SD, min),         # retrieve the min value
+     .SDcols = selected_cols]  # for each column provided in the selected_cols vector</code></pre>
+<pre><code>##     Fruit Year
+## 1: banana 2009
+## 2:  apple 2010
+## 3: orange 2011</code></pre>
+<p>A regular expression can also be passed using <code>patterns()</code>:</p>
+<pre class="r"><code>DT[, lapply(.SD, min),
+     by = Fruit,
+     .SDcols = patterns(&quot;^Co&quot;)]</code></pre>
+<pre><code>##     Fruit Count
+## 1: banana     2
+## 2:  apple     4
+## 3: orange     6</code></pre>
+<p>Alternatively, a function can be provided in <code>.SDcols</code>. This function must return a boolean signalling inclusion/exclusion of the column:</p>
+<pre class="r"><code>DT[, lapply(.SD, min),
+     by = Fruit,
+     .SDcols = is.integer] # !is.integer can also be used</code></pre>
+<pre><code>##     Fruit Count
+## 1: banana     2
+## 2:  apple     4
+## 3: orange     6</code></pre>
+<pre class="r"><code>foo &lt;- function(x) {is.numeric(x) &amp;&amp; mean(x) &gt; 2000}
+DT[, lapply(.SD, min),
+     by = Fruit,
+     .SDcols = foo]</code></pre>
+<pre><code>##     Fruit Year MeanYear
+## 1: banana 2009   2010.0
+## 2:  apple 2010   2010.5
+## 3: orange 2011   2011.0</code></pre>
+<p></br></br></p>
+</div>
+</div>
+<div id="to-infinity-and-beyond" class="section level1">
+<h1>To infinity and beyond!</h1>
+<p>In this post, we have introduced the data.table syntax to perform common data wrangling operations. Nevertheless, we’ve only scratched the surface. data.table offers tens of other impressive features. Here are some more reasons why it deserves to be in your data science toolbox.</p>
+<ul>
+<li><p>data.table has been created in 2006 and is still <a href="https://github.com/Rdatatable/data.table/graphs/contributors">actively</a> maintained on github, with a responsive, welcoming, and insightful support.</p></li>
+<li><p>data.table is reliable. A lot of care is given to maintain compatibility in the long run. R dependency is as old as possible and there are no dependencies on other packages, for simpler production and maintenance.</p></li>
+<li><p>data.table is very reliable. It is a masterpiece of continuous integration and contains more than 9000 tests that you can run locally using <code>test.data.table()</code> to make sure everything works fine with your own settings.
+There is more test code in data.table than there is code.</p></li>
+<li><p>while data.table performance is impressive, it is not only for ‘large data’. Why analyzing ‘small data’ should be less convenient than analyzing ‘large data’? data.table is great, even for a six-row dataset like the one used in this post.</p></li>
+<li><p>data.table offers the <code>fread</code> and <code>fwrite</code> functions, the fastest, most robust and full-featured functions to read or write text files.</p></li>
+<li><p>data.table offers <a href="https://rdatatable.gitlab.io/data.table/articles/datatable-keys-fast-subset.html">keys</a> and <a href="https://rdatatable.gitlab.io/data.table/articles/datatable-secondary-indices-and-auto-indexing.html">indices</a>, which are mechanisms that make row subsetting (and joins) blazingly fast.</p></li>
+<li><p>data.table can perfom the most common data joins as well as advanced joins like non-equi joins or overlap joins.</p></li>
+<li><p>data.table also include <code>dcast()</code>, <code>melt()</code>, as well as a bunch of utility functions, for efficient and versatile <a href="https://rdatatable.gitlab.io/data.table/articles/datatable-reshape.html">data reshaping</a>.</p></li>
+<li><p>all these data manipulations are fast (see <a href="https://h2oai.github.io/db-benchmark/">benchmark</a>), memory-efficient, and just as easy to perform as the few commands presented in this document.</p></li>
+<li><p>and last but not least, data.table has a nice and fun <a href="https://github.com/Rdatatable/data.table/issues/1237">logo</a>! R! R! R!</p></li>
+</ul>
+<p>Happy data.tabling!</p>
+<div style="text-align: center;">
+<p><img src="/images/data.table.png" /></p>
+</div>
+<p></br></br></p>
+<pre class="r"><code>sessionInfo()</code></pre>
+<pre><code>## R version 3.6.3 (2020-02-29)
+## Platform: x86_64-pc-linux-gnu (64-bit)
+## Running under: Ubuntu 18.04.4 LTS
+## 
+## Matrix products: default
+## BLAS:   /usr/lib/x86_64-linux-gnu/blas/libblas.so.3.7.1
+## LAPACK: /usr/lib/x86_64-linux-gnu/lapack/liblapack.so.3.7.1
+## 
+## locale:
+##  [1] LC_CTYPE=en_US.UTF-8       LC_NUMERIC=C              
+##  [3] LC_TIME=fr_FR.UTF-8        LC_COLLATE=en_US.UTF-8    
+##  [5] LC_MONETARY=fr_FR.UTF-8    LC_MESSAGES=en_US.UTF-8   
+##  [7] LC_PAPER=fr_FR.UTF-8       LC_NAME=C                 
+##  [9] LC_ADDRESS=C               LC_TELEPHONE=C            
+## [11] LC_MEASUREMENT=fr_FR.UTF-8 LC_IDENTIFICATION=C       
+## 
+## attached base packages:
+## [1] stats     graphics  grDevices utils     datasets  methods   base     
+## 
+## other attached packages:
+## [1] data.table_1.13.0
+## 
+## loaded via a namespace (and not attached):
+##  [1] compiler_3.6.3  magrittr_1.5    bookdown_0.16   tools_3.6.3    
+##  [5] htmltools_0.4.0 yaml_2.2.0      Rcpp_1.0.3      stringi_1.4.3  
+##  [9] rmarkdown_2.0   blogdown_0.17   knitr_1.26      stringr_1.4.0  
+## [13] digest_0.6.23   xfun_0.11       rlang_0.4.6     evaluate_0.14</code></pre>
+</div>
+
+
+		
+	</div>
+
+	<div class="pagination">
+		<a href="/post/2020-06-14-datatable-pandas/" class="left arrow">&#8592;</a>
+
+		<a href="#" class="top">Top</a>
+	</div>
+</main>
+
+
+        		<footer>
+			<span>
+			&copy; 2020. Made with <a href='https://gohugo.io'>Hugo</a> using the <a href='https://github.com/EmielH/tale-hugo/'>Tale</a> theme.
+			</span>
+		</footer>
+
+    </body>
+</html>

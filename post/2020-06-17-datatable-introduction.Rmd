@@ -1,0 +1,544 @@
+---
+title: "A gentle introduction to data.table"
+author: "Atrebas"
+date: "2020-06-17"
+summary: This post presents a quick introduction to data.table, an indispensable package for data wrangling in R. The main objective is to present the data.table syntax, showing how to perform basic but essential data manipulation tasks.     
+output:
+  blogdown::html_page:
+    toc: true
+categories: ["R"]
+tags: ["R", "data.table"]
+---
+
+<!-- 
+<script src="/js/set-target-blank-links.js"></script>
+<script src="/js/jquery-3.3.1.min.js"></script>
+-->
+
+<style>
+  .hljs{
+    background: #a7a7a71a;
+    font-size: 90%;
+    word-wrap: break-word;
+  }
+  pre:not(.r):not(.python) {
+    background: #a7a7a71a;
+    word-wrap: break-word;
+    color: #333333;
+  }
+
+
+</style>
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+# rmarkdown::render("2020-06-17-datatable-introduction.Rmd")
+```
+
+
+data.table is one of the greatest R package. It provides an enhanced version of base R’s `data.frame` with syntax and feature enhancements, making data manipulation concise, consistent, efficient, and fun!    
+
+This post gives a quick introduction to data.table. The main objective is to present the data.table syntax, showing how to perform basic, but essential, data wrangling tasks.     
+
+Let's start by creating a simple data.table.      
+
+```{r}
+library(data.table) # version 1.13.0
+
+DT <- data.table(Fruit = rep(c("banana", "apple", "orange"), 3:1),
+                 Year  = c(2008, 2009, 2010, 2009, 2010, 2010),
+                 Count = 1:6)
+DT
+class(DT)
+```
+
+How we can select the first two rows and the first two columns of a data.table? Well, that's simple:    
+```{r}
+DT[1:2, 1:2]
+```
+
+In base R, we can access elements of a matrix or a data.frame using the square brackets indexing method. It's the same with data.table.    
+
+To start, think `DT[rows, columns]`, also presented in a short way: `DT[i, j]`. With data.table, most of the things take place within these square brackets.      
+The magic is that you can do much more with the simple command `DT[i, j]`. In particular, rows and columns can be referred to without using any quotes or `$` symbol, making the code very clear.       
+
+# The basics
+
+## Operations on rows
+
+For example, to select rows using a condition:     
+```{r}
+DT[Fruit == "banana", ]                  # select rows where Fruit equals banana
+DT[Fruit == "banana" & Year > 2008]      # select rows where Fruit equals banana and Year is higher than 2008
+```
+When performing operations on rows only, the `j` element is left empty (`DT[i,]`), as in the first command, or simply ignored (`DT[i]`) as in the second command.     
+
+Likewise, we can order the data:
+```{r}
+DT[order(Fruit), ]          # order according to the Fruit column, in ascending order
+DT[order(Fruit, -Year)]     # order according to the Fruit and Year columns, in ascending and descending order, respectively
+```
+
+Or sample rows:
+```{r}
+DT[sample(nrow(DT), 3)]     # randomly sample three rows
+```
+
+The command above can be abbreviated as follows:    
+```{r}
+DT[sample(.N, 3), ]        # randomly sample three rows
+```
+`.N` is an alias for the number of rows. data.table offers several syntactic sugars like this, as we will see below.          
+
+
+<br>
+
+## Operations on columns
+
+### Select columns
+
+To select a column, we just specify the name in `DT[, j]`.
+
+```{r}
+DT[, Count]            # select the Count column, returns a vector
+```
+
+The previous command returns a vector, if you want the result to be a data.table, you have to use `list()`, or more simply the `.` alias.    
+
+```{r}
+DT[, list(Count)]       # select the Count column, returns a data.table
+DT[, .(Count)]          # ditto
+DT[, .(Fruit, Count)]   # select the Fruit and Count columns
+```
+
+To select columns using a vector of column names, one should use the `..` prefix. It indicates to search the corresponding vector 'one level up' (_i.e._ in the global environment).
+
+```{r}
+cols <- c("Fruit", "Year")
+DT[, ..cols]   # select the columns provided in the cols vector
+```
+
+
+### Computation on columns
+
+To apply a function on a column:
+```{r}
+DT[, max(Year)]                # sum the Count values
+DT[, cumsum(Count)]
+```
+
+By default, the result is returned as a vector. Just like above with column selection, to obtain the result as a data.table, it is necessary to use `.()`.
+Doing so, we can also assign colnames to the result. When no column names are provided, they are automatically generated as V1, V2, ...     
+```{r}
+DT[, .(cumsum(Count))]                # sum the Count values
+DT[, .(CumsumCount = cumsum(Count))]     # sum the Count values with column name CumsumCount
+```
+
+To apply a function on several columns:
+```{r}
+DT[, .(sum(Count), max(Year))]   # sum the Count values and get the maximum Year value
+```
+Assigning colunm names and indenting the code:
+```{r}
+DT[, .(SUM = sum(Count),
+       MAX = max(Year))]         # sum the Count values and get the maximum Year value, assigning column names
+```
+
+
+### Modify / Add / Delete columns
+
+Note that the previous commands create a new data.table. To modify an existing column, or create a new one, use the `:=` operator.
+```{r}
+DT[, Year := Year + 1]               # modify the Year column
+DT[, Cumsum_Count := cumsum(Count)]  # create a new Cumsum_Count column
+```
+
+As you can see below, `DT` has been modified even if we did not assign the result:    
+
+```{r}
+DT
+```
+
+Using the data.table `:=` operator modifies the existing object 'in place', which has the benefit of being memory-efficient. Memory management is an important aspect of data.table. There is a dedicated [vignette](https://rdatatable.gitlab.io/data.table/articles/datatable-reference-semantics.html) to learn more about it.    
+
+
+The principle is the same to modify or add several columns:
+```{r}
+DT[, c("CountX3", "CountX4") := .(Count * 3, Count * 4)]
+DT
+```
+
+It is also possible to use the functional form, which, combined with indentation, offers a more readable alternative:
+```{r}
+DT[, ':='(CountX3 = Count * 3,
+          CountX4 = Count * 4)]
+DT
+```
+
+With a predefined vector of column names, the corresponding object must be put in parentheses.   
+```{r}
+cols <- c("CountX3", "CountX4")
+DT[, (cols) := .(Count * 3, Count * 4)]
+```
+
+And finally, to remove columns, we assign them a `NULL` value:
+```{r}
+DT[, Cumsum_Count := NULL]
+DT[, c("CountX3", "CountX4") := NULL]
+```
+
+```{r}
+DT
+```
+
+
+
+<br>
+
+## Operations on both rows and columns
+
+Obviously, the operations on rows and columns can be combined in `DT[i, j]`. 
+Operations on `j` are then performed after the condition in `i` has been applied.    
+
+```{r}
+DT[Fruit != "apple", sum(Count)]
+DT[Fruit == "banana" & Year < 2011, .(sum(Count))]
+```
+
+Combining `i` and `j` in a same expression is particularly useful because it allows to modify some values only for rows matching the condition in `i`, 
+or to create a new column, assigning a given value for matching rows, other rows being left as `NA`.     
+
+```{r}
+DT[Fruit == "banana" & Year < 2010, Count := Count + 1] # modify only the matching rows
+DT[Fruit == "orange", Orange := "orange"] # add a new column, non-matching rows will be NA
+```
+
+```{r}
+DT
+```
+
+
+<br>
+
+# by
+
+Now that you are familiar with `DT[i, j]`, let's introduce `DT[i, j, by]`.     
+`by` can somewhat be viewed as a "third virtual dimension". The data can be aggregated by group using a single additional argument: `by`. That's it. How could it be more simple?    
+
+## Aggregation by group
+
+```{r}
+DT[, sum(Count), by = Fruit]
+```
+
+A condition or a function call can also be used in `by`.     
+
+```{r}
+DT[, sum(Count), by = (IsApple = Fruit == "apple")] 
+```
+
+```{r}
+DT[, .(MeanCount = mean(Count)), by = (OddYear = Year %% 2 == 1)]
+```
+
+
+Aggregating on several columns is just as simple, with a character vector in `by`:      
+```{r}
+DT[, sum(Count), by = c("Fruit", "Year")]
+```
+
+Or using `.(...)` in by:
+```{r}
+DT[, .(SumCount = sum(Count)), by = .(Fruit, Before2011 = Year < 2011)]
+```
+
+And here is a full `DT[i, j, by]` command:
+```{r}
+DT[Fruit != "orange", max(Count), by = Fruit]
+```
+
+Once again, this is just one single argument: `by = ...`. Much more simple and practical than `base::tapply()` in my opinion. This is one of the key features that got me hooked on data.table.    
+
+## Code indentation and reordering
+
+Because data.table offers a consise syntax, commands easily fit on a single line. But it is possible to indent the code for more readability and also to reorder the elements (`DT[i, by, j]`).     
+
+```{r}
+DT[Fruit != "orange",   # select the rows that are not oranges
+   max(Count),          # then return the maximum value of Count
+   by = Fruit]          # for each fruit
+
+DT[Fruit != "orange",   # select the rows that are not oranges
+   by = Fruit,          # then, for each fruit,
+   max(Count)]          # return the maximum value of Count
+```
+
+
+## Modify a data.table by group
+
+In the previous commands, `by` has been used to aggregate data, returning a new data.table as output. 
+It is of course possible to use `by` when modifying an existing data.table and to return the output for each observation of the groups.     
+For example, to add a column with the number of observations for each group (the `.N` alias mentioned earlier can also be used in `j`!):
+
+```{r}
+DT[, N := .N, by = Fruit]
+```
+
+Here is another example:    
+```{r}
+DT[, MeanCountByFruit := round(mean(Count), 2), by = Fruit]
+```
+
+```{r}
+DT
+```
+
+<br>
+
+# Chaining commands
+
+Commands can be chained together using `DT[ ... ][ ... ]` "horizontally":
+```{r}
+DT[, MeanCountByFruit := round(mean(Count), 2), by = Fruit][MeanCountByFruit > 2]
+```
+Or "vertically":
+```{r}
+DT[, by = Fruit,
+     MeanCountByFruit := round(mean(Count), 2)
+  ][
+     MeanCountByFruit > 2
+   ]
+```
+
+Adding an empty `[]` at the end of a command will print the result. This is useful for example when modifying columns by reference using `:=`.        
+```{r}
+DT[, c("Orange", "N", "MeanCountByFruit") := NULL][]
+```
+
+<br>
+
+# Recap
+
+Let's recap the main commands we have seen so far:
+
+```{r, eval = FALSE}
+# operations on rows
+DT[Fruit == "banana", ]
+DT[Fruit == "banana" & Year > 2008]
+DT[order(Fruit), ]
+DT[order(Fruit, -Year)]
+DT[sample(.N, 3), ]
+
+# operations on columns
+DT[, Count]
+DT[, list(Count)]
+DT[, .(Count)]
+DT[, .(Fruit, Count)]
+cols <- c("Fruit", "Year")
+DT[, ..cols]
+DT[, cumsum(Count)]
+DT[, .(cumsum(Count))]
+DT[, .(CumsumCount = cumsum(Count))]
+DT[, .(sum(Count), max(Year))]
+DT[, .(SUM = sum(Count),
+       MAX = max(Year))]
+
+# operations on columns (modifying the data.table)
+DT[, Cumsum_Count := cumsum(Count)]
+DT[, ':='(CountX3 = Count * 3,
+          CountX4 = Count * 4)]
+cols <- c("CountX3", "CountX4")
+DT[, (cols) := .(Count * 3, Count * 4)]
+DT[, Cumsum_Count := NULL]
+
+# operations on both rows and columns
+DT[Fruit != "apple", sum(Count)]
+DT[Fruit == "banana" & Year < 2011, .(sum(Count))]
+DT[Fruit == "banana" & Year < 2010, Count := Count + 1]
+DT[Fruit == "orange", Orange := "orange"]
+
+# aggregation by group
+DT[, sum(Count), by = Fruit]
+DT[, sum(Count), by = (IsApple = Fruit == "apple")] 
+DT[, sum(Count), by = c("Fruit", "Year")]
+DT[, .(SumCount = sum(Count)), by = .(Fruit, Before2011 = Year < 2011)]
+DT[Fruit != "orange",
+   max(Count),
+   by = Fruit]
+DT[, N := .N, by = Fruit]
+DT[, MeanCountByFruit := round(mean(Count), 2), by = Fruit]
+
+# chaining
+DT[, MeanCountByFruit := round(mean(Count), 2), by = Fruit][MeanCountByFruit > 2]
+DT[, c("Orange", "N", "MeanCountByFruit") := NULL][]
+```
+
+That's the beauty of data.table: simplicity and consistency. `DT[rows, columns, by]`.     
+No quoted column names, no `$` symbol, and no new function. The only new thing is `:=`, used to assign column(s) by reference. `.()` is just an alias for `list()` and `.N` is an alias for the number of rows.      
+
+When we look at the commands above, it appears that data.table is so expressive that very little code is needed. In fact, with so much little text and a regular alignment, brackets, commas, and symbols somehow stand out. Removing the "uncessary" stuff makes the structure more visible. This structure is a guide to read data.table code. I think data.table is more about understanding than memorizing.         
+
+```{r}
+# DT[operation on rows, ]
+# DT[, operation on columns]
+# DT[, .(extract or compute new columns)]
+# DT[, newcolumn := assignment]
+# DT[, some computation, by = group]
+# ...
+```
+
+<br>
+
+# More details about `DT[, j]`
+
+So far `DT[, j]` has been used to select, modify, summarize, or compute new columns. But it is even more flexible: the `j` element can be any arbitrary expression, or set of expressions written within curly braces. For example:          
+```{r}
+DT[, 1 + 1]
+DT[, plot(Year, Count)]
+DT[, {sum_count <- sum(Count)
+      print("The sum of the Count column is:")
+      sum_count}]
+```
+Note that passing several expressions within curly braces is valid base R code to evaluate several commands, but only return the last result:    
+```{r}
+{sum123 <- sum(1:3); 1 + 2; sum123}
+```
+
+
+
+Also, as long as the `j` expression returns a list of equal-length elements (or elements of length one), each element of the list will be converted to a column in the resulting data.table. This is important! Keep that in mind, we'll see the implication in the next section. But note that it also explains why we used the `list()` alias `.()` earlier for operations on columns.        
+```{r}
+DT[, list(1:3, 4:6, 7)]
+DT[, {2 + 3             # this command is evaluated but not returned
+      list(Col1 = 1:3,
+           Col2 = 4:6,
+           Col3 = 7)}]
+```
+
+
+<br>
+
+# .SD
+
+Just like `.N` is an alias refering to the number of rows, `.SD` is an alias refering to the Subset of Data for each group, excluding the column(s) used in `by`. Said differently, `.SD` corresponds to "the current data for the current group (excluding grouping variables)". It offers a convenient way to iterate over the columns of a data.table.      
+
+To better see it, just print it!
+```{r}
+DT[, print(.SD), by = Fruit]
+```
+
+If there is no `by`, then `.SD` is `DT` itself.
+```{r}
+DT[, .SD]
+```
+
+## Iterate over several columns
+
+To run a function over all the columns of a data.table, we can use the following expression:
+```{r}
+DT[, lapply(.SD, min)]
+```
+
+Let's take some time to explain it step by step:     
+- iterating over the columns of a data.frame using `lapply()` is a valid base R expression (_e.g._ `lapply(mtcars, min)`)     
+- `DT[,j]` can take any arbitrary expression as mentioned earlier, so `lapply(.SD, min)` is used as the `j` expression     
+- `.SD` is, once again, just an alias for the subset of data for each group - no group is used in this first example, so `.SD` contains all the `DT` columns)    
+- iterating over the columns of `.SD` using `lapply` obviously returns a list     
+- as described in the previous section, as long as the `j` expression returns a list (of equal-length or length-one elements), each element of the list will be converted to a column in the resulting data.table     
+- so finally, the command above returns a data.table with the minimum value for each column of `.SD`    
+
+Let's run the same expression, this time by group:
+```{r}
+DT[, lapply(.SD, min), by = Fruit]
+```
+
+And of course, we can also select the rows using a `DT[i, j, by]` command:
+
+```{r}
+DT[Fruit != "apple", lapply(.SD, min), by = Fruit]
+```
+
+It is possible to append the result of the aggregation to the current data.table, the values will then be recycled for each observation of a given group:     
+```{r}
+DT[, c("MeanYear", "MeanCount") := lapply(.SD, mean),
+     by = Fruit]
+DT
+```
+
+
+## Selecting columns with `.SDcols`
+
+By default, `.SD` contains all the columns that are not provided in `by`. To run a function on specific columns, use `.SDcols` to pass a vector of colnames.      
+```{r}
+DT[, lapply(.SD, min), by = Fruit, .SDcols = c("Count", "MeanCount")]
+selected_cols <- "Year"
+# indenting the code
+DT[, by = Fruit,               # for each fruit
+     lapply(.SD, min),         # retrieve the min value
+     .SDcols = selected_cols]  # for each column provided in the selected_cols vector
+```
+A regular expression can also be passed using `patterns()`:
+```{r}
+DT[, lapply(.SD, min),
+     by = Fruit,
+     .SDcols = patterns("^Co")]
+```
+
+
+Alternatively, a function can be provided in `.SDcols`. This function must return a boolean signalling inclusion/exclusion of the column:     
+```{r}
+DT[, lapply(.SD, min),
+     by = Fruit,
+     .SDcols = is.integer] # !is.integer can also be used
+foo <- function(x) {is.numeric(x) && mean(x) > 2000}
+DT[, lapply(.SD, min),
+     by = Fruit,
+     .SDcols = foo]
+```
+
+
+
+
+
+
+</br></br>
+
+# To infinity and beyond!
+  
+In this post, we have introduced the data.table syntax to perform common data wrangling operations. Nevertheless, we've only scratched the surface. data.table offers tens of other impressive features. Here are some more reasons why it deserves to be in your data science toolbox.     
+
+- data.table has been created in 2006 and is still [actively](https://github.com/Rdatatable/data.table/graphs/contributors) maintained on github, with a responsive, welcoming, and insightful support.     
+
+- data.table is reliable. A lot of care is given to maintain compatibility in the long run. R dependency is as old as possible and there are no dependencies on other packages, for simpler production and maintenance.    
+
+- data.table is very reliable. It is a masterpiece of continuous integration and contains more than 9000 tests that you can run locally using `test.data.table()` to make sure everything works fine with your own settings. 
+There is more test code in data.table than there is code.   
+
+- while data.table performance is impressive, it is not only for 'large data'. Why analyzing 'small data' should be less convenient than analyzing 'large data'? data.table is great, even for a six-row dataset like the one used in this post.     
+
+- data.table offers the `fread` and `fwrite` functions, the fastest, most robust and full-featured functions to read or write text files.     
+
+- data.table offers [keys](https://rdatatable.gitlab.io/data.table/articles/datatable-keys-fast-subset.html) and [indices](https://rdatatable.gitlab.io/data.table/articles/datatable-secondary-indices-and-auto-indexing.html), which are mechanisms that make row subsetting (and joins) blazingly fast.     
+
+- data.table can perfom the most common data joins as well as advanced joins like non-equi joins or overlap joins.     
+
+- data.table also include `dcast()`, `melt()`, as well as a bunch of utility functions, for efficient and versatile [data reshaping](https://rdatatable.gitlab.io/data.table/articles/datatable-reshape.html).            
+
+- all these data manipulations are fast (see [benchmark](https://h2oai.github.io/db-benchmark/)), memory-efficient, and just as easy to perform as the few commands presented in this document.      
+
+- and last but not least, data.table has a nice and fun [logo](https://github.com/Rdatatable/data.table/issues/1237)! R! R! R!
+
+Happy data.tabling!
+
+<div style="text-align: center;">
+
+![](/images/data.table.png)
+
+</div>
+
+
+</br></br>
+
+```{r}
+sessionInfo()
+```

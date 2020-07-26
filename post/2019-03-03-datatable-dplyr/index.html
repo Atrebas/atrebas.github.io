@@ -203,8 +203,7 @@ this document is independently <a href="https://github.com/Atrebas/atrebas.githu
 <div id="update" class="section level3">
 <h3>Update</h3>
 <ul>
-<li><em>2020-06-13</em>: Update with data.table_1.12.9 and dplyr_1.0.0. Work in progress, stay tuned.
-‘Superseded’ dplyr code has been commented and will probably be removed in the future.<br />
+<li><em>2020-07-26</em>: Update with data.table_1.13.0 (<code>fcase()</code>, functions in <code>.SDcols</code>) and dplyr_1.0.0 (<code>across()</code>, <code>relocate()</code>, …). ‘Superseded’ dplyr code has been commented and will probably be removed in the future.<br />
 </li>
 <li><em>2019-06-22</em>: Coding style improved (thanks to <span class="citation">@tylerburleigh</span> for pointing that out). Some data.table expressions with <code>by</code> reordered and indented to better highlight the similarity with dplyr. Minor comments and improvements.</li>
 </ul>
@@ -222,7 +221,7 @@ Below is a quick overview of the main differences (from my basic user’s perspe
 It allows to combine several operations in a very concise and consistent expression.<br />
 - The syntax of dplyr is based on key verbs corresponding to the most common operations:
 <code>filter()</code>, <code>arrange()</code>, <code>select()</code>, <code>mutate()</code>, <code>summarise()</code>, …
-These functions can be combine with <code>group_by()</code> to aggregate data ‘by group’ and a bunch of helper functions.
+These functions can be combine with <code>group_by()</code> to aggregate data ‘by group’ and with a bunch of helper functions.
 It is a ‘do one thing at a time’ approach, chaining together functions dedicated to a specific task.</p>
 <p><strong>Ecosystem:</strong><br />
 The data.table package has no dependency whereas dplyr is part of the tidyverse. So, for example, while data.table includes functions to read, write, or reshape data, dplyr delegates these tasks to companion packages like readr or tidyr.<br />
@@ -865,7 +864,7 @@ DT[[&quot;V2&quot;]]     # returns a vector</code></pre>
 </td>
 <td align="left">
 <pre class="r"><code>select(DF, V2) # returns a tibble
-pull(DF, V2)   # returns a vector
+pull(DF, V2, name = V4)   # returns a (named) vector
 DF[, &quot;V2&quot;]        # returns a tibble
 DF[[&quot;V2&quot;]]        # returns a vector</code></pre>
 <pre><code>## # A tibble: 9 x 1
@@ -880,7 +879,8 @@ DF[[&quot;V2&quot;]]        # returns a vector</code></pre>
 ## 7     7
 ## 8     8
 ## 9     9
-## [1] 1 2 3 4 5 6 7 8 9
+## A B C A B C A B C 
+## 1 2 3 4 5 6 7 8 9 
 ## # A tibble: 9 x 1
 ##      V2
 ##   &lt;int&gt;
@@ -1406,7 +1406,8 @@ DF</code></pre>
 ## 9:  1  9 1.5  C 0.000000</code></pre>
 </td>
 <td align="left">
-<pre class="r"><code>DF &lt;- mutate(DF, v5 = log(V1))</code></pre>
+<pre class="r"><code>DF &lt;- mutate(DF, v5 = log(V1))
+# see ?mutate for options (.keep, .before, ...)</code></pre>
 </td>
 </tr>
 </tbody>
@@ -1949,14 +1950,8 @@ excluding the column(s) used in <code>by</code>. So, <code>DT[, .SD]</code> is <
 </td>
 <td align="left">
 <pre class="r"><code>DF %&gt;% summarise(across(everything(), max))
-DF %&gt;% summarise(across(everything(), 
-                        ~ max(.x, na.rm = TRUE)))
 # summarise_all(DF, max)</code></pre>
 <pre><code>## # A tibble: 1 x 3
-##      V1    V2 V4   
-##   &lt;dbl&gt; &lt;int&gt; &lt;chr&gt;
-## 1     4     9 C    
-## # A tibble: 1 x 3
 ##      V1    V2 V4   
 ##   &lt;dbl&gt; &lt;int&gt; &lt;chr&gt;
 ## 1     4     9 C</code></pre>
@@ -2018,7 +2013,6 @@ DT[, by = V4,
 <pre class="r"><code># DF %&gt;%
 #   group_by(V4) %&gt;%
 #   summarise_at(c(&quot;V1&quot;, &quot;V2&quot;), mean)
-## using select helpers
 DF %&gt;%
   group_by(V4) %&gt;%
   summarise(across(any_of(c(&quot;V1&quot;, &quot;V2&quot;, &quot;Z0&quot;)), mean))</code></pre>
@@ -2082,19 +2076,30 @@ DF %&gt;%
 <tr>
 <td align="left">
 <pre class="r"><code>DT[, lapply(.SD, mean),
-     .SDcols = is.numeric]</code></pre>
+     .SDcols = is.numeric]
+foo &lt;- function(x) {is.numeric(x) &amp;&amp; mean(x) &gt; 3}
+DT[, lapply(.SD, mean),
+   .SDcols = foo]</code></pre>
 <pre><code>##          V1       V2
-## 1: 2.333333 4.333333</code></pre>
+## 1: 2.333333 4.333333
+##          V2
+## 1: 4.333333</code></pre>
 </td>
 <td align="left">
 <pre class="r"><code>DF %&gt;%
   summarise(across(where(is.numeric),
                    mean))
-# summarise_if(DF, is.numeric, mean)</code></pre>
+# summarise_if(DF, is.numeric, mean)
+DF %&gt;% summarise(across(where(~ is.numeric(.x) &amp;&amp; mean(.x) &gt; 3), 
+                        mean))</code></pre>
 <pre><code>## # A tibble: 1 x 2
 ##      V1    V2
 ##   &lt;dbl&gt; &lt;dbl&gt;
-## 1  2.33  4.33</code></pre>
+## 1  2.33  4.33
+## # A tibble: 1 x 1
+##      V2
+##   &lt;dbl&gt;
+## 1  4.33</code></pre>
 </td>
 </tr>
 </tbody>
@@ -2832,15 +2837,43 @@ DF &lt;- rename(DF, V2 = v2) # reset upper</code></pre>
 </tbody>
 </table>
 </div>
+<div id="relocate-columns" class="section level4">
+<h4>Relocate columns</h4>
+<table class="table table-condensed">
+<tbody>
+<tr>
+<td align="left">
+<pre class="r"><code># coming soon (#4358)</code></pre>
+</td>
+<td align="left">
+<pre class="r"><code>DF %&gt;%
+  relocate(V4, .after = V2)</code></pre>
+<pre><code>## # A tibble: 9 x 3
+##      V1    V2 V4   
+##   &lt;int&gt; &lt;int&gt; &lt;chr&gt;
+## 1     0     3 A    
+## 2     0     4 A    
+## 3     0     7 A    
+## 4     4     0 B    
+## 5     4     8 B    
+## 6     1     5 B    
+## 7     4     5 C    
+## 8     1     0 C    
+## 9     1     9 C</code></pre>
+</td>
+</tr>
+</tbody>
+</table>
+</div>
 <div id="convert-data" class="section level4">
 <h4>Convert data</h4>
 <table class="table table-condensed">
 <tbody>
 <tr>
 <td align="left">
-<pre class="r"><code>?setDT # data.frame or list to data.table
-?setDF # data.table to data.frame
-?setattr # modify attributes</code></pre>
+<pre class="r"><code># ?setDT # data.frame or list to data.table
+# ?setDF # data.table to data.frame
+# ?setattr # modify attributes</code></pre>
 </td>
 <td align="left">
 <pre class="r"><code># </code></pre>
@@ -2854,6 +2887,7 @@ DF &lt;- rename(DF, V2 = v2) # reset upper</code></pre>
 </div>
 <div id="advanced-use-of-by" class="section level3">
 <h3>Advanced use of by</h3>
+<p>Context dependent expressions (<code>cur_*()</code>) have been introduced in dplyr 1.0.0, reflecting data.table aliases <code>.I</code>, <code>.GRP</code>, …</p>
 <div id="select-firstlast-row-by-group" class="section level4">
 <h4>Select first/last/… row by group</h4>
 <table class="table table-condensed">
@@ -2983,12 +3017,12 @@ DT[, Grp := NULL] # delete for consistency</code></pre>
 ## 9:  C  1  9   5</code></pre>
 </td>
 <td align="left">
-<pre class="r"><code>DF %&gt;% mutate(Grp = group_indices(., V4, V1))</code></pre>
-<pre><code>## Warning: The `...` argument of `group_keys()` is deprecated as of dplyr 1.0.0.
-## Please `group_by()` first
-## This warning is displayed once every 8 hours.
-## Call `lifecycle::last_warnings()` to see where this warning was generated.</code></pre>
+<pre class="r"><code>DF %&gt;%
+  group_by(V4, V1) %&gt;%
+  mutate(Grp = cur_group_id())
+# DF %&gt;% mutate(Grp = group_indices(., V4, V1))</code></pre>
 <pre><code>## # A tibble: 9 x 4
+## # Groups:   V4, V1 [5]
 ##   V4       V1    V2   Grp
 ##   &lt;chr&gt; &lt;int&gt; &lt;int&gt; &lt;int&gt;
 ## 1 A         0     3     1
@@ -3039,23 +3073,49 @@ DT[, .I[c(1, .N)], by = V4]</code></pre>
 <td align="left">
 <pre class="r"><code>DF %&gt;%
   group_by(V4) %&gt;%
-  group_data() %&gt;%
-  tidyr::unnest(.rows)
-# DF %&gt;% group_by(V4) %&gt;% group_rows() # returns a list
-#
-#</code></pre>
-<pre><code>## # A tibble: 9 x 2
-##   V4    .rows
-##   &lt;chr&gt; &lt;int&gt;
-## 1 A         1
-## 2 A         2
-## 3 A         3
-## 4 B         4
-## 5 B         5
-## 6 B         6
-## 7 C         7
-## 8 C         8
-## 9 C         9</code></pre>
+  mutate(cur_group_rows())
+#DF %&gt;%
+#  group_by(V4) %&gt;%
+#  group_data() %&gt;%
+#  tidyr::unnest(.rows)
+DF %&gt;%
+  group_by(V4) %&gt;%
+  summarize(cur_group_rows()[1])</code></pre>
+<pre><code>## `summarise()` ungrouping output (override with `.groups` argument)</code></pre>
+<pre class="r"><code>DF %&gt;%
+  group_by(V4) %&gt;%
+  summarize(cur_group_rows()[c(1, n())])</code></pre>
+<pre><code>## `summarise()` regrouping output by &#39;V4&#39; (override with `.groups` argument)</code></pre>
+<pre class="r"><code># DF %&gt;% group_by(V4) %&gt;% group_rows() # returns a list</code></pre>
+<pre><code>## # A tibble: 9 x 4
+## # Groups:   V4 [3]
+##   V4       V1    V2 `cur_group_rows()`
+##   &lt;chr&gt; &lt;int&gt; &lt;int&gt;              &lt;int&gt;
+## 1 A         0     3                  1
+## 2 A         0     4                  2
+## 3 A         0     7                  3
+## 4 B         4     0                  4
+## 5 B         4     8                  5
+## 6 B         1     5                  6
+## 7 C         4     5                  7
+## 8 C         1     0                  8
+## 9 C         1     9                  9
+## # A tibble: 3 x 2
+##   V4    `cur_group_rows()[1]`
+##   &lt;chr&gt;                 &lt;int&gt;
+## 1 A                         1
+## 2 B                         4
+## 3 C                         7
+## # A tibble: 6 x 2
+## # Groups:   V4 [3]
+##   V4    `cur_group_rows()[c(1, n())]`
+##   &lt;chr&gt;                         &lt;int&gt;
+## 1 A                                 1
+## 2 A                                 3
+## 3 B                                 4
+## 4 B                                 6
+## 5 C                                 7
+## 6 C                                 9</code></pre>
 </td>
 </tr>
 </tbody>
@@ -3740,6 +3800,31 @@ rleid(rep(c(&quot;a&quot;, &quot;b&quot;, &quot;a&quot;), each = 3), prefix = &q
 </tbody>
 </table>
 </div>
+<div id="fast-version-of-ifelse" class="section level4">
+<h4>Fast version of <code>ifelse()</code></h4>
+<table class="table table-condensed">
+<tbody>
+<tr>
+<td align="left">
+<pre class="r"><code>x &lt;- c(-3:3, NA)
+fifelse(test = x &lt; 0,
+        yes  = &quot;neg&quot;,
+        no   = &quot;pos&quot;,
+        na   = &quot;NA&quot;)</code></pre>
+<pre><code>## [1] &quot;neg&quot; &quot;neg&quot; &quot;neg&quot; &quot;pos&quot; &quot;pos&quot; &quot;pos&quot; &quot;pos&quot; &quot;NA&quot;</code></pre>
+</td>
+<td align="left">
+<pre class="r"><code>x &lt;- c(-3:3, NA)
+if_else(condition = x &lt; 0,
+        true      = &quot;neg&quot;,
+        false     = &quot;pos&quot;,
+        missing   = &quot;NA&quot;)</code></pre>
+<pre><code>## [1] &quot;neg&quot; &quot;neg&quot; &quot;neg&quot; &quot;pos&quot; &quot;pos&quot; &quot;pos&quot; &quot;pos&quot; &quot;NA&quot;</code></pre>
+</td>
+</tr>
+</tbody>
+</table>
+</div>
 <div id="vectorised-ifelse-statements" class="section level4">
 <h4>Vectorised <code>ifelse</code> statements</h4>
 <table class="table table-condensed">
@@ -3750,8 +3835,9 @@ rleid(rep(c(&quot;a&quot;, &quot;b&quot;, &quot;a&quot;), each = 3), prefix = &q
 fcase(
   x %% 6 == 0, &quot;fizz buzz&quot;,
   x %% 2 == 0, &quot;fizz&quot;,
-  x %% 3 == 0, &quot;buzz&quot;
-) # default?</code></pre>
+  x %% 3 == 0, &quot;buzz&quot;,
+  default = NA_character_
+)</code></pre>
 <pre><code>##  [1] NA          &quot;fizz&quot;      &quot;buzz&quot;      &quot;fizz&quot;      NA          &quot;fizz buzz&quot;
 ##  [7] NA          &quot;fizz&quot;      &quot;buzz&quot;      &quot;fizz&quot;</code></pre>
 </td>
@@ -4669,7 +4755,7 @@ Hopefully, this comparison is not too biased, but I must admit that my preferenc
 ## [1] stats     graphics  grDevices utils     datasets  methods   base     
 ## 
 ## other attached packages:
-## [1] dplyr_1.0.0       data.table_1.12.9 knitr_1.26       
+## [1] dplyr_1.0.0       data.table_1.13.0 knitr_1.26       
 ## 
 ## loaded via a namespace (and not attached):
 ##  [1] Rcpp_1.0.3       magrittr_1.5     hms_0.5.2        tidyselect_1.1.0

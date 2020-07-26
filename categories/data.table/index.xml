@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+  <channel>
+    <title>data.table on Home</title>
+    <link>/categories/data.table/</link>
+    <description>Recent content in data.table on Home</description>
+    <generator>Hugo -- gohugo.io</generator>
+    <language>en-us</language>
+    
+	<atom:link href="/categories/data.table/index.xml" rel="self" type="application/rss+xml" />
+    
+    
+    <item>
+      <title>A gentle introduction to data.table</title>
+      <link>/post/2020-06-17-datatable-introduction/</link>
+      <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
+      
+      <guid>/post/2020-06-17-datatable-introduction/</guid>
+      <description>This post is about drawing hiragana and katakana tables using R, data.table, and ggplot2. The objective was to better illustrate the rules that underlie these two Japanese writing systems.</description>
+    </item>
+    
+  </channel>
+</rss>

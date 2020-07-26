@@ -120,8 +120,7 @@ this document is independently [available](https://github.com/Atrebas/atrebas.gi
 <div style="text-align: center;"><input type='button' id='hideshow' value='Show the outputs'></div>
 
 ### Update
-- _2020-06-13_: Update with data.table_1.12.9 and dplyr_1.0.0. Work in progress, stay tuned. 
-'Superseded' dplyr code has been commented and will probably be removed in the future.    
+- _2020-07-26_: Update with data.table_1.13.0 (`fcase()`, functions in `.SDcols`) and dplyr_1.0.0 (`across()`, `relocate()`, ...). 'Superseded' dplyr code has been commented and will probably be removed in the future.    
 - _2019-06-22_: Coding style improved (thanks to @tylerburleigh for pointing that out). Some data.table expressions with `by` reordered and indented to better highlight the similarity with dplyr. Minor comments and improvements.  
 
 
@@ -138,7 +137,7 @@ __Syntax:__
 It allows to combine several operations in a very concise and consistent expression.    
 - The syntax of dplyr is based on key verbs corresponding to the most common operations: 
 `filter()`, `arrange()`, `select()`, `mutate()`, `summarise()`, ...
-These functions can be combine with `group_by()` to aggregate data 'by group' and a bunch of helper functions. 
+These functions can be combine with `group_by()` to aggregate data 'by group' and with a bunch of helper functions. 
 It is a 'do one thing at a time' approach, chaining together functions dedicated to a specific task.   
 
 __Ecosystem:__      
@@ -948,6 +947,16 @@ The corresponding expressions in dplyr will be less memory-efficient.
 <<set4.2>>
 ```
 </td></tr></tbody></table>
+#### Relocate columns
+<table class="table table-condensed"><tbody><tr><td align="left">
+```{r, eval=TRUE}
+<<set6.1>>
+```
+</td><td align="left">
+```{r, eval=TRUE}
+<<set6.2>>
+```
+</td></tr></tbody></table>
 #### Convert data
 <table class="table table-condensed"><tbody><tr><td align="left">
 ```{r, eval=TRUE}
@@ -962,6 +971,7 @@ The corresponding expressions in dplyr will be less memory-efficient.
 
 <br><hr>
 ### Advanced use of by
+Context dependent expressions (`cur_*()`) have been introduced in dplyr 1.0.0, reflecting data.table aliases `.I`, `.GRP`, ...      
 
 #### Select first/last/... row by group
 <table class="table table-condensed"><tbody><tr><td align="left">
@@ -1203,6 +1213,16 @@ This part is still a bit clunky. I need to find better examples. See [here](http
 </td><td align="left">
 ```{r, eval=TRUE}
 <<other5.2>>
+```
+</td></tr></tbody></table>
+#### Fast version of `ifelse()`
+<table class="table table-condensed"><tbody><tr><td align="left">
+```{r, eval=TRUE}
+<<other8.1>>
+```
+</td><td align="left">
+```{r, eval=TRUE}
+<<other8.2>>
 ```
 </td></tr></tbody></table>
 #### Vectorised `ifelse` statements
