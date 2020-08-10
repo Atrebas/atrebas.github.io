@@ -471,9 +471,7 @@ Below, the data.table code uses `DT` and the pandas code uses `DF`.
 
 <br><hr>
 ### Bind
-```{r, eval = TRUE, message = FALSE, warning = FALSE}
-<<bind1>>
-```
+<<<bind1>><<bind1.3>>>
 #### Bind rows
 <<<bind2.1>><<bind2.3>>>
 #### Bind rows using a list

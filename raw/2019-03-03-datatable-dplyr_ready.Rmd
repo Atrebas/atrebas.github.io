@@ -1,13 +1,13 @@
 ---
-title: "A data.table and pandas small stroll"
+title: "A data.table and dplyr tour"
 author: "Atrebas"
-date: "2020-06-14"
-summary: data.table and pandas are two major libraries for efficient manipulation of data frames in R and Python, respectively. Being quite familiar with data.table, I wrote this post as an exercice to learn more about pandas. Commands to execute common data munging tasks are presented side-by-side to facilitate the comparison.   
+date: "2019-03-03"
+summary: data.table and dplyr are two R packages that both aim at an easier and more efficient manipulation of data frames. This article shows how they can be used to execute common data munging tasks. The commands are presented side-by-side to facilitate the comparison.   
 output:
   blogdown::html_page:
     toc: true
 categories: ["R"]
-tags: ["R", "data.table", "pandas", "Python"]
+tags: ["R", "data.table", "dplyr"]
 ---
 
 
@@ -18,7 +18,6 @@ knitr::opts_chunk$set(results = "hold")
 ```{r echo = FALSE, message = FALSE, warning = FALSE}
 library(knitr)
 read_chunk('2019-03-03-datatable-dplyr.R')
-read_chunk('2020-06-14-pandas.py')
 ```
 
 <!----------------------------------------------------------------------------
@@ -52,7 +51,7 @@ read_chunk('2020-06-14-pandas.py')
     border-width: 1px;
     border-color: #a7a7a71a;
     }
-    pre:not(.r):not(.python) {
+    pre:not(.r) {
     display: none;
     }
     table {
@@ -87,14 +86,6 @@ read_chunk('2020-06-14-pandas.py')
     top:0;
     margin-top: 60px;
     }
-    pre:not(.r):not(.python) {
-    background: #a7a7a71a;
-    font-size: 80%;
-    word-wrap: break-word;
-    color: #333333;
-    }
-
-
 </style>
  
 <!----------------------------------------------------------------------------
@@ -105,8 +96,7 @@ read_chunk('2020-06-14-pandas.py')
 <table class="table table-condensed"><tbody><tr><td align="center">
 ![data.table_logo](/images/data.table.png)
 </td><td align="center">
-<br><br>
-![pandas_logo](/images/pandas.png)
+![dplyr_logo](/images/dplyr2.jpg)
 </td></tr></tbody></table>
 
 
@@ -114,22 +104,42 @@ read_chunk('2020-06-14-pandas.py')
 # Introduction
 
 ### About
-- Last year, I published a [post](https://atrebas.github.io/post/2019-03-03-datatable-dplyr/) 
-showing how to use the data.table and dplyr R packages to execute data munging tasks.    
-- I have learned some Python lately and thought it would be a could exercice to "translate" the commands using pandas.     
-- I am less familiar with Python and pandas than I am with R and data.table, and presenting the two librairies together in a logical way is a bit challenging. So, rather than going into convoluted explanations, 
-I choose the easy (and time-saving) solution: only the code is presented, no further explanation is given - hence the title.    
-- That's all it is. Just a programming exercice, not a A-vs-B post. 
-It is incomplete and not fully polished but I publish it in case it can be useful for someone and to better keep track of the files.     
-- The same [R code](https://github.com/Atrebas/atrebas.github.io/blob/master/post/2019-03-03-datatable-dplyr.R) 
-is used below and in my "data.table and dplyr tour". The Python code, available 
-[here](https://github.com/Atrebas/atrebas.github.io/blob/master/post/2020-06-14-pandas.py), is structured and labeled in the same way.     
+- This document has been been inspired by [this stackoverflow question](http://stackoverflow.com/questions/21435339/data-table-vs-dplyr-can-one-do-something-well-the-other-cant-or-does-poorly/27840349#27840349) and by the data.table cheat sheet published by Karlijn Willems. It has been written for my own self-teaching and may contain errors or imprecisions. Corrections and suggestions are welcome.   
+- Resources for data.table can be found on the data.table
+[wiki](https://github.com/Rdatatable/data.table/wiki), in the data.table
+[vignettes](https://cran.r-project.org/web/packages/data.table/index.html), 
+and in the package documentation.   
+- Reference documents for dplyr include the dplyr 
+[cheat sheet](https://github.com/rstudio/cheatsheets/raw/master/data-transformation.pdf),
+the dplyr [vignettes](https://cran.r-project.org/web/packages/dplyr/index.html),
+and the package documentation.   
+- For the sake of readability, the console outputs are hidden by default. 
+Click on the button below to show or hide the outputs. Also, the R code used in 
+this document is independently [available](https://github.com/Atrebas/atrebas.github.io/blob/master/post/2019-03-03-datatable-dplyr.R) and can be easily reproduced.     
 
 <div style="text-align: center;"><input type='button' id='hideshow' value='Show the outputs'></div>
 
 ### Update
-- _2020-08-10_: The python code has been improved and completed. Thanks a lot to [Samuel Oranyeli](https://twitter.com/samukweku) 
-for his careful and insightful [feedback](https://github.com/Atrebas/atrebas.github.io/issues/2#issue-671626419).     
+- _2020-06-13_: Update with data.table_1.12.9 and dplyr_1.0.0. Work in progress, stay tuned.   
+- _2019-06-22_: Coding style improved (thanks to @tylerburleigh for pointing that out). Some data.table expressions with `by` reordered and indented to better highlight the similarity with dplyr. Minor comments and improvements.  
+
+
+<br><hr>
+### data.table and dplyr
+
+data.table and dplyr are two R packages that both aim at an easier and more efficient manipulation of data frames. But while they share a lot of functionalities, their philosophies are quite different. Below is a quick overview of the main differences (from my basic user's perspective).   
+
+__Syntax:__    
+- The general data.table syntax is as follows: `DT[i, j, by, ...]` which means: "Take DT, subset rows using `i`, then calculate `j`, grouped by `by`" with possible extra options `...`. It allows to combine several operations in a very concise and consistent expression.    
+- The syntax of dplyr is based on five main functions (`filter()`, `arrange()`, `select()`, `mutate()`, `summarise()`) and `group_by()` + their scoped variants (suffixed with `_all`, `_at`, or `_if`) + a bunch of helper functions. It is a 'do one thing at a time' approach, chaining together functions dedicated to a specific task.   
+
+__Ecosystem:__      
+The data.table package has no dependency whereas dplyr is part of the tidyverse. So, for example, while data.table includes functions to read, write, or reshape data, dplyr delegates these tasks to companion packages like readr or tidyr.   
+On the other hand, data.table is focused on the processing of local in-memory data, but dplyr offers a database backend.   
+
+__Memory management and performance:__    
+In data.table, objects can be manipulated 'by reference' (using the `set*()` functions or with the `:=` symbol). It means that the data will be modified but not copied, minimizing the RAM requirements. The behaviour of dplyr is similar to the one of base R.   
+Memory management, parallelism, and shrewd optimization give data.table the advantage in terms of performance.   
 
 
 <br><hr>
@@ -139,13 +149,14 @@ for his careful and insightful [feedback](https://github.com/Atrebas/atrebas.git
 <<data1.1>>  
 ```
 </td><td align="left">
-```{python, message=FALSE, warning=FALSE}
-<<data1.3>>  
+```{r, message=FALSE, warning=FALSE}
+<<data1.2>>  
 ```
 </td></tr></tbody></table>
 
 
-Below, the data.table code uses `DT` and the pandas code uses `DF`. 
+Below, the data.table code uses `DT` and the dplyr code uses `DF`. Also, the dplyr code uses the `%>%` operator: a basic knowledge of the [magrittr](https://cran.r-project.org/web/packages/magrittr/vignettes/magrittr.html) syntax is assumed.    
+
 
 
 <!----------------------------------------------------------------------------
@@ -162,8 +173,8 @@ Below, the data.table code uses `DT` and the pandas code uses `DF`.
 <<filterRows1.1>>
 ```
 </td><td align="left">
-```{python, eval=TRUE}
-<<filterRows1.3>>
+```{r, eval=TRUE}
+<<filterRows1.2>>
 ```
 </td></tr></tbody></table>
 #### Discard rows using negative indices
@@ -172,8 +183,8 @@ Below, the data.table code uses `DT` and the pandas code uses `DF`.
 <<filterRows2.1>>
 ```
 </td><td align="left">
-```{python, eval=TRUE}
-<<filterRows2.3>>
+```{r, eval=TRUE}
+<<filterRows2.2>>
 ```
 </td></tr></tbody></table>
 #### Filter rows using a logical expression 
@@ -182,8 +193,8 @@ Below, the data.table code uses `DT` and the pandas code uses `DF`.
 <<filterRows3.1>>
 ```
 </td><td align="left">
-```{python, eval=TRUE}
-<<filterRows3.3>>
+```{r, eval=TRUE}
+<<filterRows3.2>>
 ```
 </td></tr></tbody></table>
 #### Filter rows using multiple conditions
@@ -192,8 +203,8 @@ Below, the data.table code uses `DT` and the pandas code uses `DF`.
 <<filterRows4.1>>
 ```
 </td><td align="left">
-```{python, eval=TRUE}
-<<filterRows4.3>>
+```{r, eval=TRUE}
+<<filterRows4.2>>
 ```
 </td></tr></tbody></table>
 #### Filter unique rows
@@ -202,8 +213,8 @@ Below, the data.table code uses `DT` and the pandas code uses `DF`.
 <<filterRows5.1>>
 ```
 </td><td align="left">
-```{python, eval=TRUE}
-<<filterRows5.3>>
+```{r, eval=TRUE}
+<<filterRows5.2>>
 ```
 </td></tr></tbody></table>
 #### Discard rows with missing values
@@ -212,29 +223,32 @@ Below, the data.table code uses `DT` and the pandas code uses `DF`.
 <<filterRows6.1>>
 ```
 </td><td align="left">
-```{python, eval=TRUE}
-<<filterRows6.3>>
+```{r, eval=TRUE}
+<<filterRows6.2>>
 ```
 </td></tr></tbody></table>
 #### Other filters
+In addition to the main `filter()` function, dplyr also offers the `filter_all/at/if` variants as well as three helper functions to filter rows. With data.table, we can simply use a custom expression in `DT[i]`.     
 <table class="table table-condensed"><tbody><tr><td align="left">
 ```{r, eval=TRUE}
 <<filterRows7.1>>
 ```
 </td><td align="left">
-```{python, eval=TRUE}
-<<filterRows7.3>>
+```{r, eval=TRUE}
+<<filterRows7.2>>
 ```
 </td></tr></tbody></table>
+On the other hand, data.table also provides convenience functions to filter rows based on a regular expression or to find values lying in one (or several) interval(s).      
 <table class="table table-condensed"><tbody><tr><td align="left">
 ```{r, eval=TRUE}
 <<filterRows8.1>>
 ```
 </td><td align="left">
-```{python, eval=TRUE}
-<<filterRows8.3>>
+```{r, eval=TRUE}
+<<filterRows8.2>>
 ```
 </td></tr></tbody></table>
+Below, we will see that data.table has two optimized mechanisms to filter rows efficiently (keys and indices).
 
 <br><hr>
 ### Sort rows
@@ -244,8 +258,8 @@ Below, the data.table code uses `DT` and the pandas code uses `DF`.
 <<sortRows1.1>>
 ```
 </td><td align="left">
-```{python, eval=TRUE}
-<<sortRows1.3>>
+```{r, eval=TRUE}
+<<sortRows1.2>>
 ```
 </td></tr></tbody></table>
 #### Sort rows in decreasing order
@@ -254,8 +268,8 @@ Below, the data.table code uses `DT` and the pandas code uses `DF`.
 <<sortRows2.1>>
 ```
 </td><td align="left">
-```{python, eval=TRUE}
-<<sortRows2.3>>
+```{r, eval=TRUE}
+<<sortRows2.2>>
 ```
 </td></tr></tbody></table>
 #### Sort rows based on several columns
@@ -264,8 +278,8 @@ Below, the data.table code uses `DT` and the pandas code uses `DF`.
 <<sortRows3.1>>
 ```
 </td><td align="left">
-```{python, eval=TRUE}
-<<sortRows3.3>>
+```{r, eval=TRUE}
+<<sortRows3.2>>
 ```
 </td></tr></tbody></table>
 
@@ -278,8 +292,8 @@ Below, the data.table code uses `DT` and the pandas code uses `DF`.
 <<selectCols1.1>>
 ```
 </td><td align="left">
-```{python, eval=TRUE}
-<<selectCols1.3>>
+```{r, eval=TRUE}
+<<selectCols1.2>>
 ```
 </td></tr></tbody></table>
 #### Select one column using column name
@@ -288,8 +302,8 @@ Below, the data.table code uses `DT` and the pandas code uses `DF`.
 <<selectCols2.1>>
 ```
 </td><td align="left">
-```{python, eval=TRUE}
-<<selectCols2.3>>
+```{r, eval=TRUE}
+<<selectCols2.2>>
 ```
 </td></tr></tbody></table>
 #### Select several columns
@@ -298,8 +312,8 @@ Below, the data.table code uses `DT` and the pandas code uses `DF`.
 <<selectCols3.1>>
 ```
 </td><td align="left">
-```{python, eval=TRUE}
-<<selectCols3.3>>
+```{r, eval=TRUE}
+<<selectCols3.2>>
 ```
 </td></tr></tbody></table>
 #### Exclude columns
@@ -308,8 +322,8 @@ Below, the data.table code uses `DT` and the pandas code uses `DF`.
 <<selectCols4.1>>
 ```
 </td><td align="left">
-```{python, eval=TRUE}
-<<selectCols4.3>>
+```{r, eval=TRUE}
+<<selectCols4.2>>
 ```
 </td></tr></tbody></table>
 #### Select/Exclude columns using a character vector
@@ -318,23 +332,26 @@ Below, the data.table code uses `DT` and the pandas code uses `DF`.
 <<selectCols5.1>>
 ```
 </td><td align="left">
-```{python, eval=TRUE}
-<<selectCols5.3>>
+```{r, eval=TRUE}
+<<selectCols5.2>>
 ```
 </td></tr></tbody></table>
 #### Other selections
+As for row filtering, dplyr includes helper functions to select column. With data.table, a possible solution is to first retrieve the column names (_e.g._ using a regular expression), then select these columns. Another way (using `patterns()`) is presented in a next section. 
 <table class="table table-condensed"><tbody><tr><td align="left">
 ```{r, eval=TRUE}
 <<selectCols6.1>>
 ```
 </td><td align="left">
-```{python, eval=TRUE}
-<<selectCols6.3>>
+```{r, eval=TRUE}
+<<selectCols6.2>>
 ```
 </td></tr></tbody></table>
 
 <br><hr>
 ### Summarise data
+
+Summary functions take vectors as input and return a single value (_e.g._ `min()`, `mean()`, `var()`, ...).    
 
 #### Summarise one column
 <table class="table table-condensed"><tbody><tr><td align="left">
@@ -342,8 +359,8 @@ Below, the data.table code uses `DT` and the pandas code uses `DF`.
 <<summarise1.1>>
 ```
 </td><td align="left">
-```{python, eval=TRUE}
-<<summarise1.3>>
+```{r, eval=TRUE}
+<<summarise1.2>>
 ```
 </td></tr></tbody></table>
 #### Summarise several columns
@@ -352,8 +369,8 @@ Below, the data.table code uses `DT` and the pandas code uses `DF`.
 <<summarise2.1>>
 ```
 </td><td align="left">
-```{python, eval=TRUE}
-<<summarise2.3>>
+```{r, eval=TRUE}
+<<summarise2.2>>
 ```
 </td></tr></tbody></table>
 #### Summarise several columns and assign column names
@@ -362,8 +379,8 @@ Below, the data.table code uses `DT` and the pandas code uses `DF`.
 <<summarise3.1>>
 ```
 </td><td align="left">
-```{python, eval=TRUE}
-<<summarise3.3>>
+```{r, eval=TRUE}
+<<summarise3.2>>
 ```
 </td></tr></tbody></table>
 #### Summarise a subset of rows
@@ -372,22 +389,24 @@ Below, the data.table code uses `DT` and the pandas code uses `DF`.
 <<summarise4.1>>
 ```
 </td><td align="left">
-```{python, eval=TRUE}
-<<summarise4.3>>
+```{r, eval=TRUE}
+<<summarise4.2>>
 ```
 </td></tr></tbody></table>
+dplyr helper functions for `summarise()` (or `summarize()`) include `first()`, `last()`, `n()`, `nth()`, and `n_distinct()`. The data.table package also include `first()`, `last()`, and `uniqueN()`.
 <table class="table table-condensed"><tbody><tr><td align="left">
 ```{r, eval=TRUE}
 <<summarise5.1>>
 ```
 </td><td align="left">
-```{python, eval=TRUE}
-<<summarise5.3>>
+```{r, eval=TRUE}
+<<summarise5.2>>
 ```
 </td></tr></tbody></table>
 
 <br><hr>
 ### Add/update/delete columns
+In the following commands, with data.table, columns are modified by reference using the column assignment symbol `:=` (no copy performed) and the results are returned invisibly. With dplyr, we have to assign the results.    
 
 #### Modify a column
 <table class="table table-condensed"><tbody><tr><td align="left">
@@ -395,8 +414,8 @@ Below, the data.table code uses `DT` and the pandas code uses `DF`.
 <<cols1.1>>
 ```
 </td><td align="left">
-```{python, eval=TRUE}
-<<cols1.3>>
+```{r, eval=TRUE}
+<<cols1.2>>
 ```
 </td></tr></tbody></table>
 #### Add one column
@@ -405,8 +424,8 @@ Below, the data.table code uses `DT` and the pandas code uses `DF`.
 <<cols2.1>>
 ```
 </td><td align="left">
-```{python, eval=TRUE}
-<<cols2.3>>
+```{r, eval=TRUE}
+<<cols2.2>>
 ```
 </td></tr></tbody></table>
 #### Add several columns 
@@ -415,8 +434,8 @@ Below, the data.table code uses `DT` and the pandas code uses `DF`.
 <<cols3.1>>
 ```
 </td><td align="left">
-```{python, eval=TRUE}
-<<cols3.3>>
+```{r, eval=TRUE}
+<<cols3.2>>
 ```
 </td></tr></tbody></table>
 #### Create one column and remove the others
@@ -425,8 +444,8 @@ Below, the data.table code uses `DT` and the pandas code uses `DF`.
 <<cols4.1>>
 ```
 </td><td align="left">
-```{python, eval=TRUE}
-<<cols4.3>>
+```{r, eval=TRUE}
+<<cols4.2>>
 ```
 </td></tr></tbody></table>
 #### Remove one column
@@ -435,8 +454,8 @@ Below, the data.table code uses `DT` and the pandas code uses `DF`.
 <<cols5.1>>
 ```
 </td><td align="left">
-```{python, eval=TRUE}
-<<cols5.3>>
+```{r, eval=TRUE}
+<<cols5.2>>
 ```
 </td></tr></tbody></table>
 #### Remove several columns
@@ -445,8 +464,8 @@ Below, the data.table code uses `DT` and the pandas code uses `DF`.
 <<cols6.1>>
 ```
 </td><td align="left">
-```{python, eval=TRUE}
-<<cols6.3>>
+```{r, eval=TRUE}
+<<cols6.2>>
 ```
 </td></tr></tbody></table>
 #### Remove columns using a vector of colnames
@@ -455,8 +474,8 @@ Below, the data.table code uses `DT` and the pandas code uses `DF`.
 <<cols7.1>>
 ```
 </td><td align="left">
-```{python, eval=TRUE}
-<<cols7.3>>
+```{r, eval=TRUE}
+<<cols7.2>>
 ```
 </td></tr></tbody></table>
 #### Replace values for rows matching a condition
@@ -465,8 +484,8 @@ Below, the data.table code uses `DT` and the pandas code uses `DF`.
 <<cols8.1>>
 ```
 </td><td align="left">
-```{python, eval=TRUE}
-<<cols8.3>>
+```{r, eval=TRUE}
+<<cols8.2>>
 ```
 </td></tr></tbody></table>
 
@@ -474,14 +493,18 @@ Below, the data.table code uses `DT` and the pandas code uses `DF`.
 <br><hr>
 ### by
 
+The `dplyr::group_by()` function and the corresponding `by` and `keyby` statements in data.table allow to run manipulate each group of observations and combine the results. The sole difference between  `by` and `keyby` is that `keyby` orders the results and creates a `key` that will allow faster subsetting (cf. the [indexing and keys](#indexing-and-keys) section). Below, we arbitrary use one or the other.    
+Again, the `all-at-if` variants of `group_by()` are available in dplyr but not presented here.    
+Note that it is possible to reorder the arguments in data.table: `DT[i, j, by]` <=> `DT[i, by, j]`. This is done below to better highlight the similarity with dplyr.    
+
 #### By group
 <table class="table table-condensed"><tbody><tr><td align="left">
 ```{r, eval=TRUE}
 <<by1.1>>
 ```
 </td><td align="left">
-```{python, eval=TRUE}
-<<by1.3>>
+```{r, eval=TRUE}
+<<by1.2>>
 ```
 </td></tr></tbody></table>
 #### By several groups
@@ -490,8 +513,8 @@ Below, the data.table code uses `DT` and the pandas code uses `DF`.
 <<by2.1>>
 ```
 </td><td align="left">
-```{python, eval=TRUE}
-<<by2.3>>
+```{r, eval=TRUE}
+<<by2.2>>
 ```
 </td></tr></tbody></table>
 #### Calling function in by
@@ -500,8 +523,8 @@ Below, the data.table code uses `DT` and the pandas code uses `DF`.
 <<by3.1>>
 ```
 </td><td align="left">
-```{python, eval=TRUE}
-<<by3.3>>
+```{r, eval=TRUE}
+<<by3.2>>
 ```
 </td></tr></tbody></table>
 #### Assigning column name in by
@@ -510,8 +533,8 @@ Below, the data.table code uses `DT` and the pandas code uses `DF`.
 <<by4.1>>
 ```
 </td><td align="left">
-```{python, eval=TRUE}
-<<by4.3>>
+```{r, eval=TRUE}
+<<by4.2>>
 ```
 </td></tr></tbody></table>
 #### Using a condition in by
@@ -520,8 +543,8 @@ Below, the data.table code uses `DT` and the pandas code uses `DF`.
 <<by5.1>>
 ```
 </td><td align="left">
-```{python, eval=TRUE}
-<<by5.3>>
+```{r, eval=TRUE}
+<<by5.2>>
 ```
 </td></tr></tbody></table>
 #### By on a subset of rows
@@ -530,8 +553,8 @@ Below, the data.table code uses `DT` and the pandas code uses `DF`.
 <<by6.1>>
 ```
 </td><td align="left">
-```{python, eval=TRUE}
-<<by6.3>>
+```{r, eval=TRUE}
+<<by6.2>>
 ```
 </td></tr></tbody></table>
 #### Count number of observations for each group
@@ -540,8 +563,8 @@ Below, the data.table code uses `DT` and the pandas code uses `DF`.
 <<by7.1>>
 ```
 </td><td align="left">
-```{python, eval=TRUE}
-<<by7.3>>
+```{r, eval=TRUE}
+<<by7.2>>
 ```
 </td></tr></tbody></table>
 #### Add a column with number of observations for each group
@@ -550,8 +573,8 @@ Below, the data.table code uses `DT` and the pandas code uses `DF`.
 <<by8.1>>
 ```
 </td><td align="left">
-```{python, eval=TRUE}
-<<by8.3>>
+```{r, eval=TRUE}
+<<by8.2>>
 ```
 </td></tr></tbody></table>
 #### Retrieve the first/last/nth observation for each group
@@ -560,8 +583,8 @@ Below, the data.table code uses `DT` and the pandas code uses `DF`.
 <<by9.1>>
 ```
 </td><td align="left">
-```{python, eval=TRUE}
-<<by9.3>>
+```{r, eval=TRUE}
+<<by9.2>>
 ```
 </td></tr></tbody></table>
 
@@ -575,6 +598,8 @@ Below, the data.table code uses `DT` and the pandas code uses `DF`.
 # Going further 
 
 ### Advanced columns manipulation
+To further manipulate columns, dplyr includes nine functions: the `_all`, `_at`, and `_if` versions of `summarise()`, `mutate()`, and `transmute()`.    
+With data.table, we use `.SD`, which is a `data.table` containing the Subset of Data for each group, excluding the column(s) used in `by`. So, `DT[, .SD]` is `DT` itself and in the expression `DT[, .SD, by = V4]`, `.SD` contains all the DT columns (except V4) for each values in V4 (see `DT[, print(.SD), by = V4]`). `.SDcols` allows to select the columns included in `.SD`.     
 
 #### Summarise all the columns
 <table class="table table-condensed"><tbody><tr><td align="left">
@@ -582,8 +607,8 @@ Below, the data.table code uses `DT` and the pandas code uses `DF`.
 <<advCols1.1>>
 ```
 </td><td align="left">
-```{python, eval=TRUE}
-<<advCols1.3>>
+```{r, eval=TRUE}
+<<advCols1.2>>
 ```
 </td></tr></tbody></table>
 #### Summarise several columns
@@ -592,8 +617,8 @@ Below, the data.table code uses `DT` and the pandas code uses `DF`.
 <<advCols2.1>>
 ```
 </td><td align="left">
-```{python, eval=TRUE}
-<<advCols2.3>>
+```{r, eval=TRUE}
+<<advCols2.2>>
 ```
 </td></tr></tbody></table>
 #### Summarise several columns by group
@@ -602,8 +627,8 @@ Below, the data.table code uses `DT` and the pandas code uses `DF`.
 <<advCols3.1>>
 ```
 </td><td align="left">
-```{python, eval=TRUE}
-<<advCols3.3>>
+```{r, eval=TRUE}
+<<advCols3.2>>
 ```
 </td></tr></tbody></table>
 #### Summarise with more than one function by group
@@ -612,8 +637,8 @@ Below, the data.table code uses `DT` and the pandas code uses `DF`.
 <<advCols4.1>>
 ```
 </td><td align="left">
-```{python, eval=TRUE}
-<<advCols4.3>>
+```{r, eval=TRUE}
+<<advCols4.2>>
 ```
 </td></tr></tbody></table>
 #### Summarise using a condition
@@ -622,8 +647,8 @@ Below, the data.table code uses `DT` and the pandas code uses `DF`.
 <<advCols5.1>>
 ```
 </td><td align="left">
-```{python, eval=TRUE}
-<<advCols5.3>>
+```{r, eval=TRUE}
+<<advCols5.2>>
 ```
 </td></tr></tbody></table>
 #### Modify all the columns
@@ -632,8 +657,8 @@ Below, the data.table code uses `DT` and the pandas code uses `DF`.
 <<advCols6.1>>
 ```
 </td><td align="left">
-```{python, eval=TRUE}
-<<advCols6.3>>
+```{r, eval=TRUE}
+<<advCols6.2>>
 ```
 </td></tr></tbody></table>
 #### Modify several columns (dropping the others)
@@ -642,8 +667,8 @@ Below, the data.table code uses `DT` and the pandas code uses `DF`.
 <<advCols7.1>>
 ```
 </td><td align="left">
-```{python, eval=TRUE}
-<<advCols7.3>>
+```{r, eval=TRUE}
+<<advCols7.2>>
 ```
 </td></tr></tbody></table>
 #### Modify several columns (keeping the others)
@@ -652,8 +677,8 @@ Below, the data.table code uses `DT` and the pandas code uses `DF`.
 <<advCols8.1>>
 ```
 </td><td align="left">
-```{python, eval=TRUE}
-<<advCols8.3>>
+```{r, eval=TRUE}
+<<advCols8.2>>
 ```
 </td></tr></tbody></table>
 #### Modify columns using a condition (dropping the others)
@@ -662,8 +687,8 @@ Below, the data.table code uses `DT` and the pandas code uses `DF`.
 <<advCols9.1>>
 ```
 </td><td align="left">
-```{python, eval=TRUE}
-<<advCols9.3>>
+```{r, eval=TRUE}
+<<advCols9.2>>
 ```
 </td></tr></tbody></table>
 #### Modify columns using a condition (keeping the others)
@@ -672,11 +697,13 @@ Below, the data.table code uses `DT` and the pandas code uses `DF`.
 <<advCols10.1>>
 ```
 </td><td align="left">
-```{python, eval=TRUE}
-<<advCols10.3>>
+```{r, eval=TRUE}
+<<advCols10.2>>
 ```
 </td></tr></tbody></table>
 
+
+The use of `DT[,j]` is very flexible, allowing to pass complex expressions in a straightforward way, or combine expressions with multiple outputs.
 
 #### Use a complex expression
 <table class="table table-condensed"><tbody><tr><td align="left">
@@ -684,8 +711,8 @@ Below, the data.table code uses `DT` and the pandas code uses `DF`.
 <<advCols11.1>>
 ```
 </td><td align="left">
-```{python, eval=TRUE}
-<<advCols11.3>>
+```{r, eval=TRUE}
+<<advCols11.2>>
 ```
 </td></tr></tbody></table>
 #### Use multiple expressions (with `DT[,{j}]`)
@@ -694,14 +721,15 @@ Below, the data.table code uses `DT` and the pandas code uses `DF`.
 <<advCols12.1>>
 ```
 </td><td align="left">
-```{python, eval=TRUE}
-<<advCols12.3>>
+```{r, eval=TRUE}
+<<advCols12.2>>
 ```
 </td></tr></tbody></table>
 
 
 <br><hr>
 ### Chain expressions
+The dplyr workflow relies on the magrittr pipe operator (`%>%`). The magrittr package can also be used with `data.table` objects, but data.table comes with its own chaining system: `DT[ ... ][ ... ][ ... ]`.      
 
 #### Expression chaining using `DT[][]` (recommended)
 <table class="table table-condensed"><tbody><tr><td align="left">
@@ -709,14 +737,33 @@ Below, the data.table code uses `DT` and the pandas code uses `DF`.
 <<chain1.1>>
 ```
 </td><td align="left">
-```{python, eval=TRUE}
-<<chain1.3>>
+```{r, eval=TRUE}
+<<chain1.2>>
+```
+</td></tr></tbody></table>
+#### Expression chaining using  `%>%` 
+<table class="table table-condensed"><tbody><tr><td align="left">
+```{r, eval=TRUE}
+<<chain2.1>>
+```
+</td><td align="left">
+```{r, eval=TRUE}
+<<chain2.2>>
 ```
 </td></tr></tbody></table>
 
 
 <br><hr>
 ### Indexing and Keys
+Row subsetting in dplyr relies on the `filter()` and `slice()` functions, as shown in the first section. With data.table, in addition to the above-mentioned approach, two systems are available to make row filtering and join operations more convenient and blazingly fast (~170x speed-up): _keys_ (primary ordered index) and _indices_ (automatic secondary indexing).    
+
+The main differences between keys and indices are:      
+- When using keys, data are physically reordered in memory. When using indices, the order is stored as an attribute.      
+- Only one key is possible but several indices can coexist.     
+- Keys are defined explicitly. Indices can be created manually but are also created on-the-fly (and stored when using `==` or `%in%`).     
+- Indices are used with the `on` argument. It is optional when using keys, but recommended (and used below) for better readability.      
+Note: in the following code, we set both a key and an index to demonstrate their usage, but internally, indices are not used when a key already exists for the same columns(s).   
+
 
 #### Set the key/index   
 <table class="table table-condensed"><tbody><tr><td align="left">
@@ -724,8 +771,8 @@ Below, the data.table code uses `DT` and the pandas code uses `DF`.
 <<key1.1>>
 ```
 </td><td align="left">
-```{python, eval=TRUE}
-<<key1.3>>
+```{r, eval=TRUE}
+<<key1.2>>
 ```
 </td></tr></tbody></table>
 #### Select the matching rows
@@ -734,8 +781,8 @@ Below, the data.table code uses `DT` and the pandas code uses `DF`.
 <<key2.1>>
 ```
 </td><td align="left">
-```{python, eval=TRUE}
-<<key2.3>>
+```{r, eval=TRUE}
+<<key2.2>>
 ```
 </td></tr></tbody></table>
 #### Select the first matching row
@@ -744,8 +791,8 @@ Below, the data.table code uses `DT` and the pandas code uses `DF`.
 <<key3.1>>
 ```
 </td><td align="left">
-```{python, eval=TRUE}
-<<key3.3>>
+```{r, eval=TRUE}
+<<key3.2>>
 ```
 </td></tr></tbody></table>
 #### Select the last matching row
@@ -754,8 +801,8 @@ Below, the data.table code uses `DT` and the pandas code uses `DF`.
 <<key4.1>>
 ```
 </td><td align="left">
-```{python, eval=TRUE}
-<<key4.3>>
+```{r, eval=TRUE}
+<<key4.2>>
 ```
 </td></tr></tbody></table>
 #### Nomatch argument
@@ -764,8 +811,8 @@ Below, the data.table code uses `DT` and the pandas code uses `DF`.
 <<key5.1>>
 ```
 </td><td align="left">
-```{python, eval=TRUE}
-<<key5.3>>
+```{r, eval=TRUE}
+<<key5.2>>
 ```
 </td></tr></tbody></table>
 #### Apply a function on the matching rows
@@ -774,8 +821,8 @@ Below, the data.table code uses `DT` and the pandas code uses `DF`.
 <<key6.1>>
 ```
 </td><td align="left">
-```{python, eval=TRUE}
-<<key6.3>>
+```{r, eval=TRUE}
+<<key6.2>>
 ```
 </td></tr></tbody></table>
 #### Modify values for matching rows
@@ -784,8 +831,8 @@ Below, the data.table code uses `DT` and the pandas code uses `DF`.
 <<key7.1>>
 ```
 </td><td align="left">
-```{python, eval=TRUE}
-<<key7.3>>
+```{r, eval=TRUE}
+<<key7.2>>
 ```
 </td></tr></tbody></table>
 #### Use keys in by
@@ -794,8 +841,8 @@ Below, the data.table code uses `DT` and the pandas code uses `DF`.
 <<key8.1>>
 ```
 </td><td align="left">
-```{python, eval=TRUE}
-<<key8.3>>
+```{r, eval=TRUE}
+<<key8.2>>
 ```
 </td></tr></tbody></table>
 #### Set keys/indices for multiple columns
@@ -804,8 +851,8 @@ Below, the data.table code uses `DT` and the pandas code uses `DF`.
 <<key9.1>>
 ```
 </td><td align="left">
-```{python, eval=TRUE}
-<<key9.3>>
+```{r, eval=TRUE}
+<<key9.2>>
 ```
 </td></tr></tbody></table>
 #### Subset using multiple keys/indices
@@ -814,8 +861,8 @@ Below, the data.table code uses `DT` and the pandas code uses `DF`.
 <<key10.1>>
 ```
 </td><td align="left">
-```{python, eval=TRUE}
-<<key10.3>>
+```{r, eval=TRUE}
+<<key10.2>>
 ```
 </td></tr></tbody></table>
 #### Remove keys/indices
@@ -824,14 +871,15 @@ Below, the data.table code uses `DT` and the pandas code uses `DF`.
 <<key11.1>>
 ```
 </td><td align="left">
-```{python, eval=TRUE}
-<<key11.3>>
+```{r, eval=TRUE}
+<<key11.2>>
 ```
 </td></tr></tbody></table>
 
 
 <br><hr>
 ### `set*()` modifications
+In data.table, `set*()` functions modify objects by reference, making these operations fast and memory-efficient. In case this is not a desired behaviour, users can use `copy()`. The corresponding expressions in dplyr will be less memory-efficient.    
 
 #### Replace values
 <table class="table table-condensed"><tbody><tr><td align="left">
@@ -839,8 +887,8 @@ Below, the data.table code uses `DT` and the pandas code uses `DF`.
 <<set1.1>>
 ```
 </td><td align="left">
-```{python, eval=TRUE}
-<<set1.3>>
+```{r, eval=TRUE}
+<<set1.2>>
 ```
 </td></tr></tbody></table>
 #### Reorder rows
@@ -849,8 +897,8 @@ Below, the data.table code uses `DT` and the pandas code uses `DF`.
 <<set2.1>>
 ```
 </td><td align="left">
-```{python, eval=TRUE}
-<<set2.3>>
+```{r, eval=TRUE}
+<<set2.2>>
 ```
 </td></tr></tbody></table>
 #### Modify colnames
@@ -859,8 +907,8 @@ Below, the data.table code uses `DT` and the pandas code uses `DF`.
 <<set3.1>>
 ```
 </td><td align="left">
-```{python, eval=TRUE}
-<<set3.3>>
+```{r, eval=TRUE}
+<<set3.2>>
 ```
 </td></tr></tbody></table>
 #### Reorder columns
@@ -869,8 +917,8 @@ Below, the data.table code uses `DT` and the pandas code uses `DF`.
 <<set4.1>>
 ```
 </td><td align="left">
-```{python, eval=TRUE}
-<<set4.3>>
+```{r, eval=TRUE}
+<<set4.2>>
 ```
 </td></tr></tbody></table>
 #### Convert data
@@ -879,8 +927,8 @@ Below, the data.table code uses `DT` and the pandas code uses `DF`.
 <<set5.1>>
 ```
 </td><td align="left">
-```{python, eval=TRUE}
-<<set5.3>>
+```{r, eval=TRUE}
+<<set5.2>>
 ```
 </td></tr></tbody></table>
 
@@ -894,8 +942,8 @@ Below, the data.table code uses `DT` and the pandas code uses `DF`.
 <<advBy1.1>>
 ```
 </td><td align="left">
-```{python, eval=TRUE}
-<<advBy1.3>>
+```{r, eval=TRUE}
+<<advBy1.2>>
 ```
 </td></tr></tbody></table>
 #### Select rows using a nested query
@@ -904,8 +952,8 @@ Below, the data.table code uses `DT` and the pandas code uses `DF`.
 <<advBy2.1>>
 ```
 </td><td align="left">
-```{python, eval=TRUE}
-<<advBy2.3>>
+```{r, eval=TRUE}
+<<advBy2.2>>
 ```
 </td></tr></tbody></table>
 #### Add a group counter column
@@ -914,8 +962,8 @@ Below, the data.table code uses `DT` and the pandas code uses `DF`.
 <<advBy3.1>>
 ```
 </td><td align="left">
-```{python, eval=TRUE}
-<<advBy3.3>>
+```{r, eval=TRUE}
+<<advBy3.2>>
 ```
 </td></tr></tbody></table>
 #### Get row number of first (and last) observation by group
@@ -924,8 +972,8 @@ Below, the data.table code uses `DT` and the pandas code uses `DF`.
 <<advBy4.1>>
 ```
 </td><td align="left">
-```{python, eval=TRUE}
-<<advBy4.3>>
+```{r, eval=TRUE}
+<<advBy4.2>>
 ```
 </td></tr></tbody></table>
 #### Handle list-columns by group
@@ -934,8 +982,8 @@ Below, the data.table code uses `DT` and the pandas code uses `DF`.
 <<advBy5.1>>
 ```
 </td><td align="left">
-```{python, eval=TRUE}
-<<advBy5.3>>
+```{r, eval=TRUE}
+<<advBy5.2>>
 ```
 </td></tr></tbody></table>
 #### Grouping sets (multiple by at once)
@@ -944,8 +992,8 @@ Below, the data.table code uses `DT` and the pandas code uses `DF`.
 <<advBy6.1>>
 ```
 </td><td align="left">
-```{python, eval=TRUE}
-<<advBy6.3>>
+```{r, eval=TRUE}
+<<advBy6.2>>
 ```
 </td></tr></tbody></table>
 
@@ -959,6 +1007,10 @@ Below, the data.table code uses `DT` and the pandas code uses `DF`.
 # Miscellaneous
 
 ### Read / Write data
+`fread()` and `fwrite()` are among the most powerful functions of data.table. They are not only incredibly fast (see [benchmarks](https://www.h2o.ai/blog/fast-csv-writing-for-r/)), they are also extremely robust. 
+The few commands below only scratch the surface and there are a lot of awesome features. 
+For example, `fread()` accepts `http` and `https` URLs directly as well as operating system commands such as `sed` and `awk` output. Make sure to check the [docs](https://rdrr.io/cran/data.table/man/fread.html).     
+Here again, `fread()` and `fwrite()` are very versatile and allow to handle different file formats while dplyr delegates file reading and writing to the readr package with several specific functions (csv, tsv, delim, ...).      
 
 #### Write data to a csv file
 <table class="table table-condensed"><tbody><tr><td align="left">
@@ -966,8 +1018,8 @@ Below, the data.table code uses `DT` and the pandas code uses `DF`.
 <<readwrite1.1>>
 ```
 </td><td align="left">
-```{python, eval=TRUE}
-<<readwrite1.3>>
+```{r, eval=TRUE}
+<<readwrite1.2>>
 ```
 </td></tr></tbody></table>
 #### Write data to a tab-delimited file
@@ -976,8 +1028,8 @@ Below, the data.table code uses `DT` and the pandas code uses `DF`.
 <<readwrite2.1>>
 ```
 </td><td align="left">
-```{python, eval=TRUE}
-<<readwrite2.3>>
+```{r, eval=TRUE}
+<<readwrite2.2>>
 ```
 </td></tr></tbody></table>
 #### Write list-column data to a csv file
@@ -986,8 +1038,8 @@ Below, the data.table code uses `DT` and the pandas code uses `DF`.
 <<readwrite3.1>>
 ```
 </td><td align="left">
-```{python, eval=TRUE}
-<<readwrite3.3>>
+```{r, eval=TRUE}
+<<readwrite3.2>>
 ```
 </td></tr></tbody></table>
 #### Read a csv / tab-delimited file
@@ -996,8 +1048,8 @@ Below, the data.table code uses `DT` and the pandas code uses `DF`.
 <<readwrite4.1>>
 ```
 </td><td align="left">
-```{python, eval=TRUE}
-<<readwrite4.3>>
+```{r, eval=TRUE}
+<<readwrite4.2>>
 ```
 </td></tr></tbody></table>
 #### Read a csv file selecting / droping columns
@@ -1006,8 +1058,8 @@ Below, the data.table code uses `DT` and the pandas code uses `DF`.
 <<readwrite5.1>>
 ```
 </td><td align="left">
-```{python, eval=TRUE}
-<<readwrite5.3>>
+```{r, eval=TRUE}
+<<readwrite5.2>>
 ```
 </td></tr></tbody></table>
 #### Read and rbind several files
@@ -1016,8 +1068,8 @@ Below, the data.table code uses `DT` and the pandas code uses `DF`.
 <<readwrite6.1>>
 ```
 </td><td align="left">
-```{python, eval=TRUE}
-<<readwrite6.3>>
+```{r, eval=TRUE}
+<<readwrite6.2>>
 ```
 </td></tr></tbody></table>
 ```{r, eval = TRUE, message = FALSE, warning = FALSE, echo = FALSE, results = "hide"}
@@ -1027,6 +1079,7 @@ Below, the data.table code uses `DT` and the pandas code uses `DF`.
 
 <br><hr>
 ### Reshape data
+This part is still a bit clunky. I need to find better examples. See [here](https://cran.r-project.org/web/packages/data.table/vignettes/datatable-reshape.html) and [here](https://tidyr.tidyverse.org/) for more details.
 
 #### Melt data (from wide to long)
 <table class="table table-condensed"><tbody><tr><td align="left">
@@ -1034,8 +1087,8 @@ Below, the data.table code uses `DT` and the pandas code uses `DF`.
 <<reshape1.1>>
 ```
 </td><td align="left">
-```{python, eval=TRUE}
-<<reshape1.3>>
+```{r, eval=TRUE}
+<<reshape1.2>>
 ```
 </td></tr></tbody></table>
 #### Cast data (from long to wide)
@@ -1044,8 +1097,8 @@ Below, the data.table code uses `DT` and the pandas code uses `DF`.
 <<reshape2.1>>
 ```
 </td><td align="left">
-```{python, eval=TRUE}
-<<reshape2.3>>
+```{r, eval=TRUE}
+<<reshape2.2>>
 ```
 </td></tr></tbody></table>
 #### Split
@@ -1054,8 +1107,8 @@ Below, the data.table code uses `DT` and the pandas code uses `DF`.
 <<reshape3.1>>
 ```
 </td><td align="left">
-```{python, eval=TRUE}
-<<reshape3.3>>
+```{r, eval=TRUE}
+<<reshape3.2>>
 ```
 </td></tr></tbody></table>
 #### Split and transpose a vector/column
@@ -1064,8 +1117,8 @@ Below, the data.table code uses `DT` and the pandas code uses `DF`.
 <<reshape4.1>>
 ```
 </td><td align="left">
-```{python, eval=TRUE}
-<<reshape4.3>>
+```{r, eval=TRUE}
+<<reshape4.2>>
 ```
 </td></tr></tbody></table>
 
@@ -1078,8 +1131,8 @@ Below, the data.table code uses `DT` and the pandas code uses `DF`.
 <<other1.1>>
 ```
 </td><td align="left">
-```{python, eval=TRUE}
-<<other1.3>>
+```{r, eval=TRUE}
+<<other1.2>>
 ```
 </td></tr></tbody></table>
 #### List data.tables/tibbles
@@ -1088,8 +1141,8 @@ Below, the data.table code uses `DT` and the pandas code uses `DF`.
 <<other2.1>>
 ```
 </td><td align="left">
-```{python, eval=TRUE}
-<<other2.3>>
+```{r, eval=TRUE}
+<<other2.2>>
 ```
 </td></tr></tbody></table>
 #### Get/Set number of threads when parallelized 
@@ -1098,8 +1151,8 @@ Below, the data.table code uses `DT` and the pandas code uses `DF`.
 <<other3.1>>
 ```
 </td><td align="left">
-```{python, eval=TRUE}
-<<other3.3>>
+```{r, eval=TRUE}
+<<other3.2>>
 ```
 </td></tr></tbody></table>
 #### Lead/Lag
@@ -1108,8 +1161,8 @@ Below, the data.table code uses `DT` and the pandas code uses `DF`.
 <<other4.1>>
 ```
 </td><td align="left">
-```{python, eval=TRUE}
-<<other4.3>>
+```{r, eval=TRUE}
+<<other4.2>>
 ```
 </td></tr></tbody></table>
 #### Generate run-length ids
@@ -1118,8 +1171,8 @@ Below, the data.table code uses `DT` and the pandas code uses `DF`.
 <<other5.1>>
 ```
 </td><td align="left">
-```{python, eval=TRUE}
-<<other5.3>>
+```{r, eval=TRUE}
+<<other5.2>>
 ```
 </td></tr></tbody></table>
 #### Vectorised `ifelse` statements
@@ -1128,8 +1181,8 @@ Below, the data.table code uses `DT` and the pandas code uses `DF`.
 <<other6.1>>
 ```
 </td><td align="left">
-```{python, eval=TRUE}
-<<other6.3>>
+```{r, eval=TRUE}
+<<other6.2>>
 ```
 </td></tr></tbody></table>
 #### Rolling functions
@@ -1138,8 +1191,8 @@ Below, the data.table code uses `DT` and the pandas code uses `DF`.
 <<other7.1>>
 ```
 </td><td align="left">
-```{python, eval=TRUE}
-<<other7.3>>
+```{r, eval=TRUE}
+<<other7.2>>
 ```
 </td></tr></tbody></table>
 
@@ -1154,23 +1207,20 @@ Below, the data.table code uses `DT` and the pandas code uses `DF`.
 
 ### Join
 
-<table class="table table-condensed"><tbody><tr><td align="left">
-```{r, eval=TRUE}
+Joining data in data.table works like the fast subsetting approach described above. It can be performed using keys, using the _ad hoc_ `on` argument, or using the `merge.data.table` method. For the sake of completeness, the three methods are presented below. As previously mentioned, the `on` and `by` (in `merge`) arguments are optional with keyed data.tables, but recommended to make the code more explicit.    
+In the examples below, the `x`, `y`, and `z` data.tables are also used with dplyr.    
+
+```{r, eval=TRUE, message=FALSE, warning=FALSE}
 <<join1>>
 ```
-</td><td align="left">
-```{python, eval=TRUE}
-<<join1.3>>
-```
-</td></tr></tbody></table>
 #### Join matching rows from y to x
 <table class="table table-condensed"><tbody><tr><td align="left">
 ```{r, eval=TRUE}
 <<join2.1>>
 ```
 </td><td align="left">
-```{python, eval=TRUE}
-<<join2.3>>
+```{r, eval=TRUE}
+<<join2.2>>
 ```
 </td></tr></tbody></table>
 #### Join matching rows from x to y
@@ -1179,8 +1229,8 @@ Below, the data.table code uses `DT` and the pandas code uses `DF`.
 <<join3.1>>
 ```
 </td><td align="left">
-```{python, eval=TRUE}
-<<join3.3>>
+```{r, eval=TRUE}
+<<join3.2>>
 ```
 </td></tr></tbody></table>
 #### Join matching rows from both x and y
@@ -1189,8 +1239,8 @@ Below, the data.table code uses `DT` and the pandas code uses `DF`.
 <<join4.1>>
 ```
 </td><td align="left">
-```{python, eval=TRUE}
-<<join4.3>>
+```{r, eval=TRUE}
+<<join4.2>>
 ```
 </td></tr></tbody></table>
 #### Join keeping all the rows
@@ -1199,8 +1249,8 @@ Below, the data.table code uses `DT` and the pandas code uses `DF`.
 <<join5.1>>
 ```
 </td><td align="left">
-```{python, eval=TRUE}
-<<join5.3>>
+```{r, eval=TRUE}
+<<join5.2>>
 ```
 </td></tr></tbody></table>
 #### Return rows from x matching y
@@ -1209,8 +1259,8 @@ Below, the data.table code uses `DT` and the pandas code uses `DF`.
 <<join6.1>>
 ```
 </td><td align="left">
-```{python, eval=TRUE}
-<<join6.3>>
+```{r, eval=TRUE}
+<<join6.2>>
 ```
 </td></tr></tbody></table>
 #### Return rows from x not matching y
@@ -1219,14 +1269,15 @@ Below, the data.table code uses `DT` and the pandas code uses `DF`.
 <<join7.1>>
 ```
 </td><td align="left">
-```{python, eval=TRUE}
-<<join7.3>>
+```{r, eval=TRUE}
+<<join7.2>>
 ```
 </td></tr></tbody></table>
 
 
 <br><hr>
 ### More joins
+data.table excels at joining data, and offers additional functions and features.   
 
 #### Select columns while joining
 <table class="table table-condensed"><tbody><tr><td align="left">
@@ -1234,8 +1285,8 @@ Below, the data.table code uses `DT` and the pandas code uses `DF`.
 <<morejoins1.1>>
 ```
 </td><td align="left">
-```{python, eval=TRUE}
-<<morejoins1.3>>
+```{r, eval=TRUE}
+<<morejoins1.2>>
 ```
 </td></tr></tbody></table>
 #### Aggregate columns while joining
@@ -1244,8 +1295,8 @@ Below, the data.table code uses `DT` and the pandas code uses `DF`.
 <<morejoins2.1>>
 ```
 </td><td align="left">
-```{python, eval=TRUE}
-<<morejoins2.3>>
+```{r, eval=TRUE}
+<<morejoins2.2>>
 ```
 </td></tr></tbody></table>
 #### Update columns while joining
@@ -1254,8 +1305,8 @@ Below, the data.table code uses `DT` and the pandas code uses `DF`.
 <<morejoins3.1>>
 ```
 </td><td align="left">
-```{python, eval=TRUE}
-<<morejoins3.3>>
+```{r, eval=TRUE}
+<<morejoins3.2>>
 ```
 </td></tr></tbody></table>
 #### Adds a list column with rows from y matching x (nest-join)
@@ -1264,8 +1315,8 @@ Below, the data.table code uses `DT` and the pandas code uses `DF`.
 <<morejoins4.1>>
 ```
 </td><td align="left">
-```{python, eval=TRUE}
-<<morejoins4.3>>
+```{r, eval=TRUE}
+<<morejoins4.2>>
 ```
 </td></tr></tbody></table>
 #### Update columns while joining (using vectors of colnames)
@@ -1274,8 +1325,8 @@ Below, the data.table code uses `DT` and the pandas code uses `DF`.
 <<morejoins5.1>>
 ```
 </td><td align="left">
-```{python, eval=TRUE}
-<<morejoins5.3>>
+```{r, eval=TRUE}
+<<morejoins5.2>>
 ```
 </td></tr></tbody></table>
 #### Join passing columns to match in the `on` argument
@@ -1287,8 +1338,8 @@ Below, the data.table code uses `DT` and the pandas code uses `DF`.
 <<morejoins6.1>>
 ```
 </td><td align="left">
-```{python, eval=TRUE}
-<<morejoins6.3>>
+```{r, eval=TRUE}
+<<morejoins6.2>>
 ```
 </td></tr></tbody></table>
 #### Non-equi joins
@@ -1297,8 +1348,8 @@ Below, the data.table code uses `DT` and the pandas code uses `DF`.
 <<morejoins7.1>>
 ```
 </td><td align="left">
-```{python, eval=TRUE}
-<<morejoins7.3>>
+```{r, eval=TRUE}
+<<morejoins7.2>>
 ```
 </td></tr></tbody></table>
 #### Rolling joins/subsets (performed on the last numeric column)
@@ -1307,8 +1358,8 @@ Below, the data.table code uses `DT` and the pandas code uses `DF`.
 <<morejoins8.1>>
 ```
 </td><td align="left">
-```{python, eval=TRUE}
-<<morejoins8.3>>
+```{r, eval=TRUE}
+<<morejoins8.2>>
 ```
 </td></tr></tbody></table>
 <table class="table table-condensed"><tbody><tr><td align="left">
@@ -1316,8 +1367,8 @@ Below, the data.table code uses `DT` and the pandas code uses `DF`.
 <<morejoins9.1>>
 ```
 </td><td align="left">
-```{python, eval=TRUE}
-<<morejoins9.3>>
+```{r, eval=TRUE}
+<<morejoins9.2>>
 ```
 </td></tr></tbody></table>
 <table class="table table-condensed"><tbody><tr><td align="left">
@@ -1325,8 +1376,8 @@ Below, the data.table code uses `DT` and the pandas code uses `DF`.
 <<morejoins10.1>>
 ```
 </td><td align="left">
-```{python, eval=TRUE}
-<<morejoins10.3>>
+```{r, eval=TRUE}
+<<morejoins10.2>>
 ```
 </td></tr></tbody></table>
 #### Cross join (`CJ` ~ `expand.grid`)
@@ -1335,31 +1386,27 @@ Below, the data.table code uses `DT` and the pandas code uses `DF`.
 <<morejoins11.1>>
 ```
 </td><td align="left">
-```{python, eval=TRUE}
-<<morejoins11.3>>
+```{r, eval=TRUE}
+<<morejoins11.2>>
 ```
 </td></tr></tbody></table>
+#### Overlap join
+It is important to mention `foverlaps()` from data.table that allows to perform 'overlap joins'. This is a very powerful function, but a bit out of scope for this document. See [these slides](https://raw.githubusercontent.com/wiki/Rdatatable/data.table/talks/EARL2014_OverlapRangeJoin_Arun.pdf) for more details. 
 
 
 <br><hr>
 ### Bind
-<table class="table table-condensed"><tbody><tr><td align="left">
-```{r, eval=TRUE}
+```{r, eval = TRUE, message = FALSE, warning = FALSE}
 <<bind1>>
 ```
-</td><td align="left">
-```{python, eval=TRUE}
-<<bind1.3>>
-```
-</td></tr></tbody></table>
 #### Bind rows
 <table class="table table-condensed"><tbody><tr><td align="left">
 ```{r, eval=TRUE}
 <<bind2.1>>
 ```
 </td><td align="left">
-```{python, eval=TRUE}
-<<bind2.3>>
+```{r, eval=TRUE}
+<<bind2.2>>
 ```
 </td></tr></tbody></table>
 #### Bind rows using a list
@@ -1368,8 +1415,8 @@ Below, the data.table code uses `DT` and the pandas code uses `DF`.
 <<bind3.1>>
 ```
 </td><td align="left">
-```{python, eval=TRUE}
-<<bind3.3>>
+```{r, eval=TRUE}
+<<bind3.2>>
 ```
 </td></tr></tbody></table>
 #### Bind columns
@@ -1378,8 +1425,8 @@ Below, the data.table code uses `DT` and the pandas code uses `DF`.
 <<bind4.1>>
 ```
 </td><td align="left">
-```{python, eval=TRUE}
-<<bind4.3>>
+```{r, eval=TRUE}
+<<bind4.2>>
 ```
 </td></tr></tbody></table>
 
@@ -1395,8 +1442,8 @@ Below, the data.table code uses `DT` and the pandas code uses `DF`.
 <<setOps1.1>>
 ```
 </td><td align="left">
-```{python, eval=TRUE}
-<<setOps1.3>>
+```{r, eval=TRUE}
+<<setOps1.2>>
 ```
 </td></tr></tbody></table>
 #### Difference
@@ -1405,8 +1452,8 @@ Below, the data.table code uses `DT` and the pandas code uses `DF`.
 <<setOps2.1>>
 ```
 </td><td align="left">
-```{python, eval=TRUE}
-<<setOps2.3>>
+```{r, eval=TRUE}
+<<setOps2.2>>
 ```
 </td></tr></tbody></table>
 #### Union
@@ -1415,8 +1462,8 @@ Below, the data.table code uses `DT` and the pandas code uses `DF`.
 <<setOps3.1>>
 ```
 </td><td align="left">
-```{python, eval=TRUE}
-<<setOps3.3>>
+```{r, eval=TRUE}
+<<setOps3.2>>
 ```
 </td></tr></tbody></table>
 #### Equality
@@ -1425,8 +1472,8 @@ Below, the data.table code uses `DT` and the pandas code uses `DF`.
 <<setOps4.1>>
 ```
 </td><td align="left">
-```{python, eval=TRUE}
-<<setOps4.3>>
+```{r, eval=TRUE}
+<<setOps4.2>>
 ```
 </td></tr></tbody></table>
 
@@ -1437,11 +1484,13 @@ Below, the data.table code uses `DT` and the pandas code uses `DF`.
 ------------------------------------------------------------------------------->
 
 <br><br><hr class = "hr2">
+# Summary
 
+This article presented the most important features of both data.table and dplyr, two packages that are now essential tools for data manipulation in R.      
+There are still a lot of features not covered in this document, in particular, data.table functions to deal with time-series or dplyr vectorized functions have not been discussed, but 'done is better than perfect'...     
+Hopefully, this comparison is not too biased, but I must admit that my preference is for data.table. So, I hope this post will encourage some readers to give it a try!    
 <br><br>
 
 ```{r, echo = FALSE, eval = TRUE, message = FALSE, warning = FALSE}
 <<sessionInfo>>
 ```
-
-
