@@ -485,6 +485,7 @@ DT[, c("V1", "V2") := lapply(.SD, sqrt),
 cols <- setdiff(names(DT), "V4")
 DT[, (cols) := lapply(.SD, "^", 2L),
      .SDcols = cols]
+DT
 ## @knitr advCols8.2
 DF <- DF %>%
   mutate(across(all_of(c("V1", "V2")), sqrt))
@@ -492,15 +493,18 @@ DF <- DF %>%
 DF <- DF %>%
   mutate(across(-any_of("V4"),
                  ~ "^"(.x, 2L)))
+DF
 # DF <- mutate_at(DF, vars(-V4), "^", 2L)
 
 ## @knitr advCols9.1
 DT[, .SD - 1,
      .SDcols = is.numeric]
+DT
 ## @knitr advCols9.2
 DF %>%
   transmute(across(where(is.numeric),
                    ~ '-'(., 1L)))
+DF
 # transmute_if(DF, is.numeric, list(~ '-'(., 1L)))
 
 ## @knitr advCols10.1
@@ -562,8 +566,10 @@ DF %>%
 ## @knitr key1.1
 setkey(DT, V4)
 setindex(DT, V4)
+DT
 ## @knitr key1.2
 DF <- arrange(DF, V4) # ordered just for consistency
+DF
 
 ## @knitr key2.1
 DT["A", on = "V4"]
@@ -627,8 +633,10 @@ DF %>%
 ## @knitr key9.1
 setkey(DT, V4, V1) # or setkeyv(DT, c("V4", "V1"))
 setindex(DT, V4, V1) # setindexv(DT, c("V4", "V1"))
+DT
 ## @knitr key9.2
 DF <- arrange(DF, V4, V1) # ordered just for consistency
+DF
 
 ## @knitr key10.1
 DT[.("C", 1), on = .(V4, V1)]
@@ -643,17 +651,20 @@ filter(DF, V1 == 1, V4 %in% c("B", "C"))
 ## @knitr key11.1
 setkey(DT, NULL)
 setindex(DT, NULL)
+DT
 ## @knitr key11.2
 # 
-
+DF
 
 ## @knitr set
 ## set* modifications ----------------------------------------------------
 
 ## @knitr set1.1
 set(DT, i = 1L, j = 2L, value = 3L)
+DT
 ## @knitr set1.2
 DF[1, 2] <- 3L
+DF
 
 ## @knitr set2.1
 setorder(DT, V4, -V1)
@@ -664,15 +675,18 @@ DF <- arrange(DF, V4, desc(V1))
 ## @knitr set3.1
 setnames(DT, old = "V2", new = "v2")
 setnames(DT, old = -(c(1, 3)), new = "V2")
+DT
 ## @knitr set3.2
 DF <- rename(DF, v2 = V2)
 DF <- rename(DF, V2 = v2) # reset upper
-
+DF
 
 ## @knitr set4.1
 setcolorder(DT, c("V4", "V1", "V2"))
+DT
 ## @knitr set4.2
 DF <- select(DF, V4, V1, V2)
+DF
 
 ## @knitr set5.1
 # ?setDT # data.frame or list to data.table

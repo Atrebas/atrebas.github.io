@@ -29,7 +29,7 @@ DF
 DF.iloc[2:4]
 
 ## @knitr filterRows2.3
-DF[~DF.index.isin(list(range(2, 7)))]
+DF[~DF.index.isin(range(2, 7))]
 
 ## @knitr filterRows3.3
 DF[DF.V2 > 5]
@@ -37,7 +37,8 @@ DF.query('V2>5')
 DF[DF.V4.isin(['A', 'C'])]
 
 ## @knitr filterRows4.3
-DF[DF.V1 == 1 & DF.V4.isin(['A'])]
+DF.loc[(DF.V1 == 1) & (DF.V4 == 'A')]
+# DF.query("V1 == 1 and V4 == 'A'")
 # any logical criteria can be used
 
 ## @knitr filterRows5.3
@@ -55,7 +56,7 @@ DF.sample(frac = 0.5)
 # DF[DF['V1'].nlargest(1)] # no keep = 'all'
 
 # @knitr filterRows8.3
-DF[DF.V4.str.startswith(('B'))]
+DF[DF.V4.str.startswith('B')] # use tuples when multiple
 DF[DF['V2'].between(3, 5)]
 DF[DF['V2'].between(3, 5, inclusive = False)]
 #DF[DF.V2 >= list(range(-1, 2)) & DF.V2 <= list(range(1,4))]
@@ -78,8 +79,9 @@ DF.sort_values(['V1', 'V2'], ascending = [True, False])
 ## Select columns ------------------------------------------------------
 
 ## @knitr selectCols1.3
-DF.iloc[:, 2] # returns a pandas Series
-DF.iloc[:, 2].to_frame() # convert to DataFrame
+DF.iloc[:, 2]   # returns a pandas Series
+DF.iloc[:, [2]] # convert to DataFrame
+
 
 ## @knitr selectCols2.3
 DF.V2           # returns a pandas Series
@@ -96,7 +98,7 @@ DF.drop(columns = ['V2', 'V3'])
 
 ## @knitr selectCols5.3
 cols = ['V2', 'V3']
-DF.loc[:, DF.columns.isin(cols)]
+DF.loc[:, cols]
 DF.loc[:, DF.columns.difference(cols)]
 
 ## @knitr selectCols6.3
@@ -115,22 +117,24 @@ DF.filter(regex = '^(?!V2)')
 ## @knitr summarise1.3
 DF.V1.sum()   # returns a numpy array
 DF[['V1']].sum()   # returns a pandas series
-DF[['V1']].sum().to_frame(name = 'sumV1')
+DF.loc[:, ['V1']].agg(['sum']).set_axis(['sumV1'], axis = 1)
 
 ## @knitr summarise2.3
 DF.agg({'V1': 'sum', 'V3': 'std'}) # series
 
 ## @knitr summarise3.3
-res = list(DF.agg({'V1': 'sum', 'V3': 'std'}))
-pd.DataFrame([res], columns=['sumV1','sdv3'])
+DF.agg(sumV1 = ('V1','sum'), sdv3 = ('V3','std'))
+#res = list(DF.agg({'V1': 'sum', 'V3': 'std'}))
+#pd.DataFrame([res], columns=['sumV1','sdv3'])
 
 ## @knitr summarise4.3
-DF.V1.iloc[0:4].sum()
+DF.loc[:3, 'V1'].sum()
 
 ## @knitr summarise5.3
-DF.head(1).V3
-DF.tail(1).V3
-DF.ix[4, 'V3'] # DF.V3.iloc[4]
+DF.loc[0,'V3']
+DF.at[DF.index[-1], 'V3']
+# at method better than loc with scalars
+DF.V3.iloc[4]
 DF['V4'].nunique()
 len(DF.drop_duplicates())
 
@@ -139,7 +143,8 @@ len(DF.drop_duplicates())
 ## Add/Update/Delete columns --------------------------------------------
 
 ## @knitr cols1.3
-DF['V1'] = DF['V1']**2
+DF.loc[:, 'V1'] = DF.loc[:, 'V1'] ** 2
+#DF['V1'] = DF['V1']**2
 DF.eval('V1 = V1**2', inplace = True)
 DF
 
@@ -150,7 +155,8 @@ DF = DF.assign(v5 = np.log(DF.V1))
 DF = DF.assign(v6 = np.sqrt(DF.V1), v7 = 'X')
 
 ## @knitr cols4.3
-pd.DataFrame({'v8' : DF.V3 + 1})
+DF.loc[:, ['V3']].add(1).rename(columns = {'V3':'V8'})
+# pd.DataFrame({'v8' : DF.V3 + 1})
 
 ## @knitr cols5.3
 del DF['v5'] # DF = DF.drop('v5', 1)
@@ -160,51 +166,44 @@ DF = DF.drop(['v6', 'v7'], 1)
 
 ## @knitr cols7.3
 cols = 'V3'
-DF = DF.drop(cols, 1)
+del DF[cols]
 
 ## @knitr cols8.3
-DF.loc[DF['V2'] < 4, 'V2'] = 0
+DF.loc[DF.loc[:, 'V2'] < 4, 'V2'] = 0
 
 
 ## @knitr by
 ## by ------------------------------------------------------------------
 
 ## @knitr by1.3
-(DF.groupby('V4')['V2']
-   .agg('sum')
-   .to_frame(name = 'sumV2')
-   .reset_index())
+(DF.groupby(['V4'], as_index = False)
+  .agg(sumV2 = ('V2', 'sum')))
 
 ## @knitr by2.3
-(DF.groupby(['V4', 'V1'])['V2']
-   .agg('sum')
-   .to_frame(name = 'sumV2')
-   .reset_index())
+(DF.groupby(['V4', 'V1'], as_index = False)
+  .agg(sumV2 = ('V2', 'sum')))
 
 ## @knitr by3.3
-(DF.groupby(DF['V4'].str.lower())['V1']
-   .sum()
-   .to_frame(name = 'sumV1')
-   .reset_index())
+(DF.assign(V4 = DF.V4.str.lower())
+  .groupby(['V4'], as_index = False)
+  .agg(sumV1=('V1', 'sum')))
 
 ## @knitr by4.3
-(DF.groupby(DF['V4'].str.lower())['V1']
-   .sum()
-   .to_frame(name = 'sumV1')
-   .assign(abc = lambda x: x.index)
-   .reset_index(drop = True))
+(DF.assign(abc = lambda x: x.V4.str.lower())
+  .groupby(['abc'], as_index = False)
+  .agg(sumV1 = ('V1', 'sum')))
 
 ## @knitr by5.3
-DF.groupby(DF['V4'] == 'A')['V1'].sum()
+DF.groupby(DF.V4 == 'A').V1.sum()
 
 ## @knitr by6.3
-DF.iloc[0:5].groupby('V4')['V1'].agg('sum')
+DF.iloc[:5].groupby('V4').agg(sumV1 = ('V1','sum'))
 
 ## @knitr by7.3
 DF.groupby('V4').size()
 
 ## @knitr by8.3
-pass
+DF.assign(n = lambda x: x.groupby('V1').V4.transform('count'))
 
 ## @knitr by9.3
 DF.groupby('V4')['V2'].first()
@@ -221,16 +220,14 @@ DF.groupby('V4')['V2'].nth(1) # 0-based
 ## Advanced columns manipulation ---------------------------------------
 
 ## @knitr advCols1.3
-DF.apply(np.max, axis = 0)
-DF.apply(np.max, axis = 0).to_frame().T
+DF.agg(['max'])
 
 ## @knitr advCols2.3
-DF[['V1', 'V2']].apply(np.mean, axis = 0)
+DF.loc[:, ['V1', 'V2']].agg(['mean'])
 
 ## @knitr advCols3.3
-(DF.groupby('V4')[['V1', 'V2']]
-   .apply(np.mean, axis = 0)
-   .reset_index())
+(DF.groupby('V4')
+  .agg(**{f'{col}_mean':(col, 'mean') for col in ['V1', 'V2']}))
 ## using regex
 (DF.filter(regex=('V1|V2|V4'))
    .groupby('V4')
@@ -241,34 +238,36 @@ DF[['V1', 'V2']].apply(np.mean, axis = 0)
 DF.groupby('V4').agg(['sum', 'mean'])
 
 ## @knitr advCols5.3
-DF.select_dtypes(include = [np.number]).apply(np.mean, axis = 0)
+DF.select_dtypes(include = 'number').agg(['mean'])
 
 ## @knitr advCols6.3
-DF.apply(lambda x: x[::-1], axis = 0)
+DF.iloc[::-1]
+#DF.apply(lambda x: x[::-1], axis = 0)
 
 ## @knitr advCols7.3
-DF.filter(regex=('V1|V2')).apply(np.sqrt, axis = 0)
-DF.filter(regex=('^(?!V4)')).apply(np.exp, axis = 0)
+DF.filter(['V1', 'V2']).agg(np.sqrt)
+DF.filter(regex = '[^V4]').agg(np.exp)
 
 ## @knitr advCols8.3
-DF[['V1', 'V2']] = DF.filter(regex=('V1|V2')).apply(np.sqrt, axis = 0)
+DF.loc[:, 'V1':'V2'] = DF.filter(['V1', 'V2']).agg(np.sqrt)
 cols = DF.columns.difference(['V4'])
-DF.loc[:, cols] = DF.loc[:, cols].apply(lambda x: np.power(x, 2), axis = 0)
+DF.loc[:, cols] = DF.filter(cols).agg(lambda x: pow(x,2))
+DF
 
 ## @knitr advCols9.3
-cols = DF.select_dtypes(include = [np.number]).columns
-DF.loc[:, cols].apply(lambda x: x - 1)
-# DF.transform?
+DF.select_dtypes("number").sub(1)
+#cols = DF.select_dtypes(include = [np.number]).columns
+#DF.loc[:, cols].apply(lambda x: x - 1)
 
 ## @knitr advCols10.3
 DF.loc[:, cols] = DF.loc[:, cols].astype(int)
+DF
 
 ## @knitr advCols11.3
 (DF.groupby('V4')
-   .head(2)[['V4', 'V1']]
-   .assign(V2 = 'X')
-   .sort_values(['V4']))
-
+  .head(2)
+  .assign(V2 = 'X')
+  .sort_values('V4'))
 ## @knitr advCols12.3
 pass
 
@@ -277,9 +276,9 @@ pass
 ## Chain expressions ---------------------------------------------------
 
 ## @knitr chain1.3
-(DF.groupby('V4')['V1']
-   .agg({'V1sum' : np.sum})
-   .query('V1sum>4'))
+(DF.groupby(['V4'], as_index=False)
+  .agg(V1sum = ('V1',np.sum))
+  .query('V1sum > 5'))
 
 ## @knitr chain2.3
 pass
@@ -290,6 +289,7 @@ pass
 ## @knitr key1.3
 DF.set_index('V4', drop = False, inplace = True)
 DF.sort_index(inplace = True)
+DF
 
 ## @knitr key2.3
 DF.loc['A']
@@ -303,38 +303,46 @@ DF.loc['B'].head(1)
 DF.loc['A'].tail(1)
 
 ## @knitr key5.3
-DF.loc[['A', 'D']]
-DF.loc[['A', 'D']].dropna()
+#deprecate-loc-reindex-listlike
+#DF.loc[['A', 'D']]
+#DF.loc[['A', 'D']].dropna()
+
 
 ## @knitr key6.3
-DF.loc[['A', 'C']].V1.sum()
+DF.loc[['A', 'C'],'V1'].sum() 
 
 ## @knitr key7.3
 DF.loc['A', 'V1'] = 0
+DF
 
 ## @knitr key8.3
-(DF.loc[~DF.index.isin(['B'])]
-   .groupby(level = 0)[['V1']]
-   .agg('sum'))
+(DF.query("index != 'B'")
+  .groupby(level=0)
+  .agg({'V1':np.sum}))
+#DF.loc[~(DF.index == 'B')].groupby(level = 0).agg({'V1':'sum'})
 
 ## @knitr key9.3
 DF.set_index(['V4', 'V1'], drop = False, inplace = True)
 DF.sort_index(inplace = True)
+DF
 
 ## @knitr key10.3
-DF.loc['C', 1]
-DF.loc[(['B', 'C'], 1), :]
+DF.loc[('C', 1)]
+DF.loc[(('B', 'C'), 1), :]
+#DF.query("V4 in ('B', 'C') and V1 == 1")
 list(np.where(DF.V4.isin(['B', 'C']) & DF.V1 == 1))
 DF.index.isin({'V4': ['B', 'C'], 'V1': [1]}) # wrong
 
 ## @knitr key11.3
 DF.reset_index(inplace = True, drop = True)
+DF
 
 ## @knitr set
 ## set* modifications ----------------------------------------------------
 
 ## @knitr set1.3
 DF.iloc[0, 1] = 3
+DF
 
 ## @knitr set2.3
 DF.sort_values(['V4','V1'], ascending = [True, False], inplace = True)
@@ -343,9 +351,11 @@ DF.sort_values(['V4','V1'], ascending = [True, False], inplace = True)
 DF.rename(columns = {'V2':'v2'}, inplace = True)
 cols = DF.columns.values; cols[1] = 'V2'
 DF.columns = cols
+DF
 
 ## @knitr set4.3
 DF = DF[['V4', 'V1', 'V2']]
+DF
 
 ## @knitr set5.3
 pass
@@ -364,10 +374,13 @@ DF.loc[DF.groupby('V4').V2.idxmin()]
 
 ## @knitr advBy3.3
 DF['Grp'] = DF.groupby(['V4', 'V1']).ngroup()
+DF
 del DF['Grp']
 
 ## @knitr advBy4.3
-pass
+pd.DataFrame(DF.groupby('V4').indices).melt()
+pd.DataFrame(DF.groupby('V4').indices).loc[0]
+pd.DataFrame(DF.groupby('V4').indices).iloc[[0,-1]].melt()
 
 ## @knitr advBy5.3
 DF.groupby('V4')['V1'].apply(list)
@@ -402,7 +415,7 @@ pd.read_csv('DF.txt', sep = '\t')
 
 ## @knitr readwrite5.3
 pd.read_csv('DF.csv', usecols=['V1', 'V4'])
-# ?
+pd.read_csv('DF.csv', usecols = lambda x: x != 'V4')
 
 ## @knitr readwrite6.3
 li = [pd.read_csv(fi) for fi in ['DF.csv', 'DF.csv']]
@@ -415,14 +428,15 @@ pd.concat(li, axis = 0, ignore_index = True)
 ## @knitr reshape1.3
 pd.melt(DF, id_vars = ['V4'])
 mDF = pd.melt(DF,
-              id_vars    = ['V4'],
+              id_vars    = 'V4',
               value_vars = ('V1', 'V2'), 
               var_name   = 'Variable',
               value_name = 'Value')
 
 ## @knitr reshape2.3
-# mDF.pivot()
-pass
+pd.crosstab(mDF.V4, mDF.Variable)
+pd.crosstab(mDF.V4, mDF.Variable, values = mDF.Value, aggfunc = 'sum')
+pd.crosstab(mDF.V4, mDF.Value > 5)
 
 ## @knitr reshape3.3
 list(DF.groupby('V4'))

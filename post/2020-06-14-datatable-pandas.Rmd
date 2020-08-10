@@ -123,9 +123,13 @@ I choose the easy (and time-saving) solution: only the code is presented, no fur
 It is incomplete and not fully polished but I publish it in case it can be useful for someone and to better keep track of the files.     
 - The same [R code](https://github.com/Atrebas/atrebas.github.io/blob/master/post/2019-03-03-datatable-dplyr.R) 
 is used below and in my "data.table and dplyr tour". The Python code, available 
-[here](https://github.com/Atrebas/atrebas.github.io/blob/master/post/2020-06-14-datatable-pandas.R), is structured and labeled in the same way.     
+[here](https://github.com/Atrebas/atrebas.github.io/blob/master/post/2020-06-14-pandas.py), is structured and labeled in the same way.     
 
 <div style="text-align: center;"><input type='button' id='hideshow' value='Show the outputs'></div>
+
+### Update
+- _2020-08-10_: The python code has been improved and completed. Thanks a lot to [Samuel Oranyeli](https://twitter.com/samukweku) 
+for his careful and insightful [feedback](https://github.com/Atrebas/atrebas.github.io/issues/2#issue-671626419).     
 
 
 <br><hr>

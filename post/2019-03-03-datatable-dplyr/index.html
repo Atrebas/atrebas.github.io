@@ -2224,7 +2224,18 @@ DF %&gt;% transmute(across(-any_of(&quot;V4&quot;),
 
 cols &lt;- setdiff(names(DT), &quot;V4&quot;)
 DT[, (cols) := lapply(.SD, &quot;^&quot;, 2L),
-     .SDcols = cols]</code></pre>
+     .SDcols = cols]
+DT</code></pre>
+<pre><code>##    V1 V2 V4
+## 1:  1  0  A
+## 2:  4  0  B
+## 3:  1  0  C
+## 4:  4  4  A
+## 5:  1  5  B
+## 6:  4  6  C
+## 7:  1  7  A
+## 8:  4  8  B
+## 9:  1  9  C</code></pre>
 </td>
 <td align="left">
 <pre class="r"><code>DF &lt;- DF %&gt;%
@@ -2233,7 +2244,20 @@ DT[, (cols) := lapply(.SD, &quot;^&quot;, 2L),
 DF &lt;- DF %&gt;%
   mutate(across(-any_of(&quot;V4&quot;),
                  ~ &quot;^&quot;(.x, 2L)))
+DF
 # DF &lt;- mutate_at(DF, vars(-V4), &quot;^&quot;, 2L)</code></pre>
+<pre><code>## # A tibble: 9 x 3
+##      V1    V2 V4   
+##   &lt;dbl&gt; &lt;dbl&gt; &lt;chr&gt;
+## 1     1  0    A    
+## 2     4  0    B    
+## 3     1  0    C    
+## 4     4  4    A    
+## 5     1  5.   B    
+## 6     4  6.00 C    
+## 7     1  7.   A    
+## 8     4  8.   B    
+## 9     1  9    C</code></pre>
 </td>
 </tr>
 </tbody>
@@ -2246,7 +2270,8 @@ DF &lt;- DF %&gt;%
 <tr>
 <td align="left">
 <pre class="r"><code>DT[, .SD - 1,
-     .SDcols = is.numeric]</code></pre>
+     .SDcols = is.numeric]
+DT</code></pre>
 <pre><code>##    V1 V2
 ## 1:  0 -1
 ## 2:  3 -1
@@ -2256,12 +2281,23 @@ DF &lt;- DF %&gt;%
 ## 6:  3  5
 ## 7:  0  6
 ## 8:  3  7
-## 9:  0  8</code></pre>
+## 9:  0  8
+##    V1 V2 V4
+## 1:  1  0  A
+## 2:  4  0  B
+## 3:  1  0  C
+## 4:  4  4  A
+## 5:  1  5  B
+## 6:  4  6  C
+## 7:  1  7  A
+## 8:  4  8  B
+## 9:  1  9  C</code></pre>
 </td>
 <td align="left">
 <pre class="r"><code>DF %&gt;%
   transmute(across(where(is.numeric),
                    ~ &#39;-&#39;(., 1L)))
+DF
 # transmute_if(DF, is.numeric, list(~ &#39;-&#39;(., 1L)))</code></pre>
 <pre><code>## # A tibble: 9 x 2
 ##      V1    V2
@@ -2274,7 +2310,19 @@ DF &lt;- DF %&gt;%
 ## 6     3  5.00
 ## 7     0  6.  
 ## 8     3  7.  
-## 9     0  8</code></pre>
+## 9     0  8   
+## # A tibble: 9 x 3
+##      V1    V2 V4   
+##   &lt;dbl&gt; &lt;dbl&gt; &lt;chr&gt;
+## 1     1  0    A    
+## 2     4  0    B    
+## 3     1  0    C    
+## 4     4  4    A    
+## 5     1  5.   B    
+## 6     4  6.00 C    
+## 7     1  7.   A    
+## 8     4  8.   B    
+## 9     1  9    C</code></pre>
 </td>
 </tr>
 </tbody>
@@ -2462,10 +2510,34 @@ Note: in the following code, we set both a key and an index to demonstrate their
 <tr>
 <td align="left">
 <pre class="r"><code>setkey(DT, V4)
-setindex(DT, V4)</code></pre>
+setindex(DT, V4)
+DT</code></pre>
+<pre><code>##    V1 V2 V4
+## 1:  1  0  A
+## 2:  4  4  A
+## 3:  1  7  A
+## 4:  4  0  B
+## 5:  1  5  B
+## 6:  4  8  B
+## 7:  1  0  C
+## 8:  4  5  C
+## 9:  1  9  C</code></pre>
 </td>
 <td align="left">
-<pre class="r"><code>DF &lt;- arrange(DF, V4) # ordered just for consistency</code></pre>
+<pre class="r"><code>DF &lt;- arrange(DF, V4) # ordered just for consistency
+DF</code></pre>
+<pre><code>## # A tibble: 9 x 3
+##      V1    V2 V4   
+##   &lt;int&gt; &lt;int&gt; &lt;chr&gt;
+## 1     1     0 A    
+## 2     4     4 A    
+## 3     1     7 A    
+## 4     4     0 B    
+## 5     1     5 B    
+## 6     4     8 B    
+## 7     1     0 C    
+## 8     4     5 C    
+## 9     1     9 C</code></pre>
 </td>
 </tr>
 </tbody>
@@ -2702,10 +2774,34 @@ DT[V4 != &quot;B&quot;,
 <tr>
 <td align="left">
 <pre class="r"><code>setkey(DT, V4, V1) # or setkeyv(DT, c(&quot;V4&quot;, &quot;V1&quot;))
-setindex(DT, V4, V1) # setindexv(DT, c(&quot;V4&quot;, &quot;V1&quot;))</code></pre>
+setindex(DT, V4, V1) # setindexv(DT, c(&quot;V4&quot;, &quot;V1&quot;))
+DT</code></pre>
+<pre><code>##    V1 V2 V4
+## 1:  0  0  A
+## 2:  0  4  A
+## 3:  0  7  A
+## 4:  1  5  B
+## 5:  4  0  B
+## 6:  4  8  B
+## 7:  1  0  C
+## 8:  1  9  C
+## 9:  4  5  C</code></pre>
 </td>
 <td align="left">
-<pre class="r"><code>DF &lt;- arrange(DF, V4, V1) # ordered just for consistency</code></pre>
+<pre class="r"><code>DF &lt;- arrange(DF, V4, V1) # ordered just for consistency
+DF</code></pre>
+<pre><code>## # A tibble: 9 x 3
+##      V1    V2 V4   
+##   &lt;int&gt; &lt;int&gt; &lt;chr&gt;
+## 1     0     0 A    
+## 2     0     4 A    
+## 3     0     7 A    
+## 4     1     5 B    
+## 5     4     0 B    
+## 6     4     8 B    
+## 7     1     0 C    
+## 8     1     9 C    
+## 9     4     5 C</code></pre>
 </td>
 </tr>
 </tbody>
@@ -2757,10 +2853,34 @@ filter(DF, V1 == 1, V4 %in% c(&quot;B&quot;, &quot;C&quot;))
 <tr>
 <td align="left">
 <pre class="r"><code>setkey(DT, NULL)
-setindex(DT, NULL)</code></pre>
+setindex(DT, NULL)
+DT</code></pre>
+<pre><code>##    V1 V2 V4
+## 1:  0  0  A
+## 2:  0  4  A
+## 3:  0  7  A
+## 4:  1  5  B
+## 5:  4  0  B
+## 6:  4  8  B
+## 7:  1  0  C
+## 8:  1  9  C
+## 9:  4  5  C</code></pre>
 </td>
 <td align="left">
-<pre class="r"><code># </code></pre>
+<pre class="r"><code># 
+DF</code></pre>
+<pre><code>## # A tibble: 9 x 3
+##      V1    V2 V4   
+##   &lt;int&gt; &lt;int&gt; &lt;chr&gt;
+## 1     0     0 A    
+## 2     0     4 A    
+## 3     0     7 A    
+## 4     1     5 B    
+## 5     4     0 B    
+## 6     4     8 B    
+## 7     1     0 C    
+## 8     1     9 C    
+## 9     4     5 C</code></pre>
 </td>
 </tr>
 </tbody>
@@ -2780,10 +2900,34 @@ The corresponding expressions in dplyr will be less memory-efficient.</p>
 <tbody>
 <tr>
 <td align="left">
-<pre class="r"><code>set(DT, i = 1L, j = 2L, value = 3L)</code></pre>
+<pre class="r"><code>set(DT, i = 1L, j = 2L, value = 3L)
+DT</code></pre>
+<pre><code>##    V1 V2 V4
+## 1:  0  3  A
+## 2:  0  4  A
+## 3:  0  7  A
+## 4:  1  5  B
+## 5:  4  0  B
+## 6:  4  8  B
+## 7:  1  0  C
+## 8:  1  9  C
+## 9:  4  5  C</code></pre>
 </td>
 <td align="left">
-<pre class="r"><code>DF[1, 2] &lt;- 3L</code></pre>
+<pre class="r"><code>DF[1, 2] &lt;- 3L
+DF</code></pre>
+<pre><code>## # A tibble: 9 x 3
+##      V1    V2 V4   
+##   &lt;int&gt; &lt;int&gt; &lt;chr&gt;
+## 1     0     3 A    
+## 2     0     4 A    
+## 3     0     7 A    
+## 4     1     5 B    
+## 5     4     0 B    
+## 6     4     8 B    
+## 7     1     0 C    
+## 8     1     9 C    
+## 9     4     5 C</code></pre>
 </td>
 </tr>
 </tbody>
@@ -2812,11 +2956,35 @@ setorderv(DT, c(&quot;V4&quot;, &quot;V1&quot;), c(1, -1))</code></pre>
 <tr>
 <td align="left">
 <pre class="r"><code>setnames(DT, old = &quot;V2&quot;, new = &quot;v2&quot;)
-setnames(DT, old = -(c(1, 3)), new = &quot;V2&quot;)</code></pre>
+setnames(DT, old = -(c(1, 3)), new = &quot;V2&quot;)
+DT</code></pre>
+<pre><code>##    V1 V2 V4
+## 1:  0  3  A
+## 2:  0  4  A
+## 3:  0  7  A
+## 4:  4  0  B
+## 5:  4  8  B
+## 6:  1  5  B
+## 7:  4  5  C
+## 8:  1  0  C
+## 9:  1  9  C</code></pre>
 </td>
 <td align="left">
 <pre class="r"><code>DF &lt;- rename(DF, v2 = V2)
-DF &lt;- rename(DF, V2 = v2) # reset upper</code></pre>
+DF &lt;- rename(DF, V2 = v2) # reset upper
+DF</code></pre>
+<pre><code>## # A tibble: 9 x 3
+##      V1    V2 V4   
+##   &lt;int&gt; &lt;int&gt; &lt;chr&gt;
+## 1     0     3 A    
+## 2     0     4 A    
+## 3     0     7 A    
+## 4     4     0 B    
+## 5     4     8 B    
+## 6     1     5 B    
+## 7     4     5 C    
+## 8     1     0 C    
+## 9     1     9 C</code></pre>
 </td>
 </tr>
 </tbody>
@@ -2828,10 +2996,34 @@ DF &lt;- rename(DF, V2 = v2) # reset upper</code></pre>
 <tbody>
 <tr>
 <td align="left">
-<pre class="r"><code>setcolorder(DT, c(&quot;V4&quot;, &quot;V1&quot;, &quot;V2&quot;))</code></pre>
+<pre class="r"><code>setcolorder(DT, c(&quot;V4&quot;, &quot;V1&quot;, &quot;V2&quot;))
+DT</code></pre>
+<pre><code>##    V4 V1 V2
+## 1:  A  0  3
+## 2:  A  0  4
+## 3:  A  0  7
+## 4:  B  4  0
+## 5:  B  4  8
+## 6:  B  1  5
+## 7:  C  4  5
+## 8:  C  1  0
+## 9:  C  1  9</code></pre>
 </td>
 <td align="left">
-<pre class="r"><code>DF &lt;- select(DF, V4, V1, V2)</code></pre>
+<pre class="r"><code>DF &lt;- select(DF, V4, V1, V2)
+DF</code></pre>
+<pre><code>## # A tibble: 9 x 3
+##   V4       V1    V2
+##   &lt;chr&gt; &lt;int&gt; &lt;int&gt;
+## 1 A         0     3
+## 2 A         0     4
+## 3 A         0     7
+## 4 B         4     0
+## 5 B         4     8
+## 6 B         1     5
+## 7 C         4     5
+## 8 C         1     0
+## 9 C         1     9</code></pre>
 </td>
 </tr>
 </tbody>

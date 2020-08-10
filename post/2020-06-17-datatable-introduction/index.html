@@ -161,15 +161,15 @@ The magic is that you can do much more with the simple command <code>DT[i, j]</c
 <p>Or sample rows:</p>
 <pre class="r"><code>DT[sample(nrow(DT), 3)]     # randomly sample three rows</code></pre>
 <pre><code>##     Fruit Year Count
-## 1:  apple 2010     5
-## 2: banana 2010     3
-## 3: banana 2008     1</code></pre>
+## 1: banana 2010     3
+## 2: banana 2009     2
+## 3:  apple 2010     5</code></pre>
 <p>The command above can be abbreviated as follows:</p>
 <pre class="r"><code>DT[sample(.N, 3), ]        # randomly sample three rows</code></pre>
 <pre><code>##     Fruit Year Count
 ## 1: orange 2010     6
 ## 2:  apple 2010     5
-## 3: banana 2010     3</code></pre>
+## 3:  apple 2009     4</code></pre>
 <p><code>.N</code> is an alias for the number of rows. data.table offers several syntactic sugars like this, as we will see below.</p>
 <p><br></p>
 </div>

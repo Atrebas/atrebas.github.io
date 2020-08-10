@@ -59,6 +59,7 @@
 <ul>
 <li><a href="#introduction">Introduction</a><ul>
 <li><a href="#about">About</a></li>
+<li><a href="#update">Update</a></li>
 <li><a href="#create-example-data">Create example data</a></li>
 </ul></li>
 <li><a href="#basic-operations">Basic operations</a><ul>
@@ -199,11 +200,18 @@ It is incomplete and not fully polished but I publish it in case it can be usefu
 </li>
 <li>The same <a href="https://github.com/Atrebas/atrebas.github.io/blob/master/post/2019-03-03-datatable-dplyr.R">R code</a>
 is used below and in my “data.table and dplyr tour”. The Python code, available
-<a href="https://github.com/Atrebas/atrebas.github.io/blob/master/post/2020-06-14-datatable-pandas.R">here</a>, is structured and labeled in the same way.</li>
+<a href="https://github.com/Atrebas/atrebas.github.io/blob/master/post/2020-06-14-pandas.py">here</a>, is structured and labeled in the same way.</li>
 </ul>
 <div style="text-align: center;">
 <input type='button' id='hideshow' value='Show the outputs'>
 </div>
+</div>
+<div id="update" class="section level3">
+<h3>Update</h3>
+<ul>
+<li><em>2020-08-10</em>: The python code has been improved and completed. Thanks a lot to <a href="https://twitter.com/samukweku">Samuel Oranyeli</a>
+for his careful and insightful <a href="https://github.com/Atrebas/atrebas.github.io/issues/2#issue-671626419">feedback</a>.</li>
+</ul>
 <br>
 <hr>
 </div>
@@ -320,7 +328,7 @@ DT[-(3:7)] # same</code></pre>
 ## 4:  1  9 1.5  C</code></pre>
 </td>
 <td align="left">
-<pre class="python"><code>DF[~DF.index.isin(list(range(2, 7)))]</code></pre>
+<pre class="python"><code>DF[~DF.index.isin(range(2, 7))]</code></pre>
 <pre><code>##    V1  V2   V3 V4
 ## 0   1   1  0.5  A
 ## 1   2   2  1.0  B
@@ -391,7 +399,8 @@ DT[V4 %chin% c(&quot;A&quot;, &quot;C&quot;)] # fast %in% for character</code></
 ## 2:  1  7 0.5  A</code></pre>
 </td>
 <td align="left">
-<pre class="python"><code>DF[DF.V1 == 1 &amp; DF.V4.isin([&#39;A&#39;])]
+<pre class="python"><code>DF.loc[(DF.V1 == 1) &amp; (DF.V4 == &#39;A&#39;)]
+# DF.query(&quot;V1 == 1 and V4 == &#39;A&#39;&quot;)
 # any logical criteria can be used</code></pre>
 <pre><code>##    V1  V2   V3 V4
 ## 0   1   1  0.5  A
@@ -526,16 +535,16 @@ DT[frankv(-V1, ties.method = &quot;dense&quot;) &lt; 2]</code></pre>
 <td align="left">
 <pre class="python"><code>DF.sample(n = 3)</code></pre>
 <pre><code>##    V1  V2   V3 V4
-## 8   1   9  1.5  C
-## 7   2   8  1.0  B
-## 0   1   1  0.5  A</code></pre>
+## 3   2   4  0.5  A
+## 5   2   6  1.5  C
+## 2   1   3  1.5  C</code></pre>
 <pre class="python"><code>DF.sample(frac = 0.5)
 # DF[DF[&#39;V1&#39;].nlargest(1)] # no keep = &#39;all&#39;</code></pre>
 <pre><code>##    V1  V2   V3 V4
-## 5   2   6  1.5  C
+## 1   2   2  1.0  B
 ## 7   2   8  1.0  B
-## 0   1   1  0.5  A
-## 4   1   5  1.0  B</code></pre>
+## 3   2   4  0.5  A
+## 6   1   7  0.5  A</code></pre>
 </td>
 </tr>
 </tbody>
@@ -564,7 +573,7 @@ DT[V2 %inrange% list(-1:1, 1:3)] # see also ?inrange</code></pre>
 ## 3:  1  3 1.5  C</code></pre>
 </td>
 <td align="left">
-<pre class="python"><code>DF[DF.V4.str.startswith((&#39;B&#39;))]</code></pre>
+<pre class="python"><code>DF[DF.V4.str.startswith(&#39;B&#39;)] # use tuples when multiple</code></pre>
 <pre><code>##    V1  V2   V3 V4
 ## 1   2   2  1.0  B
 ## 4   1   5  1.0  B
@@ -719,7 +728,7 @@ DT[, 3]  # returns a data.table</code></pre>
 ## 9: 1.5</code></pre>
 </td>
 <td align="left">
-<pre class="python"><code>DF.iloc[:, 2] # returns a pandas Series</code></pre>
+<pre class="python"><code>DF.iloc[:, 2]   # returns a pandas Series</code></pre>
 <pre><code>## 0    0.5
 ## 1    1.0
 ## 2    1.5
@@ -730,7 +739,7 @@ DT[, 3]  # returns a data.table</code></pre>
 ## 7    1.0
 ## 8    1.5
 ## Name: V3, dtype: float64</code></pre>
-<pre class="python"><code>DF.iloc[:, 2].to_frame() # convert to DataFrame</code></pre>
+<pre class="python"><code>DF.iloc[:, [2]] # convert to DataFrame</code></pre>
 <pre><code>##     V3
 ## 0  0.5
 ## 1  1.0
@@ -976,7 +985,7 @@ DT[, !..cols] # or DT[, -..cols]</code></pre>
 </td>
 <td align="left">
 <pre class="python"><code>cols = [&#39;V2&#39;, &#39;V3&#39;]
-DF.loc[:, DF.columns.isin(cols)]</code></pre>
+DF.loc[:, cols]</code></pre>
 <pre><code>##    V2   V3
 ## 0   1  0.5
 ## 1   2  1.0
@@ -1117,9 +1126,9 @@ DT[, .(sumV1 = sum(V1))] # returns a data.table</code></pre>
 <pre class="python"><code>DF[[&#39;V1&#39;]].sum()   # returns a pandas series</code></pre>
 <pre><code>## V1    13
 ## dtype: int64</code></pre>
-<pre class="python"><code>DF[[&#39;V1&#39;]].sum().to_frame(name = &#39;sumV1&#39;)</code></pre>
-<pre><code>##     sumV1
-## V1     13</code></pre>
+<pre class="python"><code>DF.loc[:, [&#39;V1&#39;]].agg([&#39;sum&#39;]).set_axis([&#39;sumV1&#39;], axis = 1)</code></pre>
+<pre><code>##      sumV1
+## sum     13</code></pre>
 </td>
 </tr>
 </tbody>
@@ -1157,10 +1166,12 @@ DT[, .(sumV1 = sum(V1))] # returns a data.table</code></pre>
 ## 1:    13 0.4330127</code></pre>
 </td>
 <td align="left">
-<pre class="python"><code>res = list(DF.agg({&#39;V1&#39;: &#39;sum&#39;, &#39;V3&#39;: &#39;std&#39;}))
-pd.DataFrame([res], columns=[&#39;sumV1&#39;,&#39;sdv3&#39;])</code></pre>
-<pre><code>##    sumV1      sdv3
-## 0   13.0  0.433013</code></pre>
+<pre class="python"><code>DF.agg(sumV1 = (&#39;V1&#39;,&#39;sum&#39;), sdv3 = (&#39;V3&#39;,&#39;std&#39;))
+#res = list(DF.agg({&#39;V1&#39;: &#39;sum&#39;, &#39;V3&#39;: &#39;std&#39;}))
+#pd.DataFrame([res], columns=[&#39;sumV1&#39;,&#39;sdv3&#39;])</code></pre>
+<pre><code>##          V1        V3
+## sumV1  13.0       NaN
+## sdv3    NaN  0.433013</code></pre>
 </td>
 </tr>
 </tbody>
@@ -1176,7 +1187,7 @@ pd.DataFrame([res], columns=[&#39;sumV1&#39;,&#39;sdv3&#39;])</code></pre>
 <pre><code>## [1] 6</code></pre>
 </td>
 <td align="left">
-<pre class="python"><code>DF.V1.iloc[0:4].sum()</code></pre>
+<pre class="python"><code>DF.loc[:3, &#39;V1&#39;].sum()</code></pre>
 <pre><code>## 6</code></pre>
 </td>
 </tr>
@@ -1198,22 +1209,13 @@ uniqueN(DT)</code></pre>
 ## [1] 9</code></pre>
 </td>
 <td align="left">
-<pre class="python"><code>DF.head(1).V3</code></pre>
-<pre><code>## 0    0.5
-## Name: V3, dtype: float64</code></pre>
-<pre class="python"><code>DF.tail(1).V3</code></pre>
-<pre><code>## 8    1.5
-## Name: V3, dtype: float64</code></pre>
-<pre class="python"><code>DF.ix[4, &#39;V3&#39;] # DF.V3.iloc[4]</code></pre>
-<pre><code>## 1.0
-## 
-## /home/xu/anaconda3/bin/python:1: FutureWarning: 
-## .ix is deprecated. Please use
-## .loc for label based indexing or
-## .iloc for positional indexing
-## 
-## See the documentation here:
-## http://pandas.pydata.org/pandas-docs/stable/user_guide/indexing.html#ix-indexer-is-deprecated</code></pre>
+<pre class="python"><code>DF.loc[0,&#39;V3&#39;]</code></pre>
+<pre><code>## 0.5</code></pre>
+<pre class="python"><code>DF.at[DF.index[-1], &#39;V3&#39;]
+# at method better than loc with scalars</code></pre>
+<pre><code>## 1.5</code></pre>
+<pre class="python"><code>DF.V3.iloc[4]</code></pre>
+<pre><code>## 1.0</code></pre>
 <pre class="python"><code>DF[&#39;V4&#39;].nunique()</code></pre>
 <pre><code>## 3</code></pre>
 <pre class="python"><code>len(DF.drop_duplicates())</code></pre>
@@ -1248,7 +1250,8 @@ DT</code></pre>
 ## 9:  1  9 1.5  C</code></pre>
 </td>
 <td align="left">
-<pre class="python"><code>DF[&#39;V1&#39;] = DF[&#39;V1&#39;]**2
+<pre class="python"><code>DF.loc[:, &#39;V1&#39;] = DF.loc[:, &#39;V1&#39;] ** 2
+#DF[&#39;V1&#39;] = DF[&#39;V1&#39;]**2
 DF.eval(&#39;V1 = V1**2&#39;, inplace = True)
 DF</code></pre>
 <pre><code>##    V1  V2   V3 V4
@@ -1328,8 +1331,9 @@ DT[, &#39;:=&#39;(v6 = sqrt(V1),
 ## 9: 2.5</code></pre>
 </td>
 <td align="left">
-<pre class="python"><code>pd.DataFrame({&#39;v8&#39; : DF.V3 + 1})</code></pre>
-<pre><code>##     v8
+<pre class="python"><code>DF.loc[:, [&#39;V3&#39;]].add(1).rename(columns = {&#39;V3&#39;:&#39;V8&#39;})
+# pd.DataFrame({&#39;v8&#39; : DF.V3 + 1})</code></pre>
+<pre><code>##     V8
 ## 0  1.5
 ## 1  2.0
 ## 2  2.5
@@ -1385,7 +1389,7 @@ DT[, (cols) := NULL] # ! not DT[, cols := NULL]</code></pre>
 </td>
 <td align="left">
 <pre class="python"><code>cols = &#39;V3&#39;
-DF = DF.drop(cols, 1)</code></pre>
+del DF[cols]</code></pre>
 </td>
 </tr>
 </tbody>
@@ -1411,7 +1415,7 @@ DT</code></pre>
 ## 9:  1  9  C</code></pre>
 </td>
 <td align="left">
-<pre class="python"><code>DF.loc[DF[&#39;V2&#39;] &lt; 4, &#39;V2&#39;] = 0</code></pre>
+<pre class="python"><code>DF.loc[DF.loc[:, &#39;V2&#39;] &lt; 4, &#39;V2&#39;] = 0</code></pre>
 </td>
 </tr>
 </tbody>
@@ -1444,10 +1448,8 @@ DT[, by = V4,
 ## 3:  C    15</code></pre>
 </td>
 <td align="left">
-<pre class="python"><code>(DF.groupby(&#39;V4&#39;)[&#39;V2&#39;]
-   .agg(&#39;sum&#39;)
-   .to_frame(name = &#39;sumV2&#39;)
-   .reset_index())</code></pre>
+<pre class="python"><code>(DF.groupby([&#39;V4&#39;], as_index = False)
+  .agg(sumV2 = (&#39;V2&#39;, &#39;sum&#39;)))</code></pre>
 <pre><code>##   V4  sumV2
 ## 0  A     11
 ## 1  B     13
@@ -1474,10 +1476,8 @@ DT[, by = V4,
 ## 6:  C  4     6</code></pre>
 </td>
 <td align="left">
-<pre class="python"><code>(DF.groupby([&#39;V4&#39;, &#39;V1&#39;])[&#39;V2&#39;]
-   .agg(&#39;sum&#39;)
-   .to_frame(name = &#39;sumV2&#39;)
-   .reset_index())</code></pre>
+<pre class="python"><code>(DF.groupby([&#39;V4&#39;, &#39;V1&#39;], as_index = False)
+  .agg(sumV2 = (&#39;V2&#39;, &#39;sum&#39;)))</code></pre>
 <pre><code>##   V4  V1  sumV2
 ## 0  A   1      7
 ## 1  A  16      4
@@ -1504,10 +1504,9 @@ DT[, by = V4,
 ## 3:       c     6</code></pre>
 </td>
 <td align="left">
-<pre class="python"><code>(DF.groupby(DF[&#39;V4&#39;].str.lower())[&#39;V1&#39;]
-   .sum()
-   .to_frame(name = &#39;sumV1&#39;)
-   .reset_index())</code></pre>
+<pre class="python"><code>(DF.assign(V4 = DF.V4.str.lower())
+  .groupby([&#39;V4&#39;], as_index = False)
+  .agg(sumV1=(&#39;V1&#39;, &#39;sum&#39;)))</code></pre>
 <pre><code>##   V4  sumV1
 ## 0  a     18
 ## 1  b     33
@@ -1531,15 +1530,13 @@ DT[, by = V4,
 ## 3:   c     6</code></pre>
 </td>
 <td align="left">
-<pre class="python"><code>(DF.groupby(DF[&#39;V4&#39;].str.lower())[&#39;V1&#39;]
-   .sum()
-   .to_frame(name = &#39;sumV1&#39;)
-   .assign(abc = lambda x: x.index)
-   .reset_index(drop = True))</code></pre>
-<pre><code>##    sumV1 abc
-## 0     18   a
-## 1     33   b
-## 2     18   c</code></pre>
+<pre class="python"><code>(DF.assign(abc = lambda x: x.V4.str.lower())
+  .groupby([&#39;abc&#39;], as_index = False)
+  .agg(sumV1 = (&#39;V1&#39;, &#39;sum&#39;)))</code></pre>
+<pre><code>##   abc  sumV1
+## 0   a     18
+## 1   b     33
+## 2   c     18</code></pre>
 </td>
 </tr>
 </tbody>
@@ -1558,7 +1555,7 @@ DT[, by = V4,
 ## 2:  TRUE  6</code></pre>
 </td>
 <td align="left">
-<pre class="python"><code>DF.groupby(DF[&#39;V4&#39;] == &#39;A&#39;)[&#39;V1&#39;].sum()</code></pre>
+<pre class="python"><code>DF.groupby(DF.V4 == &#39;A&#39;).V1.sum()</code></pre>
 <pre><code>## V4
 ## False    51
 ## True     18
@@ -1584,12 +1581,12 @@ DT[, by = V4,
 ## 3:  C     1</code></pre>
 </td>
 <td align="left">
-<pre class="python"><code>DF.iloc[0:5].groupby(&#39;V4&#39;)[&#39;V1&#39;].agg(&#39;sum&#39;)</code></pre>
-<pre><code>## V4
-## A    17
-## B    17
-## C     1
-## Name: V1, dtype: int64</code></pre>
+<pre class="python"><code>DF.iloc[:5].groupby(&#39;V4&#39;).agg(sumV1 = (&#39;V1&#39;,&#39;sum&#39;))</code></pre>
+<pre><code>##     sumV1
+## V4       
+## A      17
+## B      17
+## C       1</code></pre>
 </td>
 </tr>
 </tbody>
@@ -1639,7 +1636,17 @@ DT[, n := NULL] # rm column for consistency</code></pre>
 ## 9:  1  9  C 5</code></pre>
 </td>
 <td align="left">
-<pre class="python"><code>pass</code></pre>
+<pre class="python"><code>DF.assign(n = lambda x: x.groupby(&#39;V1&#39;).V4.transform(&#39;count&#39;))</code></pre>
+<pre><code>##    V1  V2 V4  n
+## 0   1   0  A  5
+## 1  16   0  B  4
+## 2   1   0  C  5
+## 3  16   4  A  4
+## 4   1   5  B  5
+## 5  16   6  C  4
+## 6   1   7  A  5
+## 7  16   8  B  4
+## 8   1   9  C  5</code></pre>
 </td>
 </tr>
 </tbody>
@@ -1713,14 +1720,9 @@ DT[, V2[2], by = V4]</code></pre>
 ## 1:  4  9  C</code></pre>
 </td>
 <td align="left">
-<pre class="python"><code>DF.apply(np.max, axis = 0)</code></pre>
-<pre><code>## V1    16
-## V2     9
-## V4     C
-## dtype: object</code></pre>
-<pre class="python"><code>DF.apply(np.max, axis = 0).to_frame().T</code></pre>
-<pre><code>##    V1 V2 V4
-## 0  16  9  C</code></pre>
+<pre class="python"><code>DF.agg([&#39;max&#39;])</code></pre>
+<pre><code>##      V1  V2 V4
+## max  16   9  C</code></pre>
 </td>
 </tr>
 </tbody>
@@ -1738,10 +1740,9 @@ DT[, V2[2], by = V4]</code></pre>
 ## 1: 2.333333 4.333333</code></pre>
 </td>
 <td align="left">
-<pre class="python"><code>DF[[&#39;V1&#39;, &#39;V2&#39;]].apply(np.mean, axis = 0)</code></pre>
-<pre><code>## V1    7.666667
-## V2    4.333333
-## dtype: float64</code></pre>
+<pre class="python"><code>DF.loc[:, [&#39;V1&#39;, &#39;V2&#39;]].agg([&#39;mean&#39;])</code></pre>
+<pre><code>##             V1        V2
+## mean  7.666667  4.333333</code></pre>
 </td>
 </tr>
 </tbody>
@@ -1770,14 +1771,14 @@ DT[, by = V4,
 ## 3:  C  2 5.000000</code></pre>
 </td>
 <td align="left">
-<pre class="python"><code>(DF.groupby(&#39;V4&#39;)[[&#39;V1&#39;, &#39;V2&#39;]]
-   .apply(np.mean, axis = 0)
-   .reset_index())
+<pre class="python"><code>(DF.groupby(&#39;V4&#39;)
+  .agg(**{f&#39;{col}_mean&#39;:(col, &#39;mean&#39;) for col in [&#39;V1&#39;, &#39;V2&#39;]}))
 ## using regex</code></pre>
-<pre><code>##   V4    V1        V2
-## 0  A   6.0  3.666667
-## 1  B  11.0  4.333333
-## 2  C   6.0  5.000000</code></pre>
+<pre><code>##     V1_mean   V2_mean
+## V4                   
+## A         6  3.666667
+## B        11  4.333333
+## C         6  5.000000</code></pre>
 <pre class="python"><code>(DF.filter(regex=(&#39;V1|V2|V4&#39;))
    .groupby(&#39;V4&#39;)
    .apply(np.mean, axis = 0)
@@ -1835,10 +1836,9 @@ DT[, lapply(.SD, mean),
 ## 1: 4.333333</code></pre>
 </td>
 <td align="left">
-<pre class="python"><code>DF.select_dtypes(include = [np.number]).apply(np.mean, axis = 0)</code></pre>
-<pre><code>## V1    7.666667
-## V2    4.333333
-## dtype: float64</code></pre>
+<pre class="python"><code>DF.select_dtypes(include = &#39;number&#39;).agg([&#39;mean&#39;])</code></pre>
+<pre><code>##             V1        V2
+## mean  7.666667  4.333333</code></pre>
 </td>
 </tr>
 </tbody>
@@ -1863,7 +1863,8 @@ DT[, lapply(.SD, mean),
 ## 9:  1  0  A</code></pre>
 </td>
 <td align="left">
-<pre class="python"><code>DF.apply(lambda x: x[::-1], axis = 0)</code></pre>
+<pre class="python"><code>DF.iloc[::-1]
+#DF.apply(lambda x: x[::-1], axis = 0)</code></pre>
 <pre><code>##    V1  V2 V4
 ## 8   1   9  C
 ## 7  16   8  B
@@ -1911,7 +1912,7 @@ DT[, lapply(.SD, exp),
 ## 9:  2.718282 8103.08393</code></pre>
 </td>
 <td align="left">
-<pre class="python"><code>DF.filter(regex=(&#39;V1|V2&#39;)).apply(np.sqrt, axis = 0)</code></pre>
+<pre class="python"><code>DF.filter([&#39;V1&#39;, &#39;V2&#39;]).agg(np.sqrt)</code></pre>
 <pre><code>##     V1        V2
 ## 0  1.0  0.000000
 ## 1  4.0  0.000000
@@ -1922,7 +1923,7 @@ DT[, lapply(.SD, exp),
 ## 6  1.0  2.645751
 ## 7  4.0  2.828427
 ## 8  1.0  3.000000</code></pre>
-<pre class="python"><code>DF.filter(regex=(&#39;^(?!V4)&#39;)).apply(np.exp, axis = 0)</code></pre>
+<pre class="python"><code>DF.filter(regex = &#39;[^V4]&#39;).agg(np.exp)</code></pre>
 <pre><code>##              V1           V2
 ## 0  2.718282e+00     1.000000
 ## 1  8.886111e+06     1.000000
@@ -1949,12 +1950,34 @@ DT[, lapply(.SD, exp),
 
 cols &lt;- setdiff(names(DT), &quot;V4&quot;)
 DT[, (cols) := lapply(.SD, &quot;^&quot;, 2L),
-     .SDcols = cols]</code></pre>
+     .SDcols = cols]
+DT</code></pre>
+<pre><code>##    V1 V2 V4
+## 1:  1  0  A
+## 2:  4  0  B
+## 3:  1  0  C
+## 4:  4  4  A
+## 5:  1  5  B
+## 6:  4  6  C
+## 7:  1  7  A
+## 8:  4  8  B
+## 9:  1  9  C</code></pre>
 </td>
 <td align="left">
-<pre class="python"><code>DF[[&#39;V1&#39;, &#39;V2&#39;]] = DF.filter(regex=(&#39;V1|V2&#39;)).apply(np.sqrt, axis = 0)
+<pre class="python"><code>DF.loc[:, &#39;V1&#39;:&#39;V2&#39;] = DF.filter([&#39;V1&#39;, &#39;V2&#39;]).agg(np.sqrt)
 cols = DF.columns.difference([&#39;V4&#39;])
-DF.loc[:, cols] = DF.loc[:, cols].apply(lambda x: np.power(x, 2), axis = 0)</code></pre>
+DF.loc[:, cols] = DF.filter(cols).agg(lambda x: pow(x,2))
+DF</code></pre>
+<pre><code>##      V1   V2 V4
+## 0   1.0  0.0  A
+## 1  16.0  0.0  B
+## 2   1.0  0.0  C
+## 3  16.0  4.0  A
+## 4   1.0  5.0  B
+## 5  16.0  6.0  C
+## 6   1.0  7.0  A
+## 7  16.0  8.0  B
+## 8   1.0  9.0  C</code></pre>
 </td>
 </tr>
 </tbody>
@@ -1967,7 +1990,8 @@ DF.loc[:, cols] = DF.loc[:, cols].apply(lambda x: np.power(x, 2), axis = 0)</cod
 <tr>
 <td align="left">
 <pre class="r"><code>DT[, .SD - 1,
-     .SDcols = is.numeric]</code></pre>
+     .SDcols = is.numeric]
+DT</code></pre>
 <pre><code>##    V1 V2
 ## 1:  0 -1
 ## 2:  3 -1
@@ -1977,12 +2001,22 @@ DF.loc[:, cols] = DF.loc[:, cols].apply(lambda x: np.power(x, 2), axis = 0)</cod
 ## 6:  3  5
 ## 7:  0  6
 ## 8:  3  7
-## 9:  0  8</code></pre>
+## 9:  0  8
+##    V1 V2 V4
+## 1:  1  0  A
+## 2:  4  0  B
+## 3:  1  0  C
+## 4:  4  4  A
+## 5:  1  5  B
+## 6:  4  6  C
+## 7:  1  7  A
+## 8:  4  8  B
+## 9:  1  9  C</code></pre>
 </td>
 <td align="left">
-<pre class="python"><code>cols = DF.select_dtypes(include = [np.number]).columns
-DF.loc[:, cols].apply(lambda x: x - 1)
-# DF.transform?</code></pre>
+<pre class="python"><code>DF.select_dtypes(&quot;number&quot;).sub(1)
+#cols = DF.select_dtypes(include = [np.number]).columns
+#DF.loc[:, cols].apply(lambda x: x - 1)</code></pre>
 <pre><code>##      V1   V2
 ## 0   0.0 -1.0
 ## 1  15.0 -1.0
@@ -2008,7 +2042,18 @@ DF.loc[:, cols].apply(lambda x: x - 1)
      .SDcols = is.numeric]</code></pre>
 </td>
 <td align="left">
-<pre class="python"><code>DF.loc[:, cols] = DF.loc[:, cols].astype(int)</code></pre>
+<pre class="python"><code>DF.loc[:, cols] = DF.loc[:, cols].astype(int)
+DF</code></pre>
+<pre><code>##    V1  V2 V4
+## 0   1   0  A
+## 1  16   0  B
+## 2   1   0  C
+## 3  16   4  A
+## 4   1   5  B
+## 5  16   5  C
+## 6   1   7  A
+## 7  16   8  B
+## 8   1   9  C</code></pre>
 </td>
 </tr>
 </tbody>
@@ -2032,16 +2077,16 @@ DF.loc[:, cols].apply(lambda x: x - 1)
 </td>
 <td align="left">
 <pre class="python"><code>(DF.groupby(&#39;V4&#39;)
-   .head(2)[[&#39;V4&#39;, &#39;V1&#39;]]
-   .assign(V2 = &#39;X&#39;)
-   .sort_values([&#39;V4&#39;]))</code></pre>
-<pre><code>##   V4  V1 V2
-## 0  A   1  X
-## 3  A  16  X
-## 1  B  16  X
-## 4  B   1  X
-## 2  C   1  X
-## 5  C  16  X</code></pre>
+  .head(2)
+  .assign(V2 = &#39;X&#39;)
+  .sort_values(&#39;V4&#39;))</code></pre>
+<pre><code>##    V1 V2 V4
+## 0   1  X  A
+## 3  16  X  A
+## 1  16  X  B
+## 4   1  X  B
+## 2   1  X  C
+## 5  16  X  C</code></pre>
 </td>
 </tr>
 </tbody>
@@ -2099,19 +2144,13 @@ DF.loc[:, cols].apply(lambda x: x - 1)
 ## 3:  C     6</code></pre>
 </td>
 <td align="left">
-<pre class="python"><code>(DF.groupby(&#39;V4&#39;)[&#39;V1&#39;]
-   .agg({&#39;V1sum&#39; : np.sum})
-   .query(&#39;V1sum&gt;4&#39;))</code></pre>
-<pre><code>##     V1sum
-## V4       
-## A      18
-## B      33
-## C      18
-## 
-## /home/xu/anaconda3/bin/python:2: FutureWarning: using a dict on a Series for aggregation
-## is deprecated and will be removed in a future version. Use                 named aggregation instead.
-## 
-##     &gt;&gt;&gt; grouper.agg(name_1=func_1, name_2=func_2)</code></pre>
+<pre class="python"><code>(DF.groupby([&#39;V4&#39;], as_index=False)
+  .agg(V1sum = (&#39;V1&#39;,np.sum))
+  .query(&#39;V1sum &gt; 5&#39;))</code></pre>
+<pre><code>##   V4  V1sum
+## 0  A     18
+## 1  B     33
+## 2  C     18</code></pre>
 </td>
 </tr>
 </tbody>
@@ -2129,11 +2168,34 @@ DF.loc[:, cols].apply(lambda x: x - 1)
 <tr>
 <td align="left">
 <pre class="r"><code>setkey(DT, V4)
-setindex(DT, V4)</code></pre>
+setindex(DT, V4)
+DT</code></pre>
+<pre><code>##    V1 V2 V4
+## 1:  1  0  A
+## 2:  4  4  A
+## 3:  1  7  A
+## 4:  4  0  B
+## 5:  1  5  B
+## 6:  4  8  B
+## 7:  1  0  C
+## 8:  4  5  C
+## 9:  1  9  C</code></pre>
 </td>
 <td align="left">
 <pre class="python"><code>DF.set_index(&#39;V4&#39;, drop = False, inplace = True)
-DF.sort_index(inplace = True)</code></pre>
+DF.sort_index(inplace = True)
+DF</code></pre>
+<pre><code>##     V1  V2 V4
+## V4           
+## A    1   0  A
+## A   16   4  A
+## A    1   7  A
+## B   16   0  B
+## B    1   5  B
+## B   16   8  B
+## C    1   0  C
+## C   16   5  C
+## C    1   9  C</code></pre>
 </td>
 </tr>
 </tbody>
@@ -2246,26 +2308,9 @@ DT[c(&quot;A&quot;, &quot;D&quot;), on = &quot;V4&quot;, nomatch = 0]</code></pr
 ## 3:  1  7  A</code></pre>
 </td>
 <td align="left">
-<pre class="python"><code>DF.loc[[&#39;A&#39;, &#39;D&#39;]]</code></pre>
-<pre><code>##       V1   V2   V4
-## V4                
-## A    1.0  0.0    A
-## A   16.0  4.0    A
-## A    1.0  7.0    A
-## D    NaN  NaN  NaN
-## 
-## /home/xu/anaconda3/bin/python:1: FutureWarning: 
-## Passing list-likes to .loc or [] with any missing label will raise
-## KeyError in the future, you can use .reindex() as an alternative.
-## 
-## See the documentation here:
-## https://pandas.pydata.org/pandas-docs/stable/user_guide/indexing.html#deprecate-loc-reindex-listlike</code></pre>
-<pre class="python"><code>DF.loc[[&#39;A&#39;, &#39;D&#39;]].dropna()</code></pre>
-<pre><code>##       V1   V2 V4
-## V4              
-## A    1.0  0.0  A
-## A   16.0  4.0  A
-## A    1.0  7.0  A</code></pre>
+<pre class="python"><code>#deprecate-loc-reindex-listlike
+#DF.loc[[&#39;A&#39;, &#39;D&#39;]]
+#DF.loc[[&#39;A&#39;, &#39;D&#39;]].dropna()</code></pre>
 </td>
 </tr>
 </tbody>
@@ -2281,7 +2326,7 @@ DT[c(&quot;A&quot;, &quot;D&quot;), on = &quot;V4&quot;, nomatch = 0]</code></pr
 <pre><code>## [1] 12</code></pre>
 </td>
 <td align="left">
-<pre class="python"><code>DF.loc[[&#39;A&#39;, &#39;C&#39;]].V1.sum()</code></pre>
+<pre class="python"><code>DF.loc[[&#39;A&#39;, &#39;C&#39;],&#39;V1&#39;].sum() </code></pre>
 <pre><code>## 36</code></pre>
 </td>
 </tr>
@@ -2308,7 +2353,19 @@ DT</code></pre>
 ## 9:  1  9  C</code></pre>
 </td>
 <td align="left">
-<pre class="python"><code>DF.loc[&#39;A&#39;, &#39;V1&#39;] = 0</code></pre>
+<pre class="python"><code>DF.loc[&#39;A&#39;, &#39;V1&#39;] = 0
+DF</code></pre>
+<pre><code>##     V1  V2 V4
+## V4           
+## A    0   0  A
+## A    0   4  A
+## A    0   7  A
+## B   16   0  B
+## B    1   5  B
+## B   16   8  B
+## C    1   0  C
+## C   16   5  C
+## C    1   9  C</code></pre>
 </td>
 </tr>
 </tbody>
@@ -2332,9 +2389,10 @@ DT[V4 != &quot;B&quot;,
 ## 2:  C  6</code></pre>
 </td>
 <td align="left">
-<pre class="python"><code>(DF.loc[~DF.index.isin([&#39;B&#39;])]
-   .groupby(level = 0)[[&#39;V1&#39;]]
-   .agg(&#39;sum&#39;))</code></pre>
+<pre class="python"><code>(DF.query(&quot;index != &#39;B&#39;&quot;)
+  .groupby(level=0)
+  .agg({&#39;V1&#39;:np.sum}))
+#DF.loc[~(DF.index == &#39;B&#39;)].groupby(level = 0).agg({&#39;V1&#39;:&#39;sum&#39;})</code></pre>
 <pre><code>##     V1
 ## V4    
 ## A    0
@@ -2351,11 +2409,34 @@ DT[V4 != &quot;B&quot;,
 <tr>
 <td align="left">
 <pre class="r"><code>setkey(DT, V4, V1) # or setkeyv(DT, c(&quot;V4&quot;, &quot;V1&quot;))
-setindex(DT, V4, V1) # setindexv(DT, c(&quot;V4&quot;, &quot;V1&quot;))</code></pre>
+setindex(DT, V4, V1) # setindexv(DT, c(&quot;V4&quot;, &quot;V1&quot;))
+DT</code></pre>
+<pre><code>##    V1 V2 V4
+## 1:  0  0  A
+## 2:  0  4  A
+## 3:  0  7  A
+## 4:  1  5  B
+## 5:  4  0  B
+## 6:  4  8  B
+## 7:  1  0  C
+## 8:  1  9  C
+## 9:  4  5  C</code></pre>
 </td>
 <td align="left">
 <pre class="python"><code>DF.set_index([&#39;V4&#39;, &#39;V1&#39;], drop = False, inplace = True)
-DF.sort_index(inplace = True)</code></pre>
+DF.sort_index(inplace = True)
+DF</code></pre>
+<pre><code>##        V1  V2 V4
+## V4 V1           
+## A  0    0   0  A
+##    0    0   4  A
+##    0    0   7  A
+## B  1    1   5  B
+##    16  16   0  B
+##    16  16   8  B
+## C  1    1   0  C
+##    1    1   9  C
+##    16  16   5  C</code></pre>
 </td>
 </tr>
 </tbody>
@@ -2381,12 +2462,13 @@ DT[.(c(&quot;B&quot;, &quot;C&quot;), 1), on = .(V4, V1), which = TRUE]</code></
 ## [1] 4 7 8</code></pre>
 </td>
 <td align="left">
-<pre class="python"><code>DF.loc[&#39;C&#39;, 1]</code></pre>
+<pre class="python"><code>DF.loc[(&#39;C&#39;, 1)]</code></pre>
 <pre><code>##        V1  V2 V4
 ## V4 V1           
 ## C  1    1   0  C
 ##    1    1   9  C</code></pre>
-<pre class="python"><code>DF.loc[([&#39;B&#39;, &#39;C&#39;], 1), :]</code></pre>
+<pre class="python"><code>DF.loc[((&#39;B&#39;, &#39;C&#39;), 1), :]
+#DF.query(&quot;V4 in (&#39;B&#39;, &#39;C&#39;) and V1 == 1&quot;)</code></pre>
 <pre><code>##        V1  V2 V4
 ## V4 V1           
 ## B  1    1   5  B
@@ -2408,10 +2490,32 @@ DT[.(c(&quot;B&quot;, &quot;C&quot;), 1), on = .(V4, V1), which = TRUE]</code></
 <tr>
 <td align="left">
 <pre class="r"><code>setkey(DT, NULL)
-setindex(DT, NULL)</code></pre>
+setindex(DT, NULL)
+DT</code></pre>
+<pre><code>##    V1 V2 V4
+## 1:  0  0  A
+## 2:  0  4  A
+## 3:  0  7  A
+## 4:  1  5  B
+## 5:  4  0  B
+## 6:  4  8  B
+## 7:  1  0  C
+## 8:  1  9  C
+## 9:  4  5  C</code></pre>
 </td>
 <td align="left">
-<pre class="python"><code>DF.reset_index(inplace = True, drop = True)</code></pre>
+<pre class="python"><code>DF.reset_index(inplace = True, drop = True)
+DF</code></pre>
+<pre><code>##    V1  V2 V4
+## 0   0   0  A
+## 1   0   4  A
+## 2   0   7  A
+## 3   1   5  B
+## 4  16   0  B
+## 5  16   8  B
+## 6   1   0  C
+## 7   1   9  C
+## 8  16   5  C</code></pre>
 </td>
 </tr>
 </tbody>
@@ -2428,10 +2532,32 @@ setindex(DT, NULL)</code></pre>
 <tbody>
 <tr>
 <td align="left">
-<pre class="r"><code>set(DT, i = 1L, j = 2L, value = 3L)</code></pre>
+<pre class="r"><code>set(DT, i = 1L, j = 2L, value = 3L)
+DT</code></pre>
+<pre><code>##    V1 V2 V4
+## 1:  0  3  A
+## 2:  0  4  A
+## 3:  0  7  A
+## 4:  1  5  B
+## 5:  4  0  B
+## 6:  4  8  B
+## 7:  1  0  C
+## 8:  1  9  C
+## 9:  4  5  C</code></pre>
 </td>
 <td align="left">
-<pre class="python"><code>DF.iloc[0, 1] = 3</code></pre>
+<pre class="python"><code>DF.iloc[0, 1] = 3
+DF</code></pre>
+<pre><code>##    V1  V2 V4
+## 0   0   3  A
+## 1   0   4  A
+## 2   0   7  A
+## 3   1   5  B
+## 4  16   0  B
+## 5  16   8  B
+## 6   1   0  C
+## 7   1   9  C
+## 8  16   5  C</code></pre>
 </td>
 </tr>
 </tbody>
@@ -2460,12 +2586,34 @@ setorderv(DT, c(&quot;V4&quot;, &quot;V1&quot;), c(1, -1))</code></pre>
 <tr>
 <td align="left">
 <pre class="r"><code>setnames(DT, old = &quot;V2&quot;, new = &quot;v2&quot;)
-setnames(DT, old = -(c(1, 3)), new = &quot;V2&quot;)</code></pre>
+setnames(DT, old = -(c(1, 3)), new = &quot;V2&quot;)
+DT</code></pre>
+<pre><code>##    V1 V2 V4
+## 1:  0  3  A
+## 2:  0  4  A
+## 3:  0  7  A
+## 4:  4  0  B
+## 5:  4  8  B
+## 6:  1  5  B
+## 7:  4  5  C
+## 8:  1  0  C
+## 9:  1  9  C</code></pre>
 </td>
 <td align="left">
 <pre class="python"><code>DF.rename(columns = {&#39;V2&#39;:&#39;v2&#39;}, inplace = True)
 cols = DF.columns.values; cols[1] = &#39;V2&#39;
-DF.columns = cols</code></pre>
+DF.columns = cols
+DF</code></pre>
+<pre><code>##    V1  V2 V4
+## 0   0   3  A
+## 1   0   4  A
+## 2   0   7  A
+## 4  16   0  B
+## 5  16   8  B
+## 3   1   5  B
+## 8  16   5  C
+## 6   1   0  C
+## 7   1   9  C</code></pre>
 </td>
 </tr>
 </tbody>
@@ -2477,10 +2625,32 @@ DF.columns = cols</code></pre>
 <tbody>
 <tr>
 <td align="left">
-<pre class="r"><code>setcolorder(DT, c(&quot;V4&quot;, &quot;V1&quot;, &quot;V2&quot;))</code></pre>
+<pre class="r"><code>setcolorder(DT, c(&quot;V4&quot;, &quot;V1&quot;, &quot;V2&quot;))
+DT</code></pre>
+<pre><code>##    V4 V1 V2
+## 1:  A  0  3
+## 2:  A  0  4
+## 3:  A  0  7
+## 4:  B  4  0
+## 5:  B  4  8
+## 6:  B  1  5
+## 7:  C  4  5
+## 8:  C  1  0
+## 9:  C  1  9</code></pre>
 </td>
 <td align="left">
-<pre class="python"><code>DF = DF[[&#39;V4&#39;, &#39;V1&#39;, &#39;V2&#39;]]</code></pre>
+<pre class="python"><code>DF = DF[[&#39;V4&#39;, &#39;V1&#39;, &#39;V2&#39;]]
+DF</code></pre>
+<pre><code>##   V4  V1  V2
+## 0  A   0   3
+## 1  A   0   4
+## 2  A   0   7
+## 4  B  16   0
+## 5  B  16   8
+## 3  B   1   5
+## 8  C  16   5
+## 6  C   1   0
+## 7  C   1   9</code></pre>
 </td>
 </tr>
 </tbody>
@@ -2608,8 +2778,24 @@ DT[, Grp := NULL] # delete for consistency</code></pre>
 ## 9:  C  1  9   5</code></pre>
 </td>
 <td align="left">
-<pre class="python"><code>DF[&#39;Grp&#39;] = DF.groupby([&#39;V4&#39;, &#39;V1&#39;]).ngroup()
-del DF[&#39;Grp&#39;]</code></pre>
+<pre class="python"><code>DF[&#39;Grp&#39;] = DF.groupby([&#39;V4&#39;, &#39;V1&#39;]).ngroup()</code></pre>
+<pre><code>## /home/xu/anaconda3/bin/python:1: SettingWithCopyWarning: 
+## A value is trying to be set on a copy of a slice from a DataFrame.
+## Try using .loc[row_indexer,col_indexer] = value instead
+## 
+## See the caveats in the documentation: https://pandas.pydata.org/pandas-docs/stable/user_guide/indexing.html#returning-a-view-versus-a-copy</code></pre>
+<pre class="python"><code>DF</code></pre>
+<pre><code>##   V4  V1  V2  Grp
+## 0  A   0   3    0
+## 1  A   0   4    0
+## 2  A   0   7    0
+## 4  B  16   0    2
+## 5  B  16   8    2
+## 3  B   1   5    1
+## 8  C  16   5    4
+## 6  C   1   0    3
+## 7  C   1   9    3</code></pre>
+<pre class="python"><code>del DF[&#39;Grp&#39;]</code></pre>
 </td>
 </tr>
 </tbody>
@@ -2647,7 +2833,30 @@ DT[, .I[c(1, .N)], by = V4]</code></pre>
 ## 6:  C  9</code></pre>
 </td>
 <td align="left">
-<pre class="python"><code>pass</code></pre>
+<pre class="python"><code>pd.DataFrame(DF.groupby(&#39;V4&#39;).indices).melt()</code></pre>
+<pre><code>##   variable  value
+## 0        A      0
+## 1        A      1
+## 2        A      2
+## 3        B      3
+## 4        B      4
+## 5        B      5
+## 6        C      6
+## 7        C      7
+## 8        C      8</code></pre>
+<pre class="python"><code>pd.DataFrame(DF.groupby(&#39;V4&#39;).indices).loc[0]</code></pre>
+<pre><code>## A    0
+## B    3
+## C    6
+## Name: 0, dtype: int64</code></pre>
+<pre class="python"><code>pd.DataFrame(DF.groupby(&#39;V4&#39;).indices).iloc[[0,-1]].melt()</code></pre>
+<pre><code>##   variable  value
+## 0        A      0
+## 1        A      2
+## 2        B      3
+## 3        B      5
+## 4        C      6
+## 5        C      8</code></pre>
 </td>
 </tr>
 </tbody>
@@ -2922,8 +3131,7 @@ fread(&quot;DT.csv&quot;, drop = &quot;V4&quot;)</code></pre>
 ## 9:  1  9</code></pre>
 </td>
 <td align="left">
-<pre class="python"><code>pd.read_csv(&#39;DF.csv&#39;, usecols=[&#39;V1&#39;, &#39;V4&#39;])
-# ?</code></pre>
+<pre class="python"><code>pd.read_csv(&#39;DF.csv&#39;, usecols=[&#39;V1&#39;, &#39;V4&#39;])</code></pre>
 <pre><code>##   V4  V1
 ## 0  A   0
 ## 1  A   0
@@ -2934,6 +3142,17 @@ fread(&quot;DT.csv&quot;, drop = &quot;V4&quot;)</code></pre>
 ## 6  C  16
 ## 7  C   1
 ## 8  C   1</code></pre>
+<pre class="python"><code>pd.read_csv(&#39;DF.csv&#39;, usecols = lambda x: x != &#39;V4&#39;)</code></pre>
+<pre><code>##    V1  V2
+## 0   0   3
+## 1   0   4
+## 2   0   7
+## 3  16   0
+## 4  16   8
+## 5   1   5
+## 6  16   5
+## 7   1   0
+## 8   1   9</code></pre>
 </td>
 </tr>
 </tbody>
@@ -3053,7 +3272,7 @@ mDT &lt;- melt(DT,
 ## 16  C       V2      0
 ## 17  C       V2      9</code></pre>
 <pre class="python"><code>mDF = pd.melt(DF,
-              id_vars    = [&#39;V4&#39;],
+              id_vars    = &#39;V4&#39;,
               value_vars = (&#39;V1&#39;, &#39;V2&#39;), 
               var_name   = &#39;Variable&#39;,
               value_name = &#39;Value&#39;)</code></pre>
@@ -3091,8 +3310,24 @@ mDT &lt;- melt(DT,
 ## 3:  C     5    1</code></pre>
 </td>
 <td align="left">
-<pre class="python"><code># mDF.pivot()
-pass</code></pre>
+<pre class="python"><code>pd.crosstab(mDF.V4, mDF.Variable)</code></pre>
+<pre><code>## Variable  V1  V2
+## V4              
+## A          3   3
+## B          3   3
+## C          3   3</code></pre>
+<pre class="python"><code>pd.crosstab(mDF.V4, mDF.Variable, values = mDF.Value, aggfunc = &#39;sum&#39;)</code></pre>
+<pre><code>## Variable  V1  V2
+## V4              
+## A          0  14
+## B         33  13
+## C         18  14</code></pre>
+<pre class="python"><code>pd.crosstab(mDF.V4, mDF.Value &gt; 5)</code></pre>
+<pre><code>## Value  False  True 
+## V4                 
+## A          5      1
+## B          3      3
+## C          4      2</code></pre>
 </td>
 </tr>
 </tbody>
@@ -3779,15 +4014,15 @@ x = x.assign(X2 = &#39;x&#39; + x.X1.astype(str))
 pd.merge(x, z, how = &#39;right&#39;, left_on = &#39;X1&#39;, right_on = &#39;Z1&#39;)</code></pre>
 <pre><code>##     Id   X1   XY   X2 ID  Z1  Z2
 ## 0    C  5.0   x6   x5  C   5  z5
-## 1    C  7.0   x8   x7  C   7  z7
-## 2  NaN  NaN  NaN  NaN  C   6  z6
+## 1  NaN  NaN  NaN  NaN  C   6  z6
+## 2    C  7.0   x8   x7  C   7  z7
 ## 3  NaN  NaN  NaN  NaN  C   8  z8
 ## 4  NaN  NaN  NaN  NaN  C   9  z9</code></pre>
 <pre class="python"><code>pd.merge(x, z, how = &#39;right&#39;, left_on = [&#39;Id&#39;, &#39;X1&#39;], right_on = [&#39;ID&#39;, &#39;Z1&#39;])</code></pre>
 <pre><code>##     Id   X1   XY   X2 ID  Z1  Z2
 ## 0    C  5.0   x6   x5  C   5  z5
-## 1    C  7.0   x8   x7  C   7  z7
-## 2  NaN  NaN  NaN  NaN  C   6  z6
+## 1  NaN  NaN  NaN  NaN  C   6  z6
+## 2    C  7.0   x8   x7  C   7  z7
 ## 3  NaN  NaN  NaN  NaN  C   8  z8
 ## 4  NaN  NaN  NaN  NaN  C   9  z9</code></pre>
 </td>
@@ -4047,33 +4282,26 @@ rbind(x, z, fill = TRUE)</code></pre>
 </td>
 <td align="left">
 <pre class="python"><code>pd.concat([x, y])</code></pre>
-<pre><code>##   Id   X1   X2  XY   Y1
-## 0  A  1.0   x1  x2  NaN
-## 1  B  3.0   x3  x4  NaN
-## 2  C  5.0   x5  x6  NaN
-## 3  C  7.0   x7  x8  NaN
-## 0  A  NaN  NaN  y1  1.0
-## 1  B  NaN  NaN  y3  3.0
-## 2  B  NaN  NaN  y5  5.0
-## 3  D  NaN  NaN  y7  7.0
-## 
-## /home/xu/anaconda3/bin/python:1: FutureWarning: Sorting because non-concatenation axis is not aligned. A future version
-## of pandas will change to not sort by default.
-## 
-## To accept the future behavior, pass &#39;sort=False&#39;.
-## 
-## To retain the current behavior and silence the warning, pass &#39;sort=True&#39;.</code></pre>
+<pre><code>##   Id   X1  XY   X2   Y1
+## 0  A  1.0  x2   x1  NaN
+## 1  B  3.0  x4   x3  NaN
+## 2  C  5.0  x6   x5  NaN
+## 3  C  7.0  x8   x7  NaN
+## 0  A  NaN  y1  NaN  1.0
+## 1  B  NaN  y3  NaN  3.0
+## 2  B  NaN  y5  NaN  5.0
+## 3  D  NaN  y7  NaN  7.0</code></pre>
 <pre class="python"><code>pd.concat([x, z])</code></pre>
-<pre><code>##     ID   Id   X1   X2   XY   Z1   Z2
-## 0  NaN    A  1.0   x1   x2  NaN  NaN
-## 1  NaN    B  3.0   x3   x4  NaN  NaN
-## 2  NaN    C  5.0   x5   x6  NaN  NaN
-## 3  NaN    C  7.0   x7   x8  NaN  NaN
-## 0    C  NaN  NaN  NaN  NaN  5.0   z5
-## 1    C  NaN  NaN  NaN  NaN  6.0   z6
-## 2    C  NaN  NaN  NaN  NaN  7.0   z7
-## 3    C  NaN  NaN  NaN  NaN  8.0   z8
-## 4    C  NaN  NaN  NaN  NaN  9.0   z9</code></pre>
+<pre><code>##     Id   X1   XY   X2   ID   Z1   Z2
+## 0    A  1.0   x2   x1  NaN  NaN  NaN
+## 1    B  3.0   x4   x3  NaN  NaN  NaN
+## 2    C  5.0   x6   x5  NaN  NaN  NaN
+## 3    C  7.0   x8   x7  NaN  NaN  NaN
+## 0  NaN  NaN  NaN  NaN    C  5.0   z5
+## 1  NaN  NaN  NaN  NaN    C  6.0   z6
+## 2  NaN  NaN  NaN  NaN    C  7.0   z7
+## 3  NaN  NaN  NaN  NaN    C  8.0   z8
+## 4  NaN  NaN  NaN  NaN    C  9.0   z9</code></pre>
 </td>
 </tr>
 </tbody>
