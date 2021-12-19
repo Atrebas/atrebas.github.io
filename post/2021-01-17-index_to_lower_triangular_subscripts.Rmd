@@ -1,0 +1,249 @@
+---
+title: "Convert a linear index to lower triangular subscripts"
+author: "Atrebas"
+date: "2021-01-17"
+summary: In this post, I present a way to convert a linear index to lower triangular subscripts, _i.e._ row and column number in a triangular matrix. The proposed functions work for different numbering directions (rowwise, colwise, and diagwise), including or excluding the diagonal.   
+output:
+  blogdown::html_page
+categories: ["R"]
+tags: ["R", "matrix", "lower triangular subscripts"]
+---
+
+<!-- 
+<script src="/js/set-target-blank-links.js"></script>
+<script src="/js/jquery-3.3.1.min.js"></script>
+-->
+
+<style>
+  .hljs{
+    background: #a7a7a71a;
+    font-size: 90%;
+    word-wrap: break-word;
+  }
+  pre:not(.r):not(.python) {
+    background: #a7a7a71a;
+    word-wrap: break-word;
+    color: #333333;
+  }
+</style>
+
+```{r setup, include=FALSE}
+# knitr::opts_chunk$set(echo = TRUE)
+# rmarkdown::render("2021-01-17-index_to_lower_triangular_subscripts.Rmd")
+```
+
+
+Recently, while browsing an [article](https://hal.archives-ouvertes.fr/hal-02047514/document) 
+dealing with parallel euclidean distance computation, I discovered an interesting formula.     
+This formula allows to convert a linear index to lower triangular subscripts (_i_, _j_). 
+So, given an integer _k_, we can easily determine the row and the column of 
+the k-th element in a lower triangular matrix.    
+As an example, in the lower triangle of a 4 x 4 matrix, 
+the row and column numbers of the 7th element are 4 and 1, respectively (row-wise, diagonal included).     
+
+
+![](/images/matrix4x4.png)
+
+</br>
+Below is the algorithm used for the computation (source: Angeletti _et al._ 2019):
+![](/images/k_to_i_j_rowwise.png)
+
+</br>
+
+This is a computational trick to avoid using nested loops over rows and columns 
+and it can therefore be very useful to compute distances, or for similar operations 
+involving pairwise comparisons.     
+
+
+The aforementioned paper presents formulas for row-wise numbering 
+(diagonal included) and col-wise numbering (diagonal included and excluded, 
+with some errors in this last case, I think).     
+There is a related 
+[stackoverflow question](https://stackoverflow.com/questions/27086195/linear-index-upper-triangular-matrix), 
+with an insightful comment by Mikhail Maltsev pointing to the theory behind 
+this approach, namely [triangular numbers](https://en.wikipedia.org/wiki/Triangular_number).
+
+Based on these elements, I wrote some R functions for this kind of index conversion. 
+The proposed functions can be used for row-wise, col-wise, and diag-wise numbering, 
+including or excluding the diagonal.     
+I wrote a specific function for each case and a wrapper function for more convenience. 
+It implies some redundancy but makes things easier to follow.       
+
+# Functions for row-wise numbering
+
+```{r}
+# diagonal included
+index_to_i_j_rowwise_diag <- function(k, n) {
+  p  <- (sqrt(1 + 8 * k) - 1) / 2
+  i0 <- floor(p)
+  if (i0 == p) {
+    return(c(i0, i0)) # (i, j)
+  } else {
+    i <- i0 + 1
+    j <- k - i0 * (i0 + 1) / 2
+    c(i, j)
+  }
+}
+
+# diagonal excluded
+index_to_i_j_rowwise_nodiag <- function(k, n) {
+  kp <- k - 1
+  p  <- floor((sqrt(1 + 8 * kp) - 1) / 2)
+  i  <- p + 2
+  j  <- kp - p * (p + 1) / 2 + 1
+  c(i, j)
+}
+```
+
+# Functions for col-wise numbering
+
+```{r}
+# diagonal included
+index_to_i_j_colwise_diag <- function(k, n) {
+  kp <- n * (n + 1) / 2 - k
+  p  <- floor((sqrt(1 + 8 * kp) - 1) / 2)
+  i  <- n - (kp - p * (p + 1) / 2)
+  j  <- n - p
+  c(i, j)
+}
+
+# diagonal excluded
+index_to_i_j_colwise_nodiag <- function(k, n) {
+  kp <- n * (n - 1) / 2 - k
+  p  <- floor((sqrt(1 + 8 * kp) - 1) / 2)
+  i  <- n - (kp - p * (p + 1) / 2)
+  j  <- n - 1 - p
+  c(i, j)
+}
+```
+
+# Functions for diag-wise numbering
+
+```{r}
+# diagonal included
+index_to_i_j_diagwise_diag <- function(k, n) {
+  kp <- n * (n + 1) / 2 - k
+  p  <- floor((sqrt(1 + 8 * kp) - 1) / 2)
+  i  <- n - (kp - p * (p + 1) / 2)
+  j  <- i + 1 - (n - p)
+  c(i, j)
+}
+
+# diagonal excluded
+index_to_i_j_diagwise_nodiag <- function(k, n) {
+  kp <- n * (n - 1) / 2 - k
+  p  <- floor((sqrt(1 + 8 * kp) - 1) / 2)
+  i  <- n - (kp - p * (p + 1) / 2)
+  j  <- i - (n - 1 - p)
+  c(i, j)
+}
+```
+
+# Wrapper function
+
+```{r}
+index_to_i_j <- function(k, n,
+                         direction = c("diagwise", "colwise", "rowwise"),
+                         diagonal = FALSE) {
+  
+  direction <- match.arg(direction)
+  
+  if (diagonal) {
+    switch(direction,
+           diagwise = index_to_i_j_diagwise_diag(k, n),
+           colwise  = index_to_i_j_colwise_diag(k, n),
+           rowwise  = index_to_i_j_rowwise_diag(k, n))
+  } else {
+    switch(direction,
+           diagwise = index_to_i_j_diagwise_nodiag(k, n),
+           colwise  = index_to_i_j_colwise_nodiag(k, n),
+           rowwise  = index_to_i_j_rowwise_nodiag(k, n))
+  }
+}
+```
+
+# Examples
+
+```{r}
+index_to_i_j(3, 7) # get i and j for the 3rd element in a matrix of size 7
+index_to_i_j(3, 7, "colwise")
+index_to_i_j(3, 7, "rowwise")
+index_to_i_j(3, 7, "diagwise", TRUE)
+index_to_i_j(3, 7, "colwise", TRUE)
+index_to_i_j(3, 7, "rowwise", TRUE)
+```
+
+# Test
+
+Here is some code to illustrate the six cases with a 7*7 matrix.   
+The `index_to_i_j` function is meant to be used for one element at a time and 
+for a specific numbering case. The code below is therefore quite unelegant, 
+but this is just to check the results.    
+
+```{r}
+res <- list() # used to store the results (for each direction*diagonal)
+z   <- 1      # counter used in the loops
+n   <- 7      # size of the matrix
+
+for (direction in c("Diagwise", "Colwise", "Rowwise")) {
+  for (diagonal in c(FALSE, TRUE)) {
+    # compute the number of elements
+    if (diagonal) {
+      K <- n * (n + 1) / 2
+    } else {
+      K <- n * (n - 1) / 2
+    }
+    # run index_to_i_j for each k
+    ij <- lapply(1:K, function(x) {
+      index_to_i_j(x, n, tolower(direction), diagonal)
+    })
+    ij       <- do.call(rbind, ij)
+    # create a full square matrix with dots (".") and replace lower triangle
+    mat      <- matrix(".", nrow = n, ncol = n)
+    mat[ij]  <- 1:K
+    # format to data.frame
+    row_col  <- expand.grid(1:n, 1:n)
+    diagonal <- ifelse(diagonal, "Diagonal included", "Diagonal excluded")
+    res[[z]] <- data.frame(row_col, as.vector(mat), direction, diagonal)
+    z <- z + 1
+  }
+}
+
+# combine and format the results (using base R)
+res <- do.call(rbind, res)
+colnames(res)[1:3] <- c("i", "j", "k")
+res$i <- factor(res$i, levels = n:1)
+res$j <- factor(res$j, levels = 1:n)
+
+library(ggplot2) # plot the results
+
+p <- ggplot(data = res,
+            aes(x = j,
+                y = i)) +
+  geom_tile(aes(fill = (i == j)),
+            colour = "lightgray",
+            show.legend = FALSE) +
+  geom_text(aes(label = k),
+            size = 4) +
+  scale_fill_manual(values = c("white", "lightgray")) +
+  scale_x_discrete(position = "top") +
+  facet_grid(rows = vars(diagonal),
+             cols = vars(direction),
+             switch = "x") +
+  theme_minimal() +
+  theme(strip.text = element_text(face = "bold", size = 12)) +
+  xlab("") +
+  ylab("")
+p
+```
+
+# Conclusion
+
+It seems to work. The potential benefit offered by these functions will be evaluated in the next article: 
+[Comparison of different for loops methods in parallel distance computation with R, C, and OpenMP](https://atrebas.github.io/post/2021-03-07-comparison-of-different-for-loops-methods-in-parallel-distance-computation-with-r-c-and-openmp/).    
+
+</br></br>
+
+```{r}
+sessionInfo()
+```

@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+  <channel>
+    <title>OpenMP on Home</title>
+    <link>/tags/openmp/</link>
+    <description>Recent content in OpenMP on Home</description>
+    <generator>Hugo -- gohugo.io</generator>
+    <language>en-us</language>
+    <lastBuildDate>Sun, 07 Mar 2021 00:00:00 +0000</lastBuildDate>
+    
+	<atom:link href="/tags/openmp/index.xml" rel="self" type="application/rss+xml" />
+    
+    
+    <item>
+      <title>Comparison of different for loops methods in parallel distance computation with R, C, and OpenMP</title>
+      <link>/post/2021-03-07-comparison-of-different-for-loops-methods-in-parallel-distance-computation-with-r-c-and-openmp/</link>
+      <pubDate>Sun, 07 Mar 2021 00:00:00 +0000</pubDate>
+      
+      <guid>/post/2021-03-07-comparison-of-different-for-loops-methods-in-parallel-distance-computation-with-r-c-and-openmp/</guid>
+      <description>Based on the formulas presented in my previous article, I evaluate looping strategies in a parallel distance computation. A classic nested loop approach is compared to a single loop approach based on a linear index used to compute the indices of the rows being evaluated.</description>
+    </item>
+    
+  </channel>
+</rss>

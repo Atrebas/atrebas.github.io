@@ -1,0 +1,260 @@
+<!DOCTYPE html>
+<html lang="en-us">
+    <head>
+		<meta charset="UTF-8">
+		<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+		<title>Comparison of different for loops methods in parallel distance computation with R, C, and OpenMP &middot; Home</title>
+
+		
+  		<link rel="stylesheet" href="/css/style.css">
+		<link rel="stylesheet" href="/css/fonts.css">
+		
+		<link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32.png">
+		<link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16.png">
+		<link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon.png">
+
+		
+		<link href="" rel="alternate" type="application/rss+xml" title="Home" />
+
+                
+                <link rel="stylesheet" href="/css/github-gist.css" rel="stylesheet" id="theme-stylesheet">
+                <script src="/js/highlight.pack.js"></script>
+                <script>hljs.initHighlightingOnLoad();</script>
+	</head>
+
+    <body>
+        		<nav class="nav">
+			<div class="nav-container">
+				<a href="/">
+					<h2 class="nav-title">Home</h2>
+				</a>
+				<ul>
+    
+    
+    <li><a href="/about">About</a></li>
+    <li><a href="/">Posts</a></li>
+</ul>
+			</div>
+		</nav>
+
+        
+
+<main>
+	<div class="post">
+		<div class="post-info">
+    <span>Written by</span>
+        Atrebas
+        <br>
+        <span>on&nbsp;</span><time datetime="2021-03-07 00:00:00 &#43;0000 UTC">March 7, 2021</time>
+</div>
+		<h1 class="post-title">Comparison of different for loops methods in parallel distance computation with R, C, and OpenMP</h1>
+<div class="post-line"></div>
+
+		
+
+		
+
+
+<!-- 
+<script src="/js/set-target-blank-links.js"></script>
+<script src="/js/jquery-3.3.1.min.js"></script>
+-->
+<style>
+  .hljs{
+    background: #a7a7a71a;
+    font-size: 90%;
+    word-wrap: break-word;
+  }
+  pre:not(.r):not(.python) {
+    background: #a7a7a71a;
+    word-wrap: break-word;
+    color: #333333;
+  }
+</style>
+<p>The title is a bit long, but I’ll try to keep the post short. In my previous <a href="https://atrebas.github.io/post/2021-01-17-index_to_lower_triangular_subscripts/">post</a>,
+I presented how to convert a linear index to lower triangular subscripts. As
+an example, it can be useful for distance computation. Rather than using two loops
+for each row being compared in the input matrix, it is possible to use a single loop on an index,
+and then compute the indices of the evaluated rows.<br />
+In a standard parallel distance implementation using two loops, all the computations
+are done for the first row, then the second, …
+I once heard that it could lead to a concurrency issue and limit the performance.<br />
+Using an index, we can proceed with a ‘diagonal-wise’ numbering, the combinations being computed in
+parallel are then more likely to involved different rows, and this may consequently limit a putative concurrency
+phenomenon. That’s what I aimed to check in this article.</p>
+<div id="the-pmdr-package" class="section level1">
+<h1>The pmdr package</h1>
+<p>I wrote a toy R package, named <code>pmdr</code> for Parallel Manhattan Distances in R.
+I focused on manhattan distances because it was easier to implement for this
+exploratory approach. For simplicity, it only works with integers
+and missing values are not allowed. Also, the results are returned as a vector.<br />
+This package contains three
+<a href="https://github.com/Atrebas/pmdr/blob/main/src/distance.c">C functions</a>,
+and the <a href="https://github.com/Atrebas/pmdr/blob/main/R/distance.R">R wrapper</a>.
+It can be installed from Github as shown below.</p>
+<pre class="r"><code># install.packages(&quot;remotes&quot;)
+remotes::install_github(&quot;Atrebas/pmdr&quot;)</code></pre>
+</div>
+<div id="looping-strategies" class="section level1">
+<h1>Looping strategies</h1>
+<div id="using-two-loops" class="section level2">
+<h2>Using two loops</h2>
+<p>In the first C function, the loop is performed in a ‘classic’ way, with a
+loop on <code>i1</code> and <code>i2</code>, the rows being evaluated. From <code>i1</code> and <code>i2</code>, <code>k</code>,
+the index of the combination being evaluated is computed.<br />
+<code>I</code> is the number of rows of the input matrix <code>ptx</code> and <code>ptres</code> is the output
+vector.<br />
+Note that the loop on <code>j</code> corresponds to the columns of the input matrix.</p>
+<pre class="c"><code>for (i1 = 1; i1 &lt; I; i1++) {                               // loop on row 1
+  for (i2 = 0; i2 &lt; i1; i2++) {                            // loop on row 2
+    k = K - (I - i2) * ((I - i2) - 1) / 2 + i1 - i2 - 1;   // compute the index
+    ptres[k] = 0;
+    for (j = 0; j &lt; J; j++) {                              // loop on the columns 
+      ptres[k] += abs(ptx[i1 + I * j] - ptx[i2 + I * j]);  // increment the Manhattan distance
+    }
+  }
+}</code></pre>
+</div>
+<div id="using-one-loop-colwise" class="section level2">
+<h2>Using one loop, colwise</h2>
+<p>In the second C function, a loop is performed on <code>k</code>, the index of the
+combination being evaluated. Within this loop, <code>i1</code> and <code>i2</code> are
+determined in a colwise way.</p>
+<pre class="c"><code>for (k = 0; k &lt; K; k++) {                                 // loop on the index (column-wise)
+  ptres[k] = 0;
+  kp = K - k - 1;
+  p  = floor((sqrt(1 + 8 * kp) - 1) / 2);
+  i1 = I - (kp - p * (p + 1) / 2) - 1;                    // compute row 1
+  i2 = I - 2 - p;                                         // compute row 2
+  for (j = 0; j &lt; J; j++) {                               // loop on the columns
+    ptres[k] += abs(ptx[i1 + I * j] - ptx[i2 + I * j]);   // increment the Manhattan distance
+  }
+}</code></pre>
+</div>
+<div id="using-one-loop-diagwise" class="section level2">
+<h2>Using one loop, diagwise</h2>
+<p>In the third function, the parallelization is done on the linear index <code>k</code>, but
+this time, the combination of rows used for the computation is determined
+using diagwise traversal (and the order of the results in the output vector
+will thus be different from the previous ones).</p>
+<pre class="c"><code>for (k = 0; k &lt; K; k++) {                                   // loop on the index (diagonal-wise)
+  ptres[k] = 0;
+  kp = K - k - 1;
+  p  = floor((sqrt(1 + 8 * kp) - 1) / 2);
+  i1 = I - (kp - p * (p + 1) / 2) - 1;                      // compute row 1
+  i2 = i1 - (I - 1 - p);                                    // compute row 2
+    for (j = 0; j &lt; J; j++) {                               // loop on the columns
+      ptres[k] += abs(ptx[i1 + I * j] - ptx[i2 + I * j]);   // increment the Manhattan distance
+    }
+}</code></pre>
+<p><br></p>
+</div>
+</div>
+<div id="example" class="section level1">
+<h1>Example</h1>
+<p>First, here is how the R function works. As mentioned earlier,
+I was interested in returning the results as a vector, not a distance matrix.</p>
+<pre class="r"><code># remotes::install_github(&quot;atrebas/pmdr&quot;)
+
+library(pmdr)
+
+n_row &lt;- 7
+n_col &lt;- 10
+
+mat   &lt;- matrix(sample(1:30, n_row * n_col, replace = TRUE),
+                nrow = n_row,
+                ncol = n_col)
+
+mat</code></pre>
+<pre><code>##      [,1] [,2] [,3] [,4] [,5] [,6] [,7] [,8] [,9] [,10]
+## [1,]    6   17   26   23   15   20   13   11    1    13
+## [2,]   25   28    1   12   18    1   10    9   10    12
+## [3,]   13   19   16   14    4   16    7   24    8    30
+## [4,]   24   22   16   12   20   16    3    1   24    10
+## [5,]    8   11   11   21   23    4   21   21    7    25
+## [6,]   25   10    5   24    2   16   11   16   16    12
+## [7,]   10    3    2   30   22    7   23    8   18    24</code></pre>
+<pre class="r"><code>distance(mat, loop = &quot;standard&quot;)</code></pre>
+<pre><code>##  [1] 103  86  99  85  88 110 105  70 100  79 103  95  79  82 124 126  87 123  97
+## [20]  59  94</code></pre>
+<pre class="r"><code>distance(mat, loop = &quot;colwise&quot;)</code></pre>
+<pre><code>##  [1] 103  86  99  85  88 110 105  70 100  79 103  95  79  82 124 126  87 123  97
+## [20]  59  94</code></pre>
+<pre class="r"><code>distance(mat, loop = &quot;diagwise&quot;)</code></pre>
+<pre><code>##  [1] 103 105  95 126  97  94  86  70  79  87  59  99 100  82 123  85  79 124  88
+## [20] 103 110</code></pre>
+</div>
+<div id="benchmark-1" class="section level1">
+<h1>Benchmark 1</h1>
+<p>Running a quick benchmark on my four-core laptop shows no benefit
+of the colwise and diagwise methods over the basic double loop.</p>
+<pre class="r"><code>library(pmdr)
+library(microbenchmark)
+
+n_row &lt;- 500
+n_col &lt;- 1000
+
+mat   &lt;- matrix(sample(1:30, n_row * n_col, replace = TRUE),
+                nrow = n_row,
+                ncol = n_col)
+
+pmdr::num_procs()</code></pre>
+<pre><code>## [1] 4</code></pre>
+<pre class="r"><code>microbenchmark(standard = distance(mat, loop = &quot;standard&quot;),
+               colwise  = distance(mat, loop = &quot;colwise&quot;),
+               diagwise = distance(mat, loop = &quot;diagwise&quot;),
+               times    = 20L)</code></pre>
+<pre><code>## Unit: milliseconds
+##      expr      min       lq     mean   median       uq      max neval
+##  standard 214.3665 217.3569 219.9808 219.4761 223.6465 226.3603    20
+##   colwise 245.2472 245.9105 247.5465 246.4485 246.8566 266.0562    20
+##  diagwise 244.0165 250.4270 252.1025 251.4929 252.5880 275.2310    20</code></pre>
+<p><br></p>
+</div>
+<div id="benchmark-2" class="section level1">
+<h1>Benchmark 2</h1>
+<p>Here is a screenshot of a second benchmark with larger data
+on a bigger machine (20 cores). In this case, the colwise method seems
+to perform slightly better, but the benefit would probably vanish if a matrix
+was returned (because in that case, computing the index in the double
+loop would be useless).<br />
+Also, a quick test with the <code>parallelDist</code> package shows that the timing
+obtained with <code>pmdr</code> is competitive.</p>
+<p><img src="/images/distance_benchmark.png" /></p>
+<p><br></p>
+</div>
+<div id="conclusion" class="section level1">
+<h1>Conclusion</h1>
+<p>No significant difference was observed between the different methods,
+but writing the <code>pmdr</code> package was a good refresher on R/C binding and
+my implementation of distance computation in OpenMP seems to work correctly.</p>
+<p>The <code>parallelDist</code> package is much more robust and feature-rich than <code>pmdr</code>, so
+the comparison is not relevant. Nevertheless, the timing obtained
+in the benchmark above looks satisfying.</p>
+<p>Note: I do not have a CS background. This post is based on MOOCs, reading,
+inspiration from other people’s work
+(<a href="https://github.com/wrathematics">Drew Schmidt</a>’s Romp package in particular),
+and a lot of segfault debugging.</p>
+</div>
+
+
+		
+	</div>
+
+	<div class="pagination">
+		<a href="/post/2021-01-17-index_to_lower_triangular_subscripts/" class="left arrow">&#8592;</a>
+
+		<a href="#" class="top">Top</a>
+	</div>
+</main>
+
+
+        		<footer>
+			<span>
+			&copy; 2020. Made with <a href='https://gohugo.io'>Hugo</a> using the <a href='https://github.com/EmielH/tale-hugo/'>Tale</a> theme.
+			</span>
+		</footer>
+
+    </body>
+</html>
